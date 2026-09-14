@@ -1,0 +1,38 @@
+[
+  {
+    "name": "julien-chapron",
+    "description": "",
+    "language": null,
+    "homepage": null,
+    "html_url": "https://github.com/Gleaming0427/julien-chapron",
+    "stargazers_count": 0,
+    "pushed_at": "2026-09-14T16:05:19Z"
+  },
+  {
+    "name": "shotokai-website",
+    "description": "",
+    "language": "Astro",
+    "homepage": "https://karate-lacroix-falgarde.fr/",
+    "html_url": "https://github.com/Gleaming0427/shotokai-website",
+    "stargazers_count": 0,
+    "pushed_at": "2026-09-11T14:41:43Z"
+  },
+  {
+    "name": "api-gateway",
+    "description": "",
+    "language": "TypeScript",
+    "homepage": null,
+    "html_url": "https://github.com/Gleaming0427/api-gateway",
+    "stargazers_count": 0,
+    "pushed_at": "2026-08-12T04:12:45Z"
+  },
+  {
+    "name": "cve-agent",
+    "description": "Open-source AI agent that finds actually exploitable CVEs in your code, AST reachability + Mistral AI triage",
+    "language": "Python",
+    "homepage": "",
+    "html_url": "https://github.com/Gleaming0427/cve-agent",
+    "stargazers_count": 0,
+    "pushed_at": "2026-08-04T22:46:15Z"
+  }
+]

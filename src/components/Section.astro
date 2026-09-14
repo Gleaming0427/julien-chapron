@@ -1,0 +1,13 @@
+---
+interface Props {
+  /** Commande affichée dans le titre, façon terminal. */
+  command: string;
+}
+
+const { command } = Astro.props;
+---
+
+<section class="section">
+  <h2 class="section-title"><span class="prompt">$</span> <span class="cmd">{command}</span></h2>
+  <slot />
+</section>
