@@ -1,0 +1,42 @@
+---
+import { identity } from "../data/cv";
+---
+
+<section class="hero">
+  <div class="terminal-window">
+    <div class="terminal-bar">
+      <span class="dot red"></span>
+      <span class="dot yellow"></span>
+      <span class="dot green"></span>
+      <span class="title">julien-chapron — zsh</span>
+    </div>
+    <div class="terminal-body">
+      <p class="line">
+        <span class="prompt">$</span> <span class="cmd">whoami</span>
+      </p>
+      <h1 class="hero-name">{identity.name}</h1>
+      <p class="hero-role">{identity.role} · {identity.experience}</p>
+
+      <p class="line">
+        <span class="prompt">$</span> <span class="cmd">cat .stack</span><br />
+        <span class="output">{identity.headline}</span>
+      </p>
+
+      <p class="line">
+        <span class="prompt">$</span> <span class="cmd">cat .contact</span><br />
+        <span class="output">📍 {identity.location}</span><br />
+        <span class="output">☎ <a href={identity.phoneHref}>{identity.phone}</a> · ✉ <a href={`mailto:${identity.email}`}>{identity.email}</a></span>
+      </p>
+
+      <p class="line">
+        <span class="prompt">$</span> <span class="cmd">./status</span><br />
+        <span class="output highlight">✓ {identity.availability}</span><span class="cursor"></span>
+      </p>
+
+      <div class="hero-links">
+        <a class="chip" href={identity.github} target="_blank" rel="noopener noreferrer">⌥ {identity.githubLabel}</a>
+        <a class="chip" href={identity.npm} target="_blank" rel="noopener noreferrer">⌘ {identity.npmLabel}</a>
+      </div>
+    </div>
+  </div>
+</section>

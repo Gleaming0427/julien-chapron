@@ -1,0 +1,74 @@
+---
+import "../styles/global.css";
+import { identity } from "../data/cv";
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+
+const base = import.meta.env.BASE_URL;
+// Construit une URL interne préfixée par la base (ex. '/julien-chapron/projets').
+const url = (path: string) =>
+  path === "/" ? (base === "/" ? "/" : base + "/") : base === "/" ? path : base + path;
+
+const nav = [
+  { href: "/", label: "CV" },
+  { href: "/projets", label: "Projets" },
+  { href: "/apps", label: "Apps" },
+];
+
+const current = Astro.url.pathname.replace(base, "/").replace(/\/+$/, "") || "/";
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href={url("/favicon.svg")} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="inner">
+        <a class="site-name" href={url("/")}><span class="prompt">$</span> ~/julien-chapron</a>
+        <nav class="site-nav">
+          {
+            nav.map((item) => (
+              <a class={current === item.href ? "active" : undefined} href={url(item.href)}>
+                {item.label}
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="inner">
+        <div class="footer-links">
+          <a href={identity.github} target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href={identity.npm} target="_blank" rel="noopener noreferrer">npm</a>
+          <a href={`mailto:${identity.email}`}>{identity.email}</a>
+          <a href={identity.phoneHref}>{identity.phone}</a>
+        </div>
+        <div>© 2026 Julien Chapron — {identity.role} · <span class="prompt">$</span> exit 0<span class="cursor"></span></div>
+      </div>
+    </footer>
+  </body>
+</html>

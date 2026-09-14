@@ -1,0 +1,103 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Hero from "../components/Hero.astro";
+import Section from "../components/Section.astro";
+import Tag from "../components/Tag.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import {
+  profile,
+  experiences,
+  skills,
+  personalProjects,
+  education,
+  languages,
+  before,
+} from "../data/cv";
+
+// Variante de couleur des tags selon la catégorie de compétence.
+const skillVariants: Record<string, string> = {
+  "Langages": "lang",
+  "Front-end": "front",
+  "Back-end": "back",
+  "Cloud & infrastructure": "cloud",
+  "Tests & CI/CD": "test",
+  "Méthodes": "method",
+};
+---
+
+<Layout
+  title="Julien Chapron — Développeur Full-Stack"
+  description="CV de Julien Chapron, développeur full-stack TypeScript / React / Node.js, 7 ans d'expérience. Projets personnels et applications."
+>
+  <Hero />
+
+  <Section command="cat profil.md" >
+    <p>{profile}</p>
+  </Section>
+
+  <Section command="experience --all">
+    <div class="timeline">
+      {
+        experiences.map((exp) => (
+          <article class="experience">
+            <div class="experience-head">
+              <h3>{exp.title} — <span class="company">{exp.company}</span></h3>
+              <span class="period">{exp.period}</span>
+            </div>
+            <p class="context">{exp.context}</p>
+            <ul>
+              {exp.bullets.map((bullet) => <li>{bullet}</li>)}
+            </ul>
+            {exp.stack && (
+              <div class="stack"><strong>Environnement technique :</strong> {exp.stack}</div>
+            )}
+          </article>
+        ))
+      }
+    </div>
+  </Section>
+
+  <Section command="cat competences.md">
+    <div class="skills-grid">
+      {
+        skills.map((group) => (
+          <div class="skill-group">
+            <h3>## {group.category}</h3>
+            <ul>
+              {group.skills.map((skill) => <li><Tag label={skill} variant={skillVariants[group.category]} /></li>)}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </Section>
+
+  <Section command="ls ~/projets-personnels">
+    <div class="cards">
+      {personalProjects.map((project) => <ProjectCard project={project} />)}
+    </div>
+  </Section>
+
+  <Section command="cat formation.md">
+    <div class="edu-list">
+      {
+        education.map((item) => (
+          <div class="edu-item">
+            <h3>{item.title}</h3>
+            <span class="detail">{item.detail}</span>
+          </div>
+        ))
+      }
+    </div>
+    <div class="lang-list">
+      {
+        languages.map((lang) => (
+          <span class="tag"><strong>{lang.name}</strong> — {lang.level}</span>
+        ))
+      }
+    </div>
+    <div class="aside">
+      <span class="icon">💬</span>{before}
+    </div>
+  </Section>
+</Layout>
