@@ -1,16 +1,16 @@
 [
   {
     "name": "julien-chapron",
-    "description": "",
-    "language": null,
+    "description": "Site CV en ligne — Astro + GitHub Pages, thème terminal interactif.",
+    "language": "Astro",
     "homepage": null,
     "html_url": "https://github.com/Gleaming0427/julien-chapron",
     "stargazers_count": 0,
-    "pushed_at": "2026-09-14T16:05:19Z"
+    "pushed_at": "2026-09-14T16:31:18Z"
   },
   {
     "name": "shotokai-website",
-    "description": "",
+    "description": "Site vitrine du club de karaté Shotokaï de Lacroix-Falgarde — Astro, content collections Markdown.",
     "language": "Astro",
     "homepage": "https://karate-lacroix-falgarde.fr/",
     "html_url": "https://github.com/Gleaming0427/shotokai-website",
@@ -19,7 +19,7 @@
   },
   {
     "name": "api-gateway",
-    "description": "",
+    "description": "Source de la librairie npm @armored1486/api-gateway-core : toolkit d’API gateway serverless.",
     "language": "TypeScript",
     "homepage": null,
     "html_url": "https://github.com/Gleaming0427/api-gateway",
