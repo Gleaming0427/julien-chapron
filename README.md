@@ -6,9 +6,11 @@ Construit avec [Astro](https://astro.build) (statique), thème « terminal » so
 
 ## Pages
 
-- `/` — CV complet (profil, expériences, compétences, projets personnels, formation)
+- `/` — CV complet (profil, expériences, compétences, projets personnels, formation) avec un mini-terminal interactif dans le hero : tapez `help`
 - `/projets` — repositories GitHub + projets personnels
 - `/apps` — galerie des applications & outils
+
+Le CV est aussi téléchargeable en PDF (`public/CV_Julien_Chapron.pdf`) et la page s'imprime proprement (Ctrl/Cmd + P).
 
 ## Développement
 

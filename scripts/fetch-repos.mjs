@@ -6,6 +6,15 @@ import { writeFile, mkdir } from 'node:fs/promises';
 const USERNAME = 'Gleaming0427';
 const API = `https://api.github.com/users/${USERNAME}/repos?sort=updated&per_page=100`;
 
+// Descriptions locales pour les repos qui n'en ont pas (ou peu) sur GitHub.
+const overrides = {
+  'julien-chapron': 'Site CV en ligne — Astro + GitHub Pages, thème terminal interactif.',
+  'shotokai-website':
+    'Site vitrine du club de karaté Shotokaï de Lacroix-Falgarde — Astro, content collections Markdown.',
+  'api-gateway':
+    'Source de la librairie npm @armored1486/api-gateway-core : toolkit d’API gateway serverless.',
+};
+
 const res = await fetch(API, {
   headers: { 'User-Agent': 'julien-chapron-site', Accept: 'application/vnd.github+json' },
 });
@@ -18,7 +27,7 @@ const data = repos
   .filter((repo) => !repo.fork)
   .map((repo) => ({
     name: repo.name,
-    description: repo.description ?? '',
+    description: overrides[repo.name] ?? repo.description ?? '',
     language: repo.language ?? null,
     homepage: repo.homepage ?? null,
     html_url: repo.html_url,

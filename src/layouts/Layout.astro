@@ -21,6 +21,7 @@ const nav = [
 ];
 
 const current = Astro.url.pathname.replace(base, "/").replace(/\/+$/, "") || "/";
+const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
@@ -31,6 +32,15 @@ const current = Astro.url.pathname.replace(base, "/").replace(/\/+$/, "") || "/"
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Julien Chapron" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
     <link rel="icon" type="image/svg+xml" href={url("/favicon.svg")} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -38,15 +48,24 @@ const current = Astro.url.pathname.replace(base, "/").replace(/\/+$/, "") || "/"
       href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap"
       rel="stylesheet"
     />
+    <!-- Marque JS actif pour les révélations au scroll : sans JS, tout reste visible. -->
+    <script is:inline>document.documentElement.classList.add("js");</script>
   </head>
   <body>
+    <a class="skip-link" href="#main">Aller au contenu</a>
+    <div id="scroll-progress" aria-hidden="true"></div>
+
     <header class="site-header">
       <div class="inner">
         <a class="site-name" href={url("/")}><span class="prompt">$</span> ~/julien-chapron</a>
-        <nav class="site-nav">
+        <nav class="site-nav" aria-label="Navigation principale">
           {
             nav.map((item) => (
-              <a class={current === item.href ? "active" : undefined} href={url(item.href)}>
+              <a
+                class={current === item.href ? "active" : undefined}
+                href={url(item.href)}
+                aria-current={current === item.href ? "page" : undefined}
+              >
                 {item.label}
               </a>
             ))
@@ -55,7 +74,7 @@ const current = Astro.url.pathname.replace(base, "/").replace(/\/+$/, "") || "/"
       </div>
     </header>
 
-    <main class="container">
+    <main class="container" id="main" tabindex="-1">
       <slot />
     </main>
 
@@ -70,5 +89,11 @@ const current = Astro.url.pathname.replace(base, "/").replace(/\/+$/, "") || "/"
         <div>© 2026 Julien Chapron — {identity.role} · <span class="prompt">$</span> exit 0<span class="cursor"></span></div>
       </div>
     </footer>
+
+    <button id="to-top" type="button" aria-label="Revenir en haut de page">↑</button>
+
+    <script>
+      import "../scripts/ui";
+    </script>
   </body>
 </html>
