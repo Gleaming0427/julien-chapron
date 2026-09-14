@@ -19,6 +19,7 @@
   --pink: #f778ba;
 
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
   --radius: 8px;
   --container: 980px;
@@ -36,9 +37,9 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font-mono);
-  font-size: 15px;
-  line-height: 1.65;
+  font-family: var(--font-sans);
+  font-size: 15.5px;
+  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -50,6 +51,15 @@ a {
 a:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--bg-softer);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
 }
 
 /* ---------- layout ---------- */
@@ -85,6 +95,7 @@ a:hover {
 .site-name {
   color: var(--text);
   font-weight: 700;
+  font-family: var(--font-mono);
 }
 
 .site-name:hover {
@@ -102,6 +113,7 @@ a:hover {
   padding: 4px 10px;
   border-radius: var(--radius);
   font-size: 14px;
+  font-weight: 500;
 }
 
 .site-nav a:hover {
@@ -277,6 +289,7 @@ html.js .reveal.visible {
 
 .terminal-bar .title {
   margin-left: 8px;
+  font-family: var(--font-mono);
   color: var(--text-dim);
   font-size: 13px;
 }
@@ -284,6 +297,7 @@ html.js .reveal.visible {
 .terminal-body {
   padding: 22px;
   font-size: 14.5px;
+  font-family: var(--font-mono);
 }
 
 .terminal-body:focus-within {
@@ -393,6 +407,7 @@ button.chip {
 .section-title {
   font-size: 18px;
   font-weight: 700;
+  font-family: var(--font-mono);
   color: var(--text);
   margin: 0 0 20px;
   padding-bottom: 10px;
@@ -457,6 +472,7 @@ button.chip {
 .experience-head h3 {
   margin: 0;
   font-size: 16px;
+  font-weight: 600;
 }
 
 .experience-head .company {
@@ -467,6 +483,7 @@ button.chip {
 .experience .period {
   color: var(--text-dim);
   font-size: 12.5px;
+  font-family: var(--font-mono);
   white-space: nowrap;
   background: var(--bg-softer);
   border: 1px solid var(--border);
@@ -476,7 +493,7 @@ button.chip {
 
 .experience .context {
   color: var(--text-dim);
-  font-size: 13px;
+  font-size: 13.5px;
   margin: 4px 0 12px;
 }
 
@@ -491,7 +508,7 @@ button.chip {
   padding-left: 18px;
   margin-bottom: 8px;
   color: var(--text);
-  font-size: 14px;
+  font-size: 14.5px;
 }
 
 .experience li::before {
@@ -504,6 +521,7 @@ button.chip {
 .experience .stack {
   margin-top: 12px;
   font-size: 12.5px;
+  font-family: var(--font-mono);
   color: var(--text-dim);
 }
 
@@ -521,6 +539,7 @@ button.chip {
   border: 1px solid var(--border);
   border-radius: 999px;
   font-size: 12.5px;
+  font-family: var(--font-mono);
   color: var(--text);
   background: var(--bg);
   white-space: nowrap;
@@ -572,6 +591,7 @@ button.chip {
 .skill-group h3 {
   margin: 0 0 10px;
   font-size: 14px;
+  font-family: var(--font-mono);
   color: var(--text-dim);
   font-weight: 500;
 }
@@ -622,7 +642,8 @@ button.chip {
 
 .card-head h3 {
   margin: 0;
-  font-size: 15px;
+  font-size: 15.5px;
+  font-weight: 600;
   color: var(--cyan);
 }
 
@@ -632,6 +653,7 @@ button.chip {
 
 .card .badge {
   font-size: 11.5px;
+  font-family: var(--font-mono);
   color: var(--text-dim);
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -664,6 +686,7 @@ button.chip {
 
 .card .stack {
   font-size: 12.5px;
+  font-family: var(--font-mono);
   color: var(--text-dim);
   margin-bottom: 12px;
 }
@@ -696,6 +719,7 @@ button.chip {
   gap: 14px;
   align-items: center;
   font-size: 12.5px;
+  font-family: var(--font-mono);
   color: var(--text-dim);
   margin: 10px 0 0;
 }
@@ -776,7 +800,8 @@ button.chip {
 
 .edu-item h3 {
   margin: 0;
-  font-size: 14.5px;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .edu-item .detail {
@@ -812,6 +837,7 @@ button.chip {
 
 .page-head h1 {
   font-size: 24px;
+  font-family: var(--font-mono);
   margin: 0;
 }
 
