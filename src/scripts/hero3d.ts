@@ -1,11 +1,11 @@
-// Fond 3D du hero : nœud torique en fil de fer vert, rotation lente et léger
-// parallaxe à la souris. Chargé à la demande (jamais si reduced motion),
-// pause quand le hero sort de l'écran ou que l'onglet est masqué.
+// Scène 3D du hero : nœud torique en fil de fer vert avec anneau orbital,
+// rotation lente, flottement et parallaxe souris. Chargé à la demande
+// (jamais si reduced motion), pause hors écran / onglet masqué.
 import * as THREE from "three";
 
 export function initHero3D(): void {
-  const hero = document.querySelector<HTMLElement>(".hero");
-  if (!hero) return;
+  const stage = document.querySelector<HTMLElement>(".hero-stage");
+  if (!stage) return;
 
   let renderer: THREE.WebGLRenderer;
   try {
@@ -16,7 +16,7 @@ export function initHero3D(): void {
 
   const canvas = renderer.domElement;
   canvas.className = "hero-canvas";
-  hero.prepend(canvas);
+  stage.prepend(canvas);
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
@@ -26,21 +26,29 @@ export function initHero3D(): void {
   // l'objet lui-même, sans conflit d'axes.
   const group = new THREE.Group();
   const knot = new THREE.Mesh(
-    new THREE.TorusKnotGeometry(1.15, 0.32, 140, 18),
+    new THREE.TorusKnotGeometry(1.05, 0.3, 140, 18),
     new THREE.MeshBasicMaterial({
       color: 0x3fb950,
       wireframe: true,
       transparent: true,
-      opacity: 0.16,
+      opacity: 0.2,
     }),
   );
   group.add(knot);
   scene.add(group);
 
+  // Anneau orbital discret : seconde profondeur.
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(1.85, 0.015, 8, 120),
+    new THREE.MeshBasicMaterial({ color: 0x58a6ff, transparent: true, opacity: 0.14 }),
+  );
+  ring.rotation.x = Math.PI / 2.4;
+  scene.add(ring);
+
   let width = 0;
   let height = 0;
   const resize = (): void => {
-    const rect = hero.getBoundingClientRect();
+    const rect = stage.getBoundingClientRect();
     if (rect.width === width && rect.height === height) return;
     width = rect.width;
     height = rect.height;
@@ -49,12 +57,10 @@ export function initHero3D(): void {
     renderer.setSize(Math.max(1, rect.width), Math.max(1, rect.height));
     camera.aspect = rect.width / rect.height;
     camera.updateProjectionMatrix();
-    // Sur petit écran, l'objet revient au centre, en retrait derrière le contenu.
-    knot.position.x = rect.width < 700 ? 0 : 1.35;
-    knot.scale.setScalar(rect.width < 700 ? 0.75 : 1);
+    knot.scale.setScalar(rect.width < 360 ? 0.75 : 1);
   };
   resize();
-  new ResizeObserver(resize).observe(hero);
+  new ResizeObserver(resize).observe(stage);
 
   // Parallaxe souris, desktop uniquement.
   let targetX = 0;
@@ -71,12 +77,16 @@ export function initHero3D(): void {
   let inView = true;
   new IntersectionObserver((entries) => {
     inView = entries[0]?.isIntersecting ?? false;
-  }).observe(hero);
+  }).observe(stage);
 
+  const clock = new THREE.Clock();
   renderer.setAnimationLoop(() => {
     if (!inView || document.hidden) return;
+    const t = clock.getElapsedTime();
     group.rotation.x += 0.002;
     group.rotation.y += 0.003;
+    group.position.y = Math.sin(t * 0.6) * 0.08;
+    ring.rotation.z += 0.0012;
     knot.rotation.x += (targetX - knot.rotation.x) * 0.05;
     knot.rotation.y += (targetY - knot.rotation.y) * 0.05;
     renderer.render(scene, camera);
