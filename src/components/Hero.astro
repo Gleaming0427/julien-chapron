@@ -22,6 +22,13 @@ const bootLines = [
     </p>
   </div>
 
+  <!-- Grand titre display, façon microsoft.ai : mot accent en italique. -->
+  <div class="hero-title">
+    <p class="hero-overline"><span class="prompt">$</span> qui suis-je</p>
+    <h1 class="hero-name">{identity.name}</h1>
+    <p class="hero-sub">Développeur <em>full-stack</em> — 7 ans d'expérience · remote ou hybride Toulouse</p>
+  </div>
+
   <div class="terminal-window">
     <div class="terminal-bar">
       <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
@@ -55,7 +62,7 @@ const bootLines = [
     <a class="chip" href={identity.npm} target="_blank" rel="noopener noreferrer">⌘ {identity.npmLabel}</a>
   </div>
 
-  <script type="application/json" id="terminal-boot" set:html={JSON.stringify(bootLines)}></script>
+  <script type="application/json" id="terminal-boot" is:inline set:html={JSON.stringify(bootLines)}></script>
 </section>
 
 <script>

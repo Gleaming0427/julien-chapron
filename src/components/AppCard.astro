@@ -13,7 +13,7 @@ const { app } = Astro.props;
   <div class="app-body">
     <div class="card-head">
       <h3>{app.name}</h3>
-      <span class:list={["badge", { online: app.status === "en ligne" }, { oss: app.status === "open source" || app.status === "open source · MIT" }]}>
+      <span class:list={["badge", { online: app.status === "en ligne" || app.status === "sur le Play Store" }, { oss: app.status === "open source" || app.status === "open source · MIT" }]}>
         {app.status}
       </span>
     </div>
