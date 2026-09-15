@@ -208,13 +208,13 @@ code {
 
 html.js .reveal {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(8px);
 }
 
 html.js .reveal.visible {
   opacity: 1;
   transform: none;
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -260,7 +260,31 @@ html.js .reveal.visible {
 /* ---------- hero : fenêtre de terminal ---------- */
 
 .hero {
+  position: relative;
   margin: 40px 0 48px;
+}
+
+/* Halo discret derrière l'objet 3D. */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 55% 45% at 72% 18%, rgba(63, 185, 80, 0.08), transparent 70%);
+}
+
+/* Canvas Three.js derrière le contenu du hero. */
+.hero-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero > *:not(.hero-canvas) {
+  position: relative;
+  z-index: 1;
 }
 
 /* ---------- titre hero, façon display ---------- */
@@ -350,7 +374,8 @@ html.js .reveal.visible {
 }
 
 .terminal-output {
-  max-height: 330px;
+  /* Hauteur fixe : l'écriture du boot ne décale jamais la mise en page. */
+  height: 222px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
@@ -366,7 +391,7 @@ html.js .reveal.visible {
 }
 
 .term-line {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   overflow-wrap: break-word;
 }
 
@@ -938,17 +963,15 @@ button.chip {
 
 .marquee {
   overflow: hidden;
-  margin: 36px calc(50% - 50vw);
-  padding: 14px 0;
-  border-block: 1px solid var(--border);
-  background: var(--bg-soft);
+  margin: 44px calc(50% - 50vw);
+  padding: 10px 0;
   user-select: none;
 }
 
 .marquee-track {
   display: flex;
   width: max-content;
-  animation: marquee 38s linear infinite;
+  animation: marquee 42s linear infinite;
 }
 
 .marquee-right .marquee-track {
@@ -966,15 +989,37 @@ button.chip {
 
 .marquee-item {
   font-family: var(--font-mono);
-  font-size: 17px;
+  font-size: clamp(17px, 2vw, 22px);
+  font-weight: 500;
   color: var(--text-dim);
-  padding: 0 14px;
+  padding: 0 18px;
   white-space: nowrap;
+}
+
+/* Alternance texte plein / contour, façon typographie éditoriale. */
+.marquee-item.outline {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(139, 148, 158, 0.55);
+}
+
+/* Variante display : grands chiffres clés en sans 800. */
+.marquee-display .marquee-item {
+  font-family: var(--font-sans);
+  font-size: clamp(24px, 3.6vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.marquee-display .marquee-item.outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(139, 148, 158, 0.5);
 }
 
 .marquee-sep {
   color: var(--green);
   font-weight: 700;
+  font-size: 0.85em;
 }
 
 @keyframes marquee {
@@ -997,6 +1042,10 @@ button.chip {
 @media (max-width: 640px) {
   .container {
     padding: 0 16px 48px;
+  }
+
+  .terminal-output {
+    height: 196px;
   }
 
   .site-header .inner {
