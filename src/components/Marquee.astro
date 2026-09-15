@@ -4,20 +4,31 @@ interface Props {
   items: string[];
   /** Sens du défilement : left (défaut) ou right. */
   direction?: "left" | "right";
+  /** mono (défaut) : stack technique · display : grands chiffres éditoriaux. */
+  variant?: "mono" | "display";
 }
 
-const { items, direction = "left" } = Astro.props;
+const { items, direction = "left", variant = "mono" } = Astro.props;
 
 // Contenu statique (pas d'entrée utilisateur) : le set:html est sans risque.
+// Un item sur deux est en contour (outline), façon typographie éditoriale.
 const half = items
   .map(
-    (item) =>
-      `<span class="marquee-item">${item}</span><span class="marquee-sep" aria-hidden="true">$</span>`,
+    (item, index) =>
+      `<span class="marquee-item${index % 2 === 1 ? " outline" : ""}">${item}</span>` +
+      `<span class="marquee-sep" aria-hidden="true">$</span>`,
   )
   .join("");
 ---
 
-<div class:list={["marquee", direction === "right" && "marquee-right"]} aria-hidden="true">
+<div
+  class:list={[
+    "marquee",
+    direction === "right" && "marquee-right",
+    variant === "display" && "marquee-display",
+  ]}
+  aria-hidden="true"
+>
   <div class="marquee-track">
     <span class="marquee-half" set:html={half}></span>
     <span class="marquee-half" set:html={half}></span>

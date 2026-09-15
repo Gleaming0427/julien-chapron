@@ -28,6 +28,15 @@ if (!reducedMotion) {
   requestAnimationFrame(raf);
 }
 
+// Fond 3D du hero (Three.js) : chargé à la demande, jamais si reduced motion.
+if (!reducedMotion) {
+  import("./hero3d")
+    .then((module) => module.initHero3D())
+    .catch(() => {
+      // WebGL indisponible : la page reste parfaitement lisible en 2D.
+    });
+}
+
 const progress = document.getElementById("scroll-progress") as HTMLDivElement;
 const toTop = document.getElementById("to-top") as HTMLButtonElement;
 
