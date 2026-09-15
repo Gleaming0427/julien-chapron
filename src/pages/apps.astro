@@ -14,7 +14,7 @@ import { apps } from "../data/cv";
     <p class="sub">Galerie des applications et outils que j'ai conçus et développés.</p>
   </header>
 
-  <Section command="find . -name '*.app'">
+  <Section command="find . -name '*.app'" index="01">
     <div class="apps-list">
       {apps.map((app) => <AppCard app={app} />)}
     </div>

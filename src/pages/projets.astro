@@ -19,13 +19,13 @@ const ownRepos = repos.filter((repo) => repo.name !== "julien-chapron");
     <p class="sub">Repositories publics et projets personnels, données GitHub synchronisées par <code>npm run fetch-repos</code>.</p>
   </header>
 
-  <Section command="git remote -v">
+  <Section command="git remote -v" index="01">
     <div class="cards">
       {ownRepos.map((repo) => <RepoCard repo={repo} />)}
     </div>
   </Section>
 
-  <Section command="ls ~/projets-personnels">
+  <Section command="ls ~/projets-personnels" index="02">
     <div class="cards">
       {personalProjects.map((project) => <ProjectCard project={project} />)}
     </div>

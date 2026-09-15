@@ -129,11 +129,19 @@ function run(command: string): void {
     case "ls":
       printText("cv.md   projets/   apps/   CV_Julien_Chapron.pdf");
       break;
-    case "cv":
-      document
-        .querySelector(".section")
-        ?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth" });
+    case "cv": {
+      const section = document.querySelector<HTMLElement>(".section");
+      if (!section) break;
+      const lenis = (window as unknown as {
+        lenis?: { scrollTo(target: HTMLElement, options?: { offset?: number; duration?: number }): void };
+      }).lenis;
+      if (lenis) {
+        lenis.scrollTo(section, { offset: -80, duration: 1.1 });
+      } else {
+        section.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth" });
+      }
       break;
+    }
     case "projets":
     case "projects":
       window.location.href = siteUrl("/projets");

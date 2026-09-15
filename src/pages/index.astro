@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Hero from "../components/Hero.astro";
+import Marquee from "../components/Marquee.astro";
 import Section from "../components/Section.astro";
 import Tag from "../components/Tag.astro";
 import ProjectCard from "../components/ProjectCard.astro";
@@ -23,6 +24,18 @@ const skillVariants: Record<string, string> = {
   "Tests & CI/CD": "test",
   "Méthodes": "method",
 };
+
+// Bandes défilantes pleine largeur, façon sites éditoriaux primés.
+const marqueeSkills = [
+  "TypeScript", "React.js", "Node.js", "GraphQL", "API REST", "Docker",
+  "Kubernetes", "GCP", "AWS Lambda", "DynamoDB", "Astro", "React Native",
+  "PostgreSQL", "Firebase", "GitLab CI", "GitHub Actions",
+];
+
+const marqueeStats = [
+  "7 ans d'expérience", "5 000 ingénieurs Renault", "200 000 véhicules électriques",
+  "15 versions npm", "11 dépôts", "librairie open source", "disponible immédiatement",
+];
 ---
 
 <Layout
@@ -31,11 +44,13 @@ const skillVariants: Record<string, string> = {
 >
   <Hero />
 
-  <Section command="cat profil.md" >
+  <Marquee items={marqueeSkills} />
+
+  <Section command="cat profil.md" index="01">
     <p>{profile}</p>
   </Section>
 
-  <Section command="experience --all">
+  <Section command="experience --all" index="02">
     <div class="timeline">
       {
         experiences.map((exp) => (
@@ -57,7 +72,7 @@ const skillVariants: Record<string, string> = {
     </div>
   </Section>
 
-  <Section command="cat competences.md">
+  <Section command="cat competences.md" index="03">
     <div class="skills-grid">
       {
         skills.map((group) => (
@@ -72,13 +87,13 @@ const skillVariants: Record<string, string> = {
     </div>
   </Section>
 
-  <Section command="ls ~/projets-personnels">
+  <Section command="ls ~/projets-personnels" index="04">
     <div class="cards">
       {personalProjects.map((project) => <ProjectCard project={project} />)}
     </div>
   </Section>
 
-  <Section command="cat formation.md">
+  <Section command="cat formation.md" index="05">
     <div class="edu-list">
       {
         education.map((item) => (
@@ -100,4 +115,5 @@ const skillVariants: Record<string, string> = {
       <span class="icon">💬</span>{before}
     </div>
   </Section>
+  <Marquee items={marqueeStats} direction="right" />
 </Layout>
