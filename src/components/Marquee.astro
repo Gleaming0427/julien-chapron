@@ -1,0 +1,25 @@
+---
+interface Props {
+  /** Textes qui défilent, séparés par un prompt vert. */
+  items: string[];
+  /** Sens du défilement : left (défaut) ou right. */
+  direction?: "left" | "right";
+}
+
+const { items, direction = "left" } = Astro.props;
+
+// Contenu statique (pas d'entrée utilisateur) : le set:html est sans risque.
+const half = items
+  .map(
+    (item) =>
+      `<span class="marquee-item">${item}</span><span class="marquee-sep" aria-hidden="true">$</span>`,
+  )
+  .join("");
+---
+
+<div class:list={["marquee", direction === "right" && "marquee-right"]} aria-hidden="true">
+  <div class="marquee-track">
+    <span class="marquee-half" set:html={half}></span>
+    <span class="marquee-half" set:html={half}></span>
+  </div>
+</div>

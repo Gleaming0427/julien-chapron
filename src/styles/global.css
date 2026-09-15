@@ -40,7 +40,18 @@ body {
   font-family: var(--font-sans);
   font-size: 15.5px;
   line-height: 1.7;
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Lenis (défilement fluide) reprend la main sur le scroll. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
 }
 
 a {
@@ -268,7 +279,7 @@ html.js .reveal.visible {
 .hero-name {
   margin: 0;
   font-family: var(--font-sans);
-  font-size: 46px;
+  font-size: clamp(34px, 7vw, 64px);
   font-weight: 800;
   line-height: 1.08;
   letter-spacing: -0.02em;
@@ -277,7 +288,7 @@ html.js .reveal.visible {
 
 .hero-sub {
   margin: 10px 0 0;
-  font-size: 19px;
+  font-size: clamp(15.5px, 2vw, 19px);
   color: var(--text-dim);
 }
 
@@ -439,13 +450,24 @@ button.chip {
 }
 
 .section-title {
-  font-size: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  font-size: clamp(19px, 2.4vw, 24px);
   font-weight: 700;
   font-family: var(--font-mono);
   color: var(--text);
   margin: 0 0 20px;
   padding-bottom: 10px;
   border-bottom: 1px solid var(--border);
+}
+
+.section-index {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(139, 148, 158, 0.16);
 }
 
 .section-title .cmd {
@@ -656,7 +678,7 @@ button.chip {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 18px;
-  transition: border-color 0.15s ease, transform 0.15s ease;
+  transition: border-color 0.15s ease, transform 0.18s ease, box-shadow 0.15s ease;
 }
 
 .card:hover {
@@ -870,7 +892,7 @@ button.chip {
 }
 
 .page-head h1 {
-  font-size: 24px;
+  font-size: clamp(22px, 4vw, 32px);
   font-family: var(--font-mono);
   margin: 0;
 }
@@ -912,19 +934,69 @@ button.chip {
   color: var(--green);
 }
 
+/* ---------- marquee défilant (pleine largeur) ---------- */
+
+.marquee {
+  overflow: hidden;
+  margin: 36px calc(50% - 50vw);
+  padding: 14px 0;
+  border-block: 1px solid var(--border);
+  background: var(--bg-soft);
+  user-select: none;
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 38s linear infinite;
+}
+
+.marquee-right .marquee-track {
+  animation-direction: reverse;
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+.marquee-half {
+  display: flex;
+  align-items: center;
+}
+
+.marquee-item {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  color: var(--text-dim);
+  padding: 0 14px;
+  white-space: nowrap;
+}
+
+.marquee-sep {
+  color: var(--green);
+  font-weight: 700;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
 /* ---------- responsive ---------- */
 
 @media (max-width: 640px) {
   .container {
     padding: 0 16px 48px;
-  }
-
-  .hero-name {
-    font-size: 31px;
-  }
-
-  .hero-sub {
-    font-size: 15.5px;
   }
 
   .site-header .inner {
@@ -976,6 +1048,7 @@ button.chip {
   .terminal-window,
   .hero-links,
   .hero-title,
+  .marquee,
   #scroll-progress,
   #to-top,
   .skip-link,
