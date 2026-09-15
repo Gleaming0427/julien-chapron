@@ -22,11 +22,27 @@ const bootLines = [
     </p>
   </div>
 
-  <!-- Grand titre display, façon microsoft.ai : mot accent en italique. -->
-  <div class="hero-title">
-    <p class="hero-overline"><span class="prompt">$</span> qui suis-je</p>
-    <h1 class="hero-name">{identity.name}</h1>
-    <p class="hero-sub">Développeur <em>full-stack</em> — 7 ans d'expérience · remote ou hybride Toulouse</p>
+  <!-- Titre éditorial à gauche, scène 3D dédiée à droite. -->
+  <div class="hero-top">
+    <div class="hero-col">
+      <div class="hero-title">
+        <p class="hero-overline"><span class="prompt">$</span> qui suis-je</p>
+        <h1 class="hero-name">{identity.name}</h1>
+        <p class="hero-sub">Développeur <em>full-stack</em> — 7 ans d'expérience · remote ou hybride Toulouse</p>
+      </div>
+      <div class="hero-links">
+        <a class="chip" href={pdfUrl}>⬇ CV (PDF)</a>
+        <a class="chip" href={identity.phoneHref}>☎ {identity.phone}</a>
+        <a class="chip" href={`mailto:${identity.email}`}>✉ {identity.email}</a>
+        <button class="chip" type="button" data-copy={identity.email}>⧉ copier l'email</button>
+        <a class="chip" href={identity.github} target="_blank" rel="noopener noreferrer">⌥ {identity.githubLabel}</a>
+        <a class="chip" href={identity.npm} target="_blank" rel="noopener noreferrer">⌘ {identity.npmLabel}</a>
+      </div>
+    </div>
+
+    <div class="hero-stage" aria-hidden="true">
+      <div class="hero-stage-label"><span class="prompt">$</span> render --wireframe --follow-cursor</div>
+    </div>
   </div>
 
   <div class="terminal-window">
@@ -51,15 +67,6 @@ const bootLines = [
         />
       </div>
     </div>
-  </div>
-
-  <div class="hero-links">
-    <a class="chip" href={pdfUrl}>⬇ CV (PDF)</a>
-    <a class="chip" href={identity.phoneHref}>☎ {identity.phone}</a>
-    <a class="chip" href={`mailto:${identity.email}`}>✉ {identity.email}</a>
-    <button class="chip" type="button" data-copy={identity.email}>⧉ copier l'email</button>
-    <a class="chip" href={identity.github} target="_blank" rel="noopener noreferrer">⌥ {identity.githubLabel}</a>
-    <a class="chip" href={identity.npm} target="_blank" rel="noopener noreferrer">⌘ {identity.npmLabel}</a>
   </div>
 
   <script type="application/json" id="terminal-boot" is:inline set:html={JSON.stringify(bootLines)}></script>

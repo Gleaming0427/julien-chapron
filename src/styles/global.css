@@ -264,27 +264,41 @@ html.js .reveal.visible {
   margin: 40px 0 48px;
 }
 
-/* Halo discret derrière l'objet 3D. */
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: radial-gradient(ellipse 55% 45% at 72% 18%, rgba(63, 185, 80, 0.08), transparent 70%);
+/* ---------- hero : titre éditorial + scène 3D dédiée ---------- */
+
+.hero-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 32px;
+  align-items: center;
+  margin-bottom: 28px;
 }
 
-/* Canvas Three.js derrière le contenu du hero. */
+.hero-stage {
+  position: relative;
+  height: 320px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: radial-gradient(circle at 50% 45%, rgba(63, 185, 80, 0.05), transparent 65%);
+  overflow: hidden;
+}
+
 .hero-canvas {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  display: block;
   pointer-events: none;
 }
 
-.hero > *:not(.hero-canvas) {
-  position: relative;
+.hero-stage-label {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
   z-index: 1;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  pointer-events: none;
 }
 
 /* ---------- titre hero, façon display ---------- */
@@ -391,7 +405,7 @@ html.js .reveal.visible {
 }
 
 .term-line {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   overflow-wrap: break-word;
 }
 
@@ -1039,6 +1053,17 @@ button.chip {
 
 /* ---------- responsive ---------- */
 
+@media (max-width: 860px) {
+  .hero-top {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .hero-stage {
+    height: 230px;
+  }
+}
+
 @media (max-width: 640px) {
   .container {
     padding: 0 16px 48px;
@@ -1097,6 +1122,7 @@ button.chip {
   .terminal-window,
   .hero-links,
   .hero-title,
+  .hero-stage,
   .marquee,
   #scroll-progress,
   #to-top,
