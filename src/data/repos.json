@@ -1,12 +1,30 @@
 [
   {
+    "name": "cve-triage",
+    "description": "Trouve les CVE qui comptent vraiment dans votre code : recoupées contre OSV/GHSA, analysées par reachability, avec correctifs exacts.",
+    "language": "Python",
+    "homepage": "",
+    "html_url": "https://github.com/Gleaming0427/cve-triage",
+    "stargazers_count": 0,
+    "pushed_at": "2026-09-15T13:26:44Z"
+  },
+  {
+    "name": "pims-pocket",
+    "description": "Application mobile de gestion d'argent de poche familial. Expo, React Native et Firebase.",
+    "language": "TypeScript",
+    "homepage": "https://play.google.com/store/apps/details?id=com.pimspocket.app",
+    "html_url": "https://github.com/Gleaming0427/pims-pocket",
+    "stargazers_count": 0,
+    "pushed_at": "2026-09-15T11:28:21Z"
+  },
+  {
     "name": "julien-chapron",
     "description": "Site CV en ligne — Astro + GitHub Pages, thème terminal interactif.",
-    "language": "Astro",
+    "language": "TypeScript",
     "homepage": null,
     "html_url": "https://github.com/Gleaming0427/julien-chapron",
     "stargazers_count": 0,
-    "pushed_at": "2026-09-14T16:31:18Z"
+    "pushed_at": "2026-09-15T10:21:46Z"
   },
   {
     "name": "shotokai-website",
@@ -25,14 +43,5 @@
     "html_url": "https://github.com/Gleaming0427/api-gateway",
     "stargazers_count": 0,
     "pushed_at": "2026-08-12T04:12:45Z"
-  },
-  {
-    "name": "cve-agent",
-    "description": "Open-source AI agent that finds actually exploitable CVEs in your code, AST reachability + Mistral AI triage",
-    "language": "Python",
-    "homepage": "",
-    "html_url": "https://github.com/Gleaming0427/cve-agent",
-    "stargazers_count": 0,
-    "pushed_at": "2026-08-04T22:46:15Z"
   }
 ]

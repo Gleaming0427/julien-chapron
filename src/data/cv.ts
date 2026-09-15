@@ -120,13 +120,13 @@ export const personalProjects: PersonalProject[] = [
     ],
   },
   {
-    name: "cve-agent",
+    name: "cve-triage",
     tagline: "détection de vulnérabilités exploitables",
     kind: "open source",
     description:
-      "Agent qui identifie, dans une base de code, les CVE réellement atteignables : analyse AST de reachability et triage assisté par IA.",
+      "Trouve les CVE qui comptent vraiment dans votre code : recoupées contre OSV/GHSA, analysées par reachability, avec correctifs exacts.",
     stack: "Python, Mistral AI",
-    links: [{ label: "github.com/Gleaming0427/cve-agent", href: "https://github.com/Gleaming0427/cve-agent" }],
+    links: [{ label: "github.com/Gleaming0427/cve-triage", href: "https://github.com/Gleaming0427/cve-triage" }],
   },
   {
     name: "Pims Pocket",
@@ -135,7 +135,10 @@ export const personalProjects: PersonalProject[] = [
     description:
       "Double interface parent / enfant : architecture multi-rôles avec règles de sécurité Firestore, authentification enfant par code et PIN, synchronisation temps réel et migration de données idempotente en production.",
     stack: "React Native (Expo Router), TypeScript, Zustand, Firebase, NativeWind",
-    links: [],
+    links: [
+      { label: "Google Play", href: "https://play.google.com/store/apps/details?id=com.pimspocket.app" },
+      { label: "github.com/Gleaming0427/pims-pocket", href: "https://github.com/Gleaming0427/pims-pocket" },
+    ],
   },
   {
     name: "Lecture de plateau de jeu par vision IA",
@@ -153,11 +156,14 @@ export const apps: App[] = [
     name: "Pims Pocket",
     emoji: "💰",
     type: "Application mobile",
-    status: "projet personnel",
+    status: "sur le Play Store",
     description:
       "Gestion d'argent de poche à double interface parent / enfant : sécurité Firestore multi-rôles, code + PIN enfant, synchronisation temps réel.",
     stack: "React Native (Expo Router) · TypeScript · Firebase",
-    links: [],
+    links: [
+      { label: "Google Play", href: "https://play.google.com/store/apps/details?id=com.pimspocket.app" },
+      { label: "GitHub", href: "https://github.com/Gleaming0427/pims-pocket" },
+    ],
   },
   {
     name: "Lecture de plateau de jeu par vision IA",
@@ -183,14 +189,14 @@ export const apps: App[] = [
     ],
   },
   {
-    name: "cve-agent",
+    name: "cve-triage",
     emoji: "🛡️",
     type: "Agent IA · CLI",
     status: "open source",
     description:
-      "Identifie dans une base de code les CVE réellement atteignables : analyse AST de reachability et triage assisté par IA.",
+      "Trouve les CVE qui comptent vraiment dans votre code : recoupées contre OSV/GHSA, analysées par reachability, avec correctifs exacts.",
     stack: "Python · Mistral AI",
-    links: [{ label: "GitHub", href: "https://github.com/Gleaming0427/cve-agent" }],
+    links: [{ label: "GitHub", href: "https://github.com/Gleaming0427/cve-triage" }],
   },
 ];
 
