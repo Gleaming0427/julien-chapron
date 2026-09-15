@@ -72,7 +72,7 @@ toTop.addEventListener("click", () => {
   }
 });
 
-// Révélation des sections au scroll.
+// Révélation « papier déchiré » au scroll.
 const observer = new IntersectionObserver(
   (entries) => {
     for (const entry of entries) {
@@ -82,7 +82,7 @@ const observer = new IntersectionObserver(
       }
     }
   },
-  { threshold: 0.06 },
+  { threshold: 0.12 },
 );
 document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
 

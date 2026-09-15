@@ -209,22 +209,36 @@ code {
 
 /* Révélation des sections au scroll — sans JS (html sans .js), tout reste visible. */
 
+/* Révélation « papier déchiré » : chaque section est recouverte d'un voile
+   au bord déchiqueté qui se soulève en pivotant légèrement au scroll —
+   sans JS (html sans .js), tout reste visible. */
+
 html.js .reveal {
-  opacity: 0;
-  transform: translateY(8px);
+  position: relative;
 }
 
-html.js .reveal.visible {
-  opacity: 1;
-  transform: none;
-  transition: opacity 0.6s ease, transform 0.6s ease;
+html.js .reveal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: var(--bg);
+  transform-origin: 50% 100%;
+  will-change: transform;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='9' viewBox='0 0 18 9'%3E%3Cpath d='M0 0h18v4l-4.5 5L9 4l-4.5 5L0 4z' fill='white'/%3E%3C/svg%3E") left bottom / 18px 9px repeat-x;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='9' viewBox='0 0 18 9'%3E%3Cpath d='M0 0h18v4l-4.5 5L9 4l-4.5 5L0 4z' fill='white'/%3E%3C/svg%3E") left bottom / 18px 9px repeat-x;
+  transition: transform 0.9s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.35s ease 0.55s;
+}
+
+html.js .reveal.visible::before {
+  transform: translateY(-103%) rotate(1.3deg);
+  opacity: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html.js .reveal {
-    opacity: 1;
-    transform: none;
-    transition: none;
+  html.js .reveal::before {
+    display: none;
   }
 
   .cursor {
