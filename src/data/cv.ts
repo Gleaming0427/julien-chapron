@@ -129,15 +129,6 @@ export const personalProjects: PersonalProject[] = [
     links: [{ label: "github.com/Gleaming0427/cve-agent", href: "https://github.com/Gleaming0427/cve-agent" }],
   },
   {
-    name: "L'Atelier CoQuest",
-    tagline: "plateforme SaaS de formation au recrutement",
-    kind: "projet personnel",
-    description:
-      "Plateforme développée de bout en bout : architecture full-stack, temps réel multi-clients (SSE), authentification JWT et double facteur TOTP, chiffrement et conformité RGPD, base de données relationnelle et gestion multi-rôles.",
-    stack: "React 19 / Vite, Node.js / Express 5, PostgreSQL, SSE, JWT + 2FA TOTP",
-    links: [],
-  },
-  {
     name: "Pims Pocket",
     tagline: "application mobile de gestion d'argent de poche",
     kind: "projet personnel",
@@ -147,36 +138,17 @@ export const personalProjects: PersonalProject[] = [
     links: [],
   },
   {
-    name: "Studio CoQuest",
-    tagline: "lecture de plateau de jeu par vision IA",
+    name: "Lecture de plateau de jeu par vision IA",
+    tagline: "preuve de concept",
     kind: "preuve de concept",
     description:
       "Application full-stack lisant un plateau de jeu physique à partir d'une photo : identification du numéro, de la couleur et des jetons de chaque carte, via extraction structurée par modèle de vision.",
     stack: "TypeScript, Node.js / Express, React / Vite, GPT-4o Vision",
     links: [],
   },
-  {
-    name: "Site vitrine CoQuest",
-    tagline: "coquest.fr",
-    kind: "site en ligne",
-    description:
-      "Site en génération statique : content collections Markdown et Zod, design system CSS, SEO technique, build optimisé (WebP, Brotli) et déploiement GitLab CI vers VPS.",
-    stack: "Astro, JavaScript ES2024, CSS, Node.js, GitLab CI",
-    links: [{ label: "coquest.fr", href: "https://coquest.fr" }],
-  },
 ];
 
 export const apps: App[] = [
-  {
-    name: "L'Atelier CoQuest",
-    emoji: "🎓",
-    type: "Application web · SaaS",
-    status: "projet personnel",
-    description:
-      "Plateforme de formation au recrutement : temps réel multi-clients (SSE), authentification JWT + 2FA TOTP, chiffrement et conformité RGPD, gestion multi-rôles.",
-    stack: "React 19 · Node.js / Express 5 · PostgreSQL",
-    links: [],
-  },
   {
     name: "Pims Pocket",
     emoji: "💰",
@@ -188,7 +160,7 @@ export const apps: App[] = [
     links: [],
   },
   {
-    name: "Studio CoQuest",
+    name: "Lecture de plateau de jeu par vision IA",
     emoji: "🎲",
     type: "Preuve de concept · vision IA",
     status: "POC",
@@ -196,16 +168,6 @@ export const apps: App[] = [
       "Lecture d'un plateau de jeu physique à partir d'une photo : identification du numéro, de la couleur et des jetons de chaque carte.",
     stack: "TypeScript · Node.js / Express · GPT-4o Vision",
     links: [],
-  },
-  {
-    name: "Site vitrine CoQuest",
-    emoji: "🌐",
-    type: "Site web statique",
-    status: "en ligne",
-    description:
-      "Site en génération statique avec Astro : content collections, SEO technique, build optimisé (WebP, Brotli), déploiement GitLab CI.",
-    stack: "Astro · JavaScript ES2024 · CSS",
-    links: [{ label: "coquest.fr", href: "https://coquest.fr" }],
   },
   {
     name: "api-gateway-core",
@@ -245,7 +207,7 @@ export const education: Education[] = [
 
 export const languages = [
   { name: "Français", level: "langue maternelle" },
-  { name: "Anglais", level: "B2 à l'écrit, A2-B1 à l'oral" },
+  { name: "Anglais", level: "B1 à l'écrit, A2 à l'oral" },
 ];
 
 export const before =
