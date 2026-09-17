@@ -1,19 +1,19 @@
 ---
 interface Props {
-  /** Textes qui défilent, séparés par un prompt vert. */
+  /** Texts that scroll, separated by a green prompt. */
   items: string[];
-  /** Sens du défilement : left (défaut) ou right. */
+  /** Scroll direction: left (default) or right. */
   direction?: "left" | "right";
-  /** mono (défaut) : stack technique · display : grands chiffres éditoriaux. */
+  /** mono (default): tech stack · display: large editorial figures. */
   variant?: "mono" | "display";
-  /** Colle le bord inférieur (pour le bandeau juste au-dessus de la déchirure). */
+  /** Sticks to the bottom edge (for the band just above the tear). */
   tightBottom?: boolean;
 }
 
 const { items, direction = "left", variant = "mono", tightBottom = false } = Astro.props;
 
-// Contenu statique (pas d'entrée utilisateur) : le set:html est sans risque.
-// Un item sur deux est en contour (outline), façon typographie éditoriale.
+// Static content (no user input): the set:html is safe.
+// Every other item is outlined, in the style of editorial typography.
 const half = items
   .map(
     (item, index) =>

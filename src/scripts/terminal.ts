@@ -1,5 +1,5 @@
-// Mini-terminal interactif du hero : séquence de démarrage typée puis invite de commande.
-// Commandes : help, whoami, contact, stack, ls, cv, projets, apps, pdf, clear, exit…
+// Interactive mini-terminal of the hero: typed boot sequence then command prompt.
+// Commands: help, whoami, contact, stack, ls, cv, projets, apps, pdf, clear, exit…
 
 interface BootLine {
   cmd: string;
@@ -91,10 +91,10 @@ async function boot(): Promise<void> {
   booted = true;
   input.disabled = false;
 
-  // Le terminal occupe le deuxième écran : lui donner le focus alors qu'on
-  // est encore sur le hero ferait sauter la page jusqu'à lui. On ne le prend
-  // que s'il est déjà sous les yeux, et jamais en faisant défiler, sinon
-  // l'invite reste là, à un clic (c'est ce que dit l'indication ci-dessus).
+  // The terminal occupies the second screen: giving it focus while one
+  // is still on the hero would make the page jump down to it. We only take
+  // it if it is already in sight, and never by scrolling, otherwise
+  // the prompt stays there, one click away (that is what the hint above says).
   const box = body.getBoundingClientRect();
   if (box.top < window.innerHeight && box.bottom > 0) {
     input.focus({ preventScroll: true });
@@ -207,7 +207,7 @@ input.addEventListener("keydown", (event) => {
   }
 });
 
-// Cliquer n'importe où dans le terminal (hors liens) redonne le focus à l'input.
+// Clicking anywhere in the terminal (outside links) gives the focus back to the input.
 body.addEventListener("click", (event) => {
   if (booted && !(event.target as HTMLElement).closest("a")) {
     input.focus();

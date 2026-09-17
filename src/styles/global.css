@@ -1,5 +1,5 @@
 /* ============================================================
-   Design system — thème « terminal » sombre (palette GitHub dark)
+   Design system — dark "terminal" theme (GitHub dark palette)
    ============================================================ */
 
 :root {
@@ -18,13 +18,13 @@
   --red: #f85149;
   --pink: #f778ba;
 
-  /* L'Archivo variable s'applique partout, même aux éléments « code ». */
+  /* The Archivo variable font applies everywhere, even to "code" elements. */
   --font-mono: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-sans: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
-  /* Échelle typographique fluide, reprise de la référence : chaque taille
-     est un multiple de 1vw/0.9. Bornée aux extrêmes — sans cela le texte
-     tomberait à 4px sur un téléphone et enflerait sur un très grand écran. */
+  /* Fluid type scale, taken from the reference: every size
+     is a multiple of 1vw/0.9. Clamped at both extremes — without that the text
+     would drop to 4px on a phone and balloon on a very large screen. */
   --fs-micro: clamp(10px, 0.83vw, 14px);
   --fs-small: clamp(12.5px, 0.9vw, 17px);
   --fs-body: clamp(14.5px, 1.111vw, 20px);
@@ -33,16 +33,16 @@
   --fs-h2: clamp(26px, 3.333vw, 52px);
   --fs-h1: clamp(42px, 7.778vw, 124px);
 
-  /* Trame de petits points du fond sombre. En token parce qu'elle sert
-     maintenant au hero ET au bloc « parcours » : les deux doivent bouger
-     ensemble si on la retouche. */
+  /* Small-dot grid of the dark background. A token because it now serves
+     the hero AND the "parcours" block: both must move
+     together if it is retouched. */
   --trame: radial-gradient(rgba(139, 148, 158, 0.16) 1px, transparent 1.2px);
   --trame-pas: 24px 24px;
 
   --radius: 8px;
   --gutter: clamp(20px, 3vw, 56px);
-  /* Hauteur réelle du header, mesurée au chargement : un « écran » de
-     contenu, c'est la hauteur de la fenêtre moins ce bandeau collant. */
+  /* Real header height, measured on load: a content
+     "screen" is the window height minus this sticky bar. */
   --header-h: 57px;
   --screen: calc(100vh - var(--header-h));
 }
@@ -57,12 +57,12 @@ html {
 
 body {
   margin: 0;
-  /* La variable Archivo a un axe de largeur : on le fixe à 100 % pour
-     garder la largeur standard, sinon l'instance par défaut rend plus
-     large que la version statique. */
+  /* The Archivo variable font has a width axis: it is set to 100% to
+     keep the standard width, otherwise the default instance renders
+     wider than the static version. */
   font-stretch: 100%;
   background-color: var(--bg);
-  /* Trame de petits points discrets sur la zone sombre. */
+  /* Discreet small-dot grid over the dark area. */
   background-image: var(--trame);
   background-size: var(--trame-pas);
   color: var(--text);
@@ -73,19 +73,19 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Partie sombre : le hero occupe l'écran, le bandeau se cale dessous.
-   Chaque bloc fait exactement un écran, ni plus ni moins — aucune hauteur
-   imposée ici, sinon les blocs seraient étirés et leur contenu rogné. */
+/* Dark part: the hero fills the screen, the banner settles below it.
+   Each block is exactly one screen, no more, no less — no height
+   imposed here, otherwise the blocks would be stretched and their content cropped. */
 .dark-zone {
   position: relative;
   display: flex;
   flex-direction: column;
   margin-inline: calc(50% - 50vw);
   padding-inline: calc(50vw - 50%);
-  /* Prolongement sombre : il garde le pied de la zone sous le bas de
-     l'écran pendant que le bandeau se centre, pour que l'orange de la
-     zone claire ne dépasse jamais le bord de l'effet. (15 + 35 = 50vh,
-     la moitié d'écran nécessaire avec un bloc de 30vh.) */
+  /* Dark extension: it keeps the foot of the area below the bottom of
+     the screen while the banner centers itself, so the orange of the
+     light zone never spills past the edge of the effect. (15 + 35 = 50vh,
+     the half-screen needed with a 30vh block.) */
   padding-bottom: 35vh;
 }
 
@@ -95,8 +95,8 @@ body {
   margin: 0;
 }
 
-/* Le bloc du bandeau : 30vh entre le hero et l'effet (arrivée plus
-   rapide à cat profil). */
+/* The banner block: 30vh between the hero and the effect (a faster
+   arrival at that point). */
 .bandeau-block {
   position: relative;
   height: 30vh;
@@ -110,7 +110,7 @@ body {
   align-items: center;
 }
 
-/* Le chiffre clé flotte au centre, par-dessus le défilement. */
+/* The key figure floats at the center, on top of the scrolling. */
 .bandeau-stat {
   position: absolute;
   inset: 0;
@@ -120,7 +120,7 @@ body {
   pointer-events: none;
 }
 
-/* Pilule translucide floutée, dans le style du site (header, étiquette). */
+/* Translucent blurred pill, in the style of the site (header, label). */
 .bandeau-stat-inner {
   position: relative;
   display: flex;
@@ -145,7 +145,7 @@ body {
   color: var(--orange);
 }
 
-/* Le même balayage lumineux sur le contour que « disponible · Toulouse ». */
+/* The same light sweep on the outline as the « disponible · Toulouse » badge. */
 .bandeau-stat-inner::before {
   content: "";
   position: absolute;
@@ -179,8 +179,8 @@ body {
   }
 }
 
-/* Zone claire : la page orange qui apparaît après le séparateur encre.
-   Elle redéfinit la palette entière pour tout le contenu qu'elle enveloppe. */
+/* Light zone: the orange page that appears after the ink separator.
+   It redefines the entire palette for all the content it wraps. */
 .light-zone {
   --bg: #ff4d00;
   --bg-soft: #f6f8fa;
@@ -197,11 +197,11 @@ body {
   --red: #d1242f;
   --pink: #bf3989;
   background: var(--bg);
-  /* Pleine largeur malgré le conteneur centré. Elle arrive pile quand la
-     feuille a fini de monter : les deux étant blanches, le raccord est
+  /* Full width despite the centered container. It arrives right when the
+     sheet has finished rising: both being white, the seam is
      invisible.
-     flow-root : empêche la marge de .section:first-child de traverser ce
-     conteneur (sinon elle s'ajoute par-dessus au lieu d'être absorbée). */
+     flow-root: stops the margin of .section:first-child from crossing this
+     container (otherwise it adds on top instead of being absorbed). */
   position: relative;
   z-index: 1;
   display: flow-root;
@@ -209,8 +209,8 @@ body {
   padding-inline: calc(50vw - 50%);
 }
 
-/* Fenêtre d'un écran collée au pied du bloc figé : c'est là que la feuille
-   blanche monte (voir index.astro pour la construction du bord déchiré). */
+/* Window of one screen stuck to the foot of the frozen block: that is where
+   the white sheet rises (see index.astro for how the torn edge is built). */
 .tear {
   position: absolute;
   left: 0;
@@ -222,12 +222,12 @@ body {
   pointer-events: none;
 }
 
-/* Marge de manœuvre pour la déformation : sans elle, le bruit déplacerait
-   la matière hors du cadre du filtre et le bord serait tranché net. */
+/* Slack for the distortion: without it, the noise would move
+   the material outside the filter's frame and the edge would be cut clean. */
 .tear-filter {
   position: absolute;
-  /* Moitié d'écran de marge : la feuille peut grandir deux fois plus
-     longtemps, le balayage reste visible sur toute sa course. */
+  /* Half a screen of margin: the sheet can grow for twice as long,
+     the sweep stays visible across its whole run. */
   inset: calc(-50vh);
   filter: url(#ink-edge);
 }
@@ -238,14 +238,14 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  /* La feuille qui monte avec l'effet tache est orange, pas blanche. */
+  /* The sheet that rises with the ink-blot effect is orange, not white. */
   background: var(--orange);
   transform-origin: center bottom;
   transform: scaleY(var(--tear, 0));
 }
 
-/* Sans JS, pas de montée : on masque la déchirure, le passage au blanc se
-   fait franchement et la page reste parfaitement lisible. */
+/* Without JS, no rise: the tear is hidden, the switch to white
+   happens plainly and the page stays perfectly readable. */
 html:not(.js) .tear {
   display: none;
 }
@@ -256,7 +256,7 @@ html:not(.js) .tear {
   }
 }
 
-/* Lenis (défilement fluide) reprend la main sur le scroll. */
+/* Lenis (smooth scrolling) takes over the scroll. */
 html.lenis,
 html.lenis body {
   height: auto;
@@ -287,8 +287,8 @@ code {
 
 /* ---------- layout ---------- */
 
-/* Pleine largeur : le contenu va d'un bord à l'autre, avec juste la marge
-   nécessaire pour que le texte ne colle pas au bord de l'écran. */
+/* Full width: the content goes from one edge to the other, with just the margin
+   needed so the text does not stick to the edge of the screen. */
 .container {
   max-width: none;
   margin: 0;
@@ -297,12 +297,12 @@ code {
 
 /* ---------- header ---------- */
 
-/* Le header ne porte plus de fond : il ne fait que ménager la gouttière
-   autour de la pilule flottante qu'il contient. */
-/* Aucun fond ici : seule la pilule en porte un. Le bandeau n'est qu'une
-   gouttière, et la page passe dessous. */
-/* La navbar suit le défilement sur ordinateur et tablette ; sur
-   téléphone elle laisse la place au seul burger. */
+/* The header no longer carries a background: it only provides the gutter
+   around the floating pill it contains. */
+/* No background here: only the pill carries one. The bar is just a
+   gutter, and the page passes underneath. */
+/* The navbar follows the scroll on desktop and tablet; on
+   phone it leaves the place to the burger alone. */
 .site-header {
   position: sticky;
   top: 0;
@@ -310,12 +310,12 @@ code {
   padding: 12px var(--gutter);
 }
 
-/* Menu ouvert : le header passe au-dessus du voile pour que le burger
-   reste cliquable — et visible — en haut de l'écran. */
-/* Largeur 100vw, pas left/right : quand le navigateur affiche une vraie
-   barre de défilement (Chrome classique, Firefox), left/right se calent
-   sur la zone utile et tout le header glisse de ~7 px vers la gauche.
-   100vw couvre l'écran entier, barre de défilement comprise. */
+/* Menu open: the header moves above the veil so the burger
+   stays clickable — and visible — at the top of the screen. */
+/* Width 100vw, not left/right: when the browser shows a real
+   scrollbar (classic Chrome, Firefox), left/right align
+   on the usable area and the whole header slides ~7 px to the left.
+   100vw covers the entire screen, scrollbar included. */
 html.menu-ouvert .site-header {
   position: fixed;
   top: 0;
@@ -323,9 +323,9 @@ html.menu-ouvert .site-header {
   width: 100vw;
 }
 
-/* La pilule : translucide, détachée des bords, flou d'arrière-plan.
-   Trois colonnes, la navigation restant centrée sur la page quelle que
-   soit la largeur du nom à gauche et du bouton à droite. */
+/* The pill: translucent, detached from the edges, background blur.
+   Three columns, the navigation staying centered on the page whatever
+   the width of the name on the left and of the button on the right. */
 .site-header .inner {
   display: grid;
   grid-template-columns: auto auto;
@@ -335,10 +335,10 @@ html.menu-ouvert .site-header {
   padding: 7px 7px 7px 14px;
   border: 1px solid rgba(240, 246, 252, 0.08);
   border-radius: 12px;
-  /* Un voile de transparence seulement : à 86 % d'opacité, la pilule laisse
-     deviner ce qui passe dessous sans virer à l'orange sur la zone claire —
-     elle s'y réchauffe à peine. Plus transparent, elle changerait de couleur
-     au fil du défilement. */
+  /* Only a veil of transparency: at 86% opacity, the pill lets you
+     guess what passes underneath without turning orange over the light zone —
+     it barely warms up there. More transparent, it would change color
+     as the scroll goes. */
   background: rgba(19, 23, 30, 0.86);
   backdrop-filter: blur(12px);
 }
@@ -387,8 +387,8 @@ html.menu-ouvert .site-header {
   color: var(--green);
 }
 
-/* Le burger : une pilule sombre en bout de barre, trois traits. Il ne
-   vit que sur téléphone — ailleurs, la navbar s'affiche en entier. */
+/* The burger: a dark pill at the end of the bar, three strokes. It only
+   lives on phone — elsewhere, the full navbar shows. */
 .burger {
   display: none;
   justify-self: end;
@@ -408,13 +408,13 @@ html.menu-ouvert .site-header {
   height: 18px;
 }
 
-/* Le menu plein écran, sous la pilule du header : le fond du site, la
-   trame, et les entrées en gros corps mono. Le contenu vit dans le HAUT
-   du voile, sous l'icône du burger restée en tête. */
-/* Largeur 100vw et non inset:0 : avec une barre de défilement classique,
-   inset:0 se cale sur la zone utile (écran − 15 px) et le contenu du
-   menu se retrouve décalé de ~7 px vers la gauche. 100vw se centre sur
-   l'écran réel, dans tous les navigateurs. */
+/* The full-screen menu, under the header pill: the background of the site, the
+   dotted grid, and the entries in large mono type. The content lives in the TOP
+   of the veil, under the burger icon that stayed at the head. */
+/* Width 100vw and not inset:0: with a classic scrollbar,
+   inset:0 aligns on the usable area (screen − 15 px) and the content of the
+   menu ends up shifted ~7 px to the left. 100vw centers on
+   the real screen, in all browsers. */
 .menu-voile {
   position: fixed;
   top: 0;
@@ -447,8 +447,8 @@ html.menu-ouvert .menu-voile {
   gap: clamp(20px, 4vh, 36px);
 }
 
-/* Les deux entrées partagent la même largeur : leurs bords s'alignent
-   et le centrage se lit d'un coup d'œil. */
+/* Both entries share the same width: their edges line up
+   and the centering reads at a glance. */
 .menu-lien,
 .menu .axiom-btn {
   width: 100%;
@@ -462,7 +462,7 @@ html.menu-ouvert .menu-voile {
 
 .menu-lien {
   font-family: var(--font-mono);
-  /* Taille de menu, pas d'accroche : l'entrée se lit, elle ne crie pas. */
+  /* Menu size, not a tagline: the entry reads, it does not shout. */
   font-size: clamp(20px, 5.5vw, 28px);
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -475,7 +475,7 @@ html.menu-ouvert .menu-voile {
   color: var(--orange);
 }
 
-/* Le lien roule verticalement au survol, comme les boutons. */
+/* The link rolls vertically on hover, like the buttons. */
 .nav-text-col {
   display: flex;
   flex-direction: column;
@@ -492,7 +492,7 @@ html.menu-ouvert .menu-voile {
   transform: translateY(-100%);
 }
 
-/* ---------- accessibilité & navigation utilitaire ---------- */
+/* ---------- accessibility & utility navigation ---------- */
 
 :focus-visible {
   outline: 2px solid var(--green);
@@ -500,14 +500,14 @@ html.menu-ouvert .menu-voile {
   border-radius: 2px;
 }
 
-/* Progression de lecture : un trait fin sur le bord droit, un repère qui le
-   parcourt, et le pourcentage en chiffres à chasse fixe. Remplace la barre
-   pleine largeur en haut de page.
-   L'encre bascule selon le fond réellement derrière l'indicateur. J'avais
-   d'abord repris le mix-blend-mode: difference de la référence — mais il
-   fonctionne chez eux parce que leur fond est sombre d'un bout à l'autre.
-   Ici, mesuré, le rail tombait à 1,20:1 de contraste sur l'orange : invisible.
-   Deux encres explicites règlent le cas franchement. */
+/* Reading progress: a thin line on the right edge, a marker that
+   travels it, and the percentage in tabular figures. Replaces the
+   full-width bar at the top of the page.
+   The ink flips according to the background actually behind the indicator. I
+   had first reused the reference's mix-blend-mode: difference — but it
+   works for them because their background is dark from one end to the other.
+   Here, measured, the rail fell to 1.20:1 contrast on the orange: invisible.
+   Two explicit inks settle the case plainly. */
 #scroll-progress {
   position: fixed;
   right: clamp(14px, 1.8vw, 26px);
@@ -519,12 +519,12 @@ html.menu-ouvert .menu-voile {
   align-items: center;
   gap: 9px;
   pointer-events: none;
-  /* Encre claire par défaut : hero sombre, blocs parcours et compétences. */
+  /* Light ink by default: dark hero, parcours and skills blocks. */
   --encre: 255, 255, 255;
 }
 
-/* Sur les écrans orange de la zone claire, l'encre passe au noir. La classe
-   est posée par ui.ts, qui sait quel fond se trouve derrière l'indicateur. */
+/* On the orange screens of the light zone, the ink switches to black. The class
+   is set by ui.ts, which knows what background sits behind the indicator. */
 #scroll-progress.sur-clair {
   --encre: 10, 9, 8;
 }
@@ -547,8 +547,8 @@ html.menu-ouvert .menu-voile {
   height: 8px;
   background: rgb(var(--encre));
   transition: background-color 0.35s ease;
-  /* Le repère parcourt le rail moins sa propre hauteur, sinon il déborderait
-     en bas à 100 %. --scroll-pct est écrit par ui.ts, de 0 à 1. */
+  /* The marker travels the rail minus its own height, otherwise it would
+     overflow at the bottom at 100%. --scroll-pct is written by ui.ts, from 0 to 1. */
   translate: 0 calc(var(--scroll-pct, 0) * 56px);
 }
 
@@ -556,7 +556,7 @@ html.menu-ouvert .menu-voile {
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.08em;
-  /* Chiffres à chasse fixe : sans ça le compteur tremble à chaque unité. */
+  /* Tabular figures: without them the counter jitters at every unit. */
   font-variant-numeric: tabular-nums;
   color: rgba(var(--encre), 0.75);
   transition: color 0.35s ease;
@@ -567,8 +567,8 @@ html.menu-ouvert .menu-voile {
     animation: none;
   }
 
-  /* Le hero est là d'emblée, sans mise en scène. Le masque du titre est
-     remis à zéro, sinon il resterait figé sur son état de départ. */
+  /* The hero is there from the outset, with no staging. The title's mask is
+     reset, otherwise it would stay frozen on its starting state. */
   .hero-name {
     -webkit-mask-image: none;
     mask-image: none;
@@ -611,16 +611,16 @@ html.menu-ouvert .menu-voile {
   }
 }
 
-/* ---------- hero : fenêtre de terminal ---------- */
+/* ---------- hero: terminal window ---------- */
 
 .hero {
   position: relative;
   margin: 40px 0 48px;
 }
 
-/* ---------- hero : titre éditorial + scène 3D dédiée ---------- */
+/* ---------- hero: editorial title + dedicated 3D scene ---------- */
 
-/* Le globe domine, le titre vient dessous : une colonne centrée. */
+/* The globe dominates, the title comes below: a centered column. */
 .hero-top {
   display: flex;
   flex-direction: column;
@@ -629,20 +629,20 @@ html.menu-ouvert .menu-voile {
   gap: 8px;
 }
 
-/* Un écran plein chacun, contenu centré. */
+/* One full screen each, content centered. */
 .dark-zone .hero-top {
   min-height: var(--screen);
 }
 
 .dark-zone .hero-top {
   justify-content: center;
-  /* Les pastilles ne collent pas au bas de l'écran. */
+  /* The chips do not stick to the bottom of the screen. */
   padding-bottom: 28px;
 }
 
-/* Sans cadre : le globe flotte. Il passe en premier dans la colonne et
-   absorbe la hauteur qui reste une fois le texte placé — c'est ce qui
-   garantit que rien ne dépasse de l'écran, même sur un écran bas. */
+/* No frame: the globe floats. It comes first in the column and
+   absorbs the height that remains once the text is placed — this is what
+   guarantees nothing overflows the screen, even on a short screen. */
 .hero-stage {
   position: relative;
   order: -1;
@@ -651,8 +651,8 @@ html.menu-ouvert .menu-voile {
   min-height: 180px;
   max-height: 560px;
   margin-bottom: -12px;
-  /* Le globe se tourne à la main ; au doigt, le geste vertical reste au
-     défilement de la page. */
+  /* The globe is turned by hand; with a finger, the vertical gesture stays with
+     the page scroll. */
   cursor: grab;
   touch-action: pan-y;
 }
@@ -661,24 +661,24 @@ html.menu-ouvert .menu-voile {
   cursor: grabbing;
 }
 
-/* Le canvas couvre tout le premier écran pour que les points puissent
-   arriver de hors page ; c'est .hero-stage qui reste la zone sensible. */
-/* Le calque déborde largement de l'écran dans les quatre directions.
-   À la taille exacte de la fenêtre, son bord bas remontait dans le champ dès
-   qu'on scrollait et tranchait les points en vol sur une ligne horizontale
-   nette — très visible pendant que le globe se forme. Les points doivent être
-   coupés par le bord de la FENÊTRE, jamais par celui de leur calque.
-   Le cadrage de la caméra se recalcule depuis les rectangles réels (voir
-   resize() dans hero3d.ts), donc agrandir le calque ne déplace pas le globe :
-   il reste centré sur .hero-stage. */
+/* The canvas covers the whole first screen so the points can
+   arrive from off-page; it is .hero-stage that remains the sensitive area. */
+/* The layer overflows the screen widely in the four directions.
+   At the exact size of the window, its bottom edge rose back into the field as
+   soon as one scrolled and cut the points in flight on a clean horizontal
+   line — very visible while the globe forms. The points must be
+   cut by the edge of the WINDOW, never by that of their layer.
+   The camera framing is recomputed from the real rectangles (see
+   resize() in hero3d.ts), so enlarging the layer does not move the globe:
+   it stays centered on .hero-stage. */
 .hero-canvas-layer {
   position: absolute;
   left: -12vw;
   right: -12vw;
-  /* La marge du BAS est la plus importante : c'est ce bord-là qui remonte
-     dans le champ quand on scrolle pendant la formation. 100vh de rab donne
-     près de 480 px de course avant qu'il n'affleure, soit bien plus que ce
-     qu'on parcourt le temps que le globe se forme. */
+  /* The BOTTOM margin is the most important: that is the edge that rises back
+     into the field when you scroll during the formation. 100vh of slack gives
+     nearly 480 px of run before it comes level, far more than what
+     one covers while the globe forms. */
   top: -30vh;
   height: calc(var(--screen) + 100vh);
   z-index: 0;
@@ -693,13 +693,13 @@ html.menu-ouvert .menu-voile {
   pointer-events: none;
 }
 
-/* Le contenu du hero passe devant le canvas. */
+/* The hero content passes in front of the canvas. */
 .dark-zone .hero {
   position: relative;
   z-index: 1;
 }
 
-/* Pastille de statut posée sur le globe, façon badge. */
+/* Status chip placed on the globe, badge-style. */
 .hero-stage-label {
   position: absolute;
   right: 4%;
@@ -722,10 +722,10 @@ html.menu-ouvert .menu-voile {
   animation-delay: 1.85s;
 }
 
-/* Un point lumineux fait le tour du contour : un dégradé conique tourne
-   derrière la pastille, et un masque ne laisse voir que l'épaisseur du
-   trait. Sans @property, le dégradé reste fixe — le badge est simplement
-   sans animation, rien ne casse. */
+/* A bright point makes the tour of the outline: a conic gradient turns
+   behind the chip, and a mask reveals only the thickness of the
+   stroke. Without @property, the gradient stays fixed — the badge is simply
+   without animation, nothing breaks. */
 @property --badge-angle {
   syntax: "<angle>";
   initial-value: 0deg;
@@ -783,7 +783,7 @@ html.menu-ouvert .menu-voile {
   }
 }
 
-/* ---------- titre hero, façon display ---------- */
+/* ---------- hero title, display-style ---------- */
 
 .hero-title {
   margin-bottom: 26px;
@@ -800,8 +800,8 @@ html.menu-ouvert .menu-voile {
   margin: 0;
   font-family: var(--font-sans);
   font-size: var(--fs-h1);
-  /* Graisse semi-bold : c'est le rendu du hero Axiom (« Complex problems.
-     Elegant solutions. ») — le 800 paraissait plus lourd que le leur. */
+  /* Semi-bold weight: this is the rendering of the Axiom hero ("Complex problems.
+     Elegant solutions.") — the 800 looked heavier than theirs. */
   font-weight: 600;
   line-height: 1.04;
   letter-spacing: -0.03em;
@@ -811,7 +811,7 @@ html.menu-ouvert .menu-voile {
 .hero-sub {
   margin: 10px 0 0;
   font-size: clamp(19px, 2.2vw, 32px);
-  /* Archivo light : le texte paraissait gras à la graisse par défaut. */
+  /* Archivo light: the text looked bold at the default weight. */
   font-weight: 300;
   color: var(--text-dim);
 }
@@ -821,8 +821,8 @@ html.menu-ouvert .menu-voile {
   color: var(--green);
 }
 
-/* Les boutons du hero, façon Axiom « Get in touch » : texte en double
-   rangée qui roule au survol, carré contenant une flèche. */
+/* The hero buttons, Axiom "Get in touch" style: text in double
+   row that rolls on hover, square containing an arrow. */
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
@@ -852,19 +852,19 @@ html.menu-ouvert .menu-voile {
   text-decoration: none;
 }
 
-/* Variante sombre (Axiom « dark »). */
+/* Dark variant (Axiom "dark"). */
 .axiom-btn-dark {
   background: #0b0c0d;
   color: #f3f1ec;
 }
 
-/* Le carré et la flèche sont noir et blanc, quel que soit le bouton. */
+/* The square and the arrow are black and white, whatever the button. */
 .axiom-btn-dark .axiom-btn-arrow-box {
   background: #f3f1ec;
   color: #0b0c0d;
 }
 
-/* Le texte roule verticalement au survol. */
+/* The text rolls vertically on hover. */
 .axiom-btn-text-col {
   display: flex;
   flex-direction: column;
@@ -881,9 +881,9 @@ html.menu-ouvert .menu-voile {
   transform: translateY(-100%);
 }
 
-/* Version navbar : même taille que le bouton du CV, même roll au survol.
-   justify-self : sans lui, la grille du header étire le bouton sur
-   toute sa colonne — c'est ce qui le rendait trop large. */
+/* Navbar version: same size as the CV button, same roll on hover.
+   justify-self: without it, the header grid stretches the button over
+   its whole column — this is what made it too wide. */
 .axiom-btn-nav {
   justify-self: end;
   padding: 4px 4px 4px 12px;
@@ -896,7 +896,7 @@ html.menu-ouvert .menu-voile {
   border-radius: 4px;
 }
 
-/* Le carré avec la flèche, noir et blanc. */
+/* The square with the arrow, black and white. */
 .axiom-btn-arrow-box {
   display: grid;
   place-items: center;
@@ -913,13 +913,13 @@ html.menu-ouvert .menu-voile {
 }
 
 
-/* ---------- arrivée du hero : tout se pose en cascade ---------- */
+/* ---------- hero arrival: everything settles in a cascade ---------- */
 
-/* Le titre ne bouge pas : il se révèle de la gauche vers la droite.
-   Un dégradé trois fois plus large que le titre sert de masque ; on le fait
-   glisser, et sa zone de fondu balaie le texte. Le flou se dissipe en même
-   temps. Si les masques ne sont pas gérés, la règle est ignorée et le titre
-   s'affiche normalement — jamais invisible. */
+/* The title does not move: it reveals itself from left to right.
+   A gradient three times wider than the title serves as a mask; it is made to
+   slide, and its fade zone sweeps the text. The blur dissipates at the same
+   time. If masks are not handled, the rule is ignored and the title
+   displays normally — never invisible. */
 .hero-name {
   -webkit-mask-image: linear-gradient(90deg, #000 0 35%, rgba(0, 0, 0, 0) 65%);
   mask-image: linear-gradient(90deg, #000 0 35%, rgba(0, 0, 0, 0) 65%);
@@ -966,8 +966,8 @@ html.menu-ouvert .menu-voile {
   animation-delay: 0.08s;
 }
 
-/* Le sous-titre et les pastilles n'arrivent qu'une fois le titre posé
-   (0,25 s d'attente + 1,6 s de balayage), en reprenant son flou léger. */
+/* The subtitle and the chips only arrive once the title is settled
+   (0.25 s of delay + 1.6 s of sweep), picking up its light blur. */
 .hero-sub,
 .hero-cta {
   animation: hero-soft-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -1004,7 +1004,7 @@ html.menu-ouvert .menu-voile {
   }
 }
 
-/* Le bandeau se pose à son tour. */
+/* The banner settles in turn. */
 .dark-zone .marquee {
   animation: hero-fade-up 1s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: 0.9s;
@@ -1048,25 +1048,25 @@ button.chip {
   border-bottom: 1px solid var(--border);
 }
 
-/* Le carrousel épinglé : une fois cat profil au centre, la molette fait
-   défiler les blocs 2-5 horizontalement (un bloc par écran). */
+/* The pinned carousel: once the profile is at the center, the wheel makes
+   blocks 2-5 scroll horizontally (one block per screen). */
 .carousel-rail {
-  /* 50vh de profil au centre, puis les transitions. La course utile est la
-     hauteur moins ces 50vh, soit 4 écrans ici, répartis par POIDS dans
-     ui.ts. POIDS donne des PROPORTIONS, pas des écrans : c'est cette hauteur
-     seule qui fixe le coût réel en molette, et les deux se règlent ensemble.
-     Les positions de l'interlude et des fiches, elles, sont exprimées en
-     écrans absolus et ne bougent pas avec cette valeur.
-     Les marges négatives annulent les gouttières de la zone claire :
-     les items de 100vw tiennent exactement dans l'écran. */
+  /* 50vh of profile at the center, then the transitions. The useful run is the
+     height minus those 50vh, so 4 screens here, distributed by WEIGHTS in
+     ui.ts. WEIGHTS gives PROPORTIONS, not screens: it is this height
+     alone that fixes the real wheel cost, and the two are tuned together.
+     The positions of the interlude and the cards, for their part, are expressed in
+     absolute screens and do not move with this value.
+     The negative margins cancel the gutters of the light zone:
+     the 100vw items fit exactly in the screen. */
   height: 450vh;
   margin-top: 8px;
   margin-inline: calc(-1 * var(--gutter));
 }
 
-/* Plein écran, épinglé tout en haut : le fond du bloc passe ainsi derrière
-   la pilule, qui flotte par-dessus au lieu de poser sur une bande. Le
-   contenu, lui, est centré et ne vient jamais sous la pilule. */
+/* Full screen, pinned at the very top: the background of the block thus passes
+   behind the pill, which floats over it instead of resting on a strip. The
+   content, for its part, is centered and never comes under the pill. */
 .carousel-sticky {
   position: sticky;
   top: 0;
@@ -1085,10 +1085,10 @@ button.chip {
   inset: 0;
   overflow-y: auto;
   scrollbar-width: none;
-  /* --item-slide vaut 1 quand le bloc attend sous l'écran et 0 quand il est
-     en place : les blocs à partir des compétences montent donc du bas et
-     recouvrent le précédent au lieu de s'y fondre. Les deux premiers gardent
-     --item-slide à 0 et ne bougent pas. */
+  /* --item-slide is 1 when the block waits below the screen and 0 when it is
+     in place: the blocks from the skills onward thus rise from the bottom and
+     cover the previous one instead of blending into it. The first two keep
+     --item-slide at 0 and do not move. */
   opacity: var(--item-op, 1);
   transform: translateY(calc(var(--item-slide, 0) * 100%));
 }
@@ -1099,24 +1099,24 @@ button.chip {
 
 .carousel-item .section {
   min-height: 0;
-  /* Pleine hauteur : le centrage vertical a de quoi centrer. */
+  /* Full height: the vertical centering has something to center against. */
   height: 100%;
   margin: 0;
 }
 
-/* Le bloc expérience : titre masqué, le 100vh est séparé en trois bandes,
-   chaque carte arrive de sa direction (CELAD de gauche, CNRS de droite,
-   Ethics Group du bas), piloté par l'apparition de l'item. */
+/* The experience block: title hidden, the 100vh is split into three bands,
+   each card arrives from its own direction (CELAD from the left, CNRS from the right,
+   Ethics Group from the bottom), driven by the appearance of the item. */
 .carousel-item .section-exp {
   align-content: stretch;
-  /* Le contenu passe au-dessus du globe de fond. */
+  /* The content passes above the background globe. */
   position: relative;
   z-index: 1;
 }
 
-/* La trame du parcours vit sur un calque dédié, sous le contenu : elle
-   reste pleine pendant toute la vie du bloc, y compris sa sortie — la
-   disparition des points se joue côté compétences (voir .section-skills). */
+/* The dotted grid of the parcours lives on a dedicated layer, under the content: it
+   stays full for the whole life of the block, including its exit — the
+   disappearing of the dots is played on the skills side (see .section-skills). */
 .carousel-item .section-exp::before {
   content: "";
   position: absolute;
@@ -1126,17 +1126,17 @@ button.chip {
   pointer-events: none;
 }
 
-/* Ces deux blocs se passent du titre en ligne de commande : ils ouvrent
-   directement sur leur contenu. */
+/* These two blocks do without the command-line title: they open
+   directly on their content. */
 .section-exp .section-title,
 .section-skills .section-title,
 .section-projets .section-title {
   display: none;
 }
 
-/* Écrans sombres du carrousel : fond noir, texte clair, et l'orange
-   redevient une couleur d'accent au lieu d'être le fond. La palette est
-   posée ici, tout ce qui est dedans en hérite. */
+/* Dark screens of the carousel: black background, light text, and the orange
+   becomes an accent color again instead of being the background. The palette is
+   set here, everything inside inherits it. */
 .carousel-item-dark {
   --bg: #0b0c0d;
   --text: #f3f1ec;
@@ -1144,26 +1144,26 @@ button.chip {
   --border: rgba(243, 241, 236, 0.16);
   --green: #ff4d00;
   background: var(--bg);
-  /* La trame de points, comme partout ailleurs. */
+  /* The dot grid, as everywhere else. */
   background-image: var(--trame);
   background-size: var(--trame-pas);
   color: var(--text);
 }
 
-/* Le fond noir du bloc parcours est repris par le canvas 3D (un plan noir
-   derrière les points) : le donut passe ainsi devant le fond. La classe
-   n'est posée par parcours3d.ts que si WebGL répond — sinon le fond CSS
-   reste opaque. La trame vit de toute façon sur .section-exp. */
+/* The black background of the parcours block is taken over by the 3D canvas (a black
+   plane behind the points): the donut thus passes in front of the background. The class
+   is only set by parcours3d.ts if WebGL answers — otherwise the CSS background
+   stays opaque. The dotted grid lives on .section-exp in any case. */
 .carousel-item-dark.parcours-gl {
   background: transparent;
 }
 
 
-/* Le fond du bloc « parcours » : un volet noir qui balaie l'écran depuis la
-   droite au lieu d'apparaître en fondu. Il est placé DERRIÈRE le calque 3D
-   (premier enfant de la zone épinglée), donc le donut se dessine par-dessus.
-   --fond-bloc2 va de 0 (volet hors champ à droite) à 1 (écran couvert) ;
-   c'est parcours3d.ts qui l'écrit, au fil du défilement. */
+/* The background of the "parcours" block: a black shutter that sweeps the screen from the
+   right instead of appearing as a fade. It is placed BEHIND the 3D layer
+   (first child of the pinned zone), so the donut draws over it.
+   --fond-bloc2 goes from 0 (shutter off-screen on the right) to 1 (screen covered);
+   it is parcours3d.ts that writes it, as the scroll progresses. */
 .parcours-fond {
   position: absolute;
   inset: 0;
@@ -1172,8 +1172,8 @@ button.chip {
   pointer-events: none;
 }
 
-/* Calque 3D du bloc « parcours » : il couvre tout le bloc pour que les
-   points puissent arriver de hors champ, et passe sous le contenu. */
+/* 3D layer of the "parcours" block: it covers the whole block so the
+   points can arrive from off-screen, and passes under the content. */
 .parcours-canvas-layer {
   position: absolute;
   inset: 0;
@@ -1189,17 +1189,17 @@ button.chip {
   pointer-events: none;
 }
 
-/* Colonne d'intro à gauche, grille de fiches à droite. */
-/* La gouttière doit être posée ici : le tour `padding-inline` de la zone
-   claire se résout à zéro depuis que le conteneur est pleine largeur, donc
-   le rail touche les bords de l'écran. */
+/* Intro column on the left, grid of cards on the right. */
+/* The gutter must be set here: the `padding-inline` trick of the light
+   zone resolves to zero now that the container is full width, so
+   the rail touches the edges of the screen. */
 .section-exp .spec-layout {
-  /* Au-dessus du calque 3D, qui occupe le fond du bloc. */
+  /* Above the 3D layer, which occupies the background of the block. */
   position: relative;
   z-index: 1;
   display: grid;
-  /* La colonne de gauche reprend de la place : le titre y est désormais
-     presque aussi gros qu'un titre de hero. */
+  /* The left column takes back some room: the title there is now
+     almost as big as a hero title. */
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.3fr);
   gap: clamp(24px, 4vw, 72px);
   align-items: center;
@@ -1207,39 +1207,39 @@ button.chip {
   padding-inline: var(--gutter);
 }
 
-/* L'intro se centre dans sa colonne au lieu d'être plaquée au bord gauche
-   de l'écran. La largeur maximale est nécessaire : sans elle le bloc
-   occupe toute la colonne et le centrage n'a aucun effet. */
+/* The intro centers itself in its column instead of being pressed against the left
+   edge of the screen. The maximum width is necessary: without it the block
+   occupies the whole column and the centering has no effect. */
 .spec-intro {
-  /* Le bloc se cale sur son élément le plus large — le titre — puis se
-     centre dans la colonne au lieu d'être plaqué au bord de l'écran. */
+  /* The block sizes itself to its widest element — the title — then
+     centers in the column instead of being pressed against the edge of the screen. */
   justify-self: center;
   width: fit-content;
   max-width: 100%;
   position: relative;
 }
 
-/* La forme 3D derrière « Sept ans en production » : un anneau de points,
-   en CSS pur — visible partout, sans WebGL. Il apparaît avec le bloc
-   (opacité de l'item) et tourne lentement. */
+/* The 3D shape behind « Sept ans en production »: a ring of points,
+   in pure CSS — visible everywhere, without WebGL. It appears with the block
+   (item opacity) and turns slowly. */
 
 
-/* Le vol des points est dessiné par un canvas 2D (specform.ts) posé
-   au-dessus de l'anneau. */
+/* The flight of the points is drawn by a 2D canvas (specform.ts) placed
+   above the ring. */
 
 
-/* La séquence : étape 1 la forme (parcours3d), étape 2 le titre apparaît,
-   étape 3 le carrousel arrive. */
-/* Repères repris de specform.ts (TITRE_DEBUT / TITRE_FIN) : le CSS ne peut
-   pas les importer, ils sont donc à reporter à la main si on les change. */
+/* The sequence: step 1 the shape (parcours3d), step 2 the title appears,
+   step 3 the carousel arrives. */
+/* Landmarks taken from specform.ts (TITRE_DEBUT / TITRE_FIN): the CSS cannot
+   import them, so they have to be copied by hand if they are changed. */
 .spec-intro {
   opacity: calc(min(1, max(0, (var(--spec-form, 0) - 0.62) / 0.1)));
 }
 
 .exp-carousel {
-  /* Le carrousel devient pleinement opaque juste après son apparition :
-     la première fiche se lit nette, pas à moitié transparente. */
-  /* Repères CARROUSEL_DEBUT / CARROUSEL_FIN de specform.ts. */
+  /* The carousel becomes fully opaque right after its appearance:
+     the first card reads sharp, not half transparent. */
+  /* CARROUSEL_DEBUT / CARROUSEL_FIN landmarks from specform.ts. */
   opacity: calc(min(1, max(0, (var(--spec-form, 0) - 0.72) / 0.12)));
 }
 
@@ -1265,14 +1265,14 @@ button.chip {
   background: var(--green);
 }
 
-/* Titre en deux tons : l'affirmation pleine, sa suite en retrait. */
+/* Two-tone title: the statement in full, its continuation held back. */
 .spec-headline {
   margin: 0 0 18px;
-  /* Entre le titre de section d'Axiom (3.333vw) et son titre de hero
-     (7.778vw) : c'est l'accroche du bloc, elle doit peser plus qu'un simple
-     sous-titre. La largeur est en em, donc indexée sur le corps : le titre
-     se casse toujours au même endroit, quelle que soit la taille d'écran.
-     L'interlignage se resserre parce que le corps a grossi. */
+  /* Between Axiom's section title (3.333vw) and its hero title
+     (7.778vw): it is the hook of the block, it must weigh more than a simple
+     subtitle. The width is in em, so indexed on the body size: the title
+     always breaks at the same place, whatever the screen size.
+     The leading tightens because the body size has grown. */
   font-size: clamp(30px, 4.6vw, 72px);
   font-weight: 700;
   line-height: 1;
@@ -1281,16 +1281,16 @@ button.chip {
   text-wrap: balance;
 }
 
-/* La césure en 9em n'appartient qu'à la colonne étroite du bloc parcours :
-   c'est elle qui empile le titre en trois lignes. Sur toute la largeur du
-   bloc compétences, elle casserait la phrase sans raison. */
+/* The 9em break belongs only to the narrow column of the parcours block:
+   it is what stacks the title into three lines. Over the whole width of the
+   skills block, it would break the sentence for no reason. */
 .spec-intro .spec-headline {
   max-width: 9em;
 }
 
 .spec-headline span {
-  /* La seconde phrase démarre sa propre ligne : le titre s'empile au lieu
-     de couler d'un bloc. */
+  /* The second sentence starts its own line: the title stacks instead
+     of flowing as one block. */
   display: block;
   color: var(--text-dim);
 }
@@ -1303,9 +1303,9 @@ button.chip {
   max-width: 34ch;
 }
 
-/* Une seule fiche à la fois, les trois empilées dans la même cellule de
-   grille : pas de saut de hauteur au changement, et la plus haute impose
-   sa taille à l'ensemble. */
+/* One single card at a time, the three stacked in the same grid
+   cell: no height jump when changing, and the tallest imposes
+   its size on the whole. */
 .exp-carousel {
   display: flex;
   flex-direction: column;
@@ -1326,10 +1326,10 @@ button.chip {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
-  /* Opacité et flou sont écrits image par image par le script, au fil du
-     scroll : aucune transition ici, elle se battrait avec lui. Les fiches
-     ne bougent pas, elles se substituent sur place.
-     Sans JS, la première fiche reste lisible et les autres empilées dessous. */
+  /* Opacity and blur are written frame by frame by the script, as the
+     scroll goes: no transition here, it would fight with it. The cards
+     do not move, they substitute in place.
+     Without JS, the first card stays readable and the others stacked below. */
   opacity: 0;
 }
 
@@ -1337,7 +1337,7 @@ button.chip {
   opacity: 1;
 }
 
-/* Le numéro en filigrane, très effacé, derrière le contenu. */
+/* The watermark number, very faded, behind the content. */
 .experience-watermark {
   position: absolute;
   right: -0.06em;
@@ -1357,7 +1357,7 @@ button.chip {
   z-index: 1;
 }
 
-/* Les puces : un tiret d'accent, pas de marqueur de liste. */
+/* The bullets: an accent dash, not a list marker. */
 .experience-points {
   list-style: none;
   margin: 0 0 18px;
@@ -1386,9 +1386,9 @@ button.chip {
   background: var(--green);
 }
 
-/* ---------- fiche d'expérience, façon fiche technique ---------- */
+/* ---------- experience card, spec-sheet style ---------- */
 
-/* Surtitre à pastille carrée, comme la référence. */
+/* Overline with a square chip, like the reference. */
 .exp-eyebrow {
   display: flex;
   align-items: center;
@@ -1407,7 +1407,7 @@ button.chip {
   background: var(--green);
 }
 
-/* Le chiffre marquant, avec son unité posée à côté, en haut. */
+/* The standout figure, with its unit set beside it, at the top. */
 .exp-stat {
   display: flex;
   align-items: flex-start;
@@ -1430,7 +1430,7 @@ button.chip {
   color: var(--text-dim);
 }
 
-/* Intitulé de partie : « Le contexte », « Ce que j'ai livré ». */
+/* Part label: « Le contexte », « Ce que j'ai livré ». */
 .exp-label {
   margin: 0 0 8px;
   font-family: var(--font-mono);
@@ -1452,7 +1452,7 @@ button.chip {
   margin-bottom: 0;
 }
 
-/* Tableau de spécifications : des rangées séparées par un filet. */
+/* Specification table: rows separated by a hairline. */
 .exp-spec {
   margin: 18px 0 0;
 }
@@ -1482,16 +1482,16 @@ button.chip {
   color: var(--text);
 }
 
-/* Navigation : des points reliés par un trait fin. Chacun se remplit en
-   part de camembert pendant le trajet qui y mène, et le trait qui l'amène
-   se remplit avec lui : on voit toujours où on en est entre deux fiches.
-   --f, posé par le script, va de 0 (point vide) à 1 (point plein). */
+/* Navigation: dots linked by a thin line. Each fills as
+   a pie slice during the journey that leads to it, and the line that brings it
+   fills with it: you always see where you are between two cards.
+   --f, set by the script, goes from 0 (empty dot) to 1 (full dot). */
 .exp-dots {
   --dot: 12px;
   --lien: 54px;
   position: relative;
-  /* Largeur au contenu : sans ça le conteneur s'étire sur toute la colonne
-     et les traits déborderaient très au-delà des points. */
+  /* Width to content: without it the container stretches over the whole column
+     and the lines would overflow very far beyond the dots. */
   width: fit-content;
   margin-inline: auto;
   display: flex;
@@ -1506,8 +1506,8 @@ button.chip {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  /* La part parcourue en plein, le reste en gris : un camembert qui se
-     remplit dans le sens des aiguilles depuis midi. */
+  /* The traveled part full, the rest in gray: a pie that
+     fills clockwise from noon. */
   background: conic-gradient(
     var(--green) calc(var(--f, 0) * 1turn),
     var(--border) 0
@@ -1515,9 +1515,9 @@ button.chip {
   cursor: pointer;
 }
 
-/* Le trait qui relie le point au précédent, aussi long que l'écart entre
-   les deux. Il se remplit de gauche à droite, au même rythme que le point
-   qu'il rejoint. */
+/* The line that links the dot to the previous one, as long as the gap between
+   the two. It fills from left to right, at the same pace as the dot
+   it joins. */
 .exp-dot + .exp-dot::before {
   content: "";
   position: absolute;
@@ -1534,15 +1534,15 @@ button.chip {
   pointer-events: none;
 }
 
-/* Sans JS — et sur la toute première image, avant que le script n'ait posé
-   --f — le premier point est déjà plein : on est dessus. Le style en ligne
-   écrit par le script l'emporte ensuite. */
+/* Without JS — and on the very first frame, before the script has set
+   --f — the first dot is already full: we are on it. The inline style
+   written by the script wins afterwards. */
 .exp-dot:first-child {
   --f: 1;
 }
 
 .exp-dot:hover {
-  /* Une couronne discrète : la cible reste petite, il faut un retour. */
+  /* A discreet ring: the target stays small, there has to be feedback. */
   box-shadow: 0 0 0 3px var(--border);
 }
 
@@ -1564,16 +1564,16 @@ button.chip {
   white-space: nowrap;
 }
 
-/* Le texte de la première section colle au bord déchiré, pas de vide blanc. */
+/* The text of the first section sticks to the torn edge, no white gap. */
 .light-zone > .section:first-child {
   margin-top: 8px;
 }
 
-/* Cat profil (premier écran du carrousel) : juste le texte, en noir,
-   sans titre — il se lit au milieu de la page pendant que l'effet se
-   termine. */
+/* The profile (first screen of the carousel): just the text, in black,
+   without a title — it reads in the middle of the page while the effect
+   finishes. */
 .carousel-item-first .section {
-  /* Le texte est centré verticalement dans la page. */
+  /* The text is vertically centered in the page. */
   align-content: center;
 }
 
@@ -1581,13 +1581,13 @@ button.chip {
   display: none;
 }
 
-/* Compétences : sans titre, le contenu se centre seul dans l'écran. Les
-   gouttières sont à reposer ici — le rail les annule pour que les blocs
-   fassent bien 100vw. */
-/* Sections qui suivent le carrousel. Elles ne sont plus empilées ni
-   épinglées : on les atteint en faisant simplement défiler la page. Les
-   marges négatives annulent les gouttières de la zone claire pour qu'elles
-   occupent toute la largeur, et la gouttière est reposée à l'intérieur. */
+/* Skills: without a title, the content centers itself in the screen. The
+   gutters have to be set again here — the rail cancels them so the blocks
+   make exactly 100vw. */
+/* Sections that follow the carousel. They are no longer stacked or
+   pinned: they are reached simply by scrolling the page. The
+   negative margins cancel the gutters of the light zone so that they
+   occupy the whole width, and the gutter is set again inside. */
 .section-apres {
   margin-block: 0;
   margin-inline: calc(-1 * var(--gutter));
@@ -1595,19 +1595,19 @@ button.chip {
   padding-block: clamp(64px, 11vh, 150px);
 }
 
-/* Les compétences gardent leur écran noir, qu'elles tenaient jusqu'ici de
-   .carousel-item-dark. La palette est reposée ici, tout ce qui est dedans
-   en hérite. */
+/* The skills keep their black screen, which they held until now from
+   .carousel-item-dark. The palette is set again here, everything inside
+   inherits it. */
 .section-skills.section-apres {
-  /* Un écran plein, comme le bloc parcours, et le contenu centré dedans.
-     En flux normal la hauteur suivrait le contenu (559 px), soit bien moins
-     que la section qui précède. */
+  /* A full screen, like the parcours block, and the content centered in it.
+     In normal flow the height would follow the content (559 px), far less
+     than the section that precedes. */
   min-height: 100vh;
   align-content: center;
-  /* Tout juste un cran au-dessus du volet du parcours (#0b0c0d) : le raccord
-     entre les deux écrans sombres doit se sentir plus qu'il ne se voit.
-     Même famille neutre que lui — un gris bleuté intercalé entre deux
-     surfaces neutres produirait une dominante visible au raccord. */
+  /* Just one notch above the parcours shutter (#0b0c0d): the seam
+     between the two dark screens must be felt more than it is seen.
+     Same neutral family as it — a bluish gray interposed between two
+     neutral surfaces would produce a visible cast at the seam. */
   --bg: #111213;
   --text: #f3f1ec;
   --text-dim: rgba(243, 241, 236, 0.58);
@@ -1615,10 +1615,10 @@ button.chip {
   --border-strong: rgba(243, 241, 236, 0.4);
   --green: #ff4d00;
   background-color: var(--bg);
-  /* La trame est bien visible à l'entrée du bloc — un cran au-dessus de la
-     trame du site — puis s'efface tout doucement pendant la fin de la
-     montée : l'alpha des points est porté par --trame-skills, écrit par
-     ui.ts, totalement éteinte quand le bloc est en place. */
+  /* The dotted grid is clearly visible as the block enters — one notch above the
+     site's grid — then fades away very gently during the end of the
+     rise: the alpha of the dots is carried by --trame-skills, written by
+     ui.ts, fully off when the block is in place. */
   background-image: radial-gradient(
     rgba(139, 148, 158, calc(0.26 * var(--trame-skills, 1))) 1px,
     transparent 1.2px
@@ -1627,8 +1627,8 @@ button.chip {
   color: var(--text);
 }
 
-/* Les projets reprennent le fond du parcours — le même noir, SANS la
-   trame : un écran plein, uni, le contenu centré. */
+/* The projects take up the background of the parcours — the same black, WITHOUT the
+   dotted grid: a full screen, plain, the content centered. */
 .section-projets.section-apres {
   min-height: 100vh;
   align-content: center;
@@ -1639,8 +1639,8 @@ button.chip {
   --border-strong: rgba(243, 241, 236, 0.4);
   --green: #ff4d00;
   background-color: var(--bg);
-  /* Les points arrivent ici pendant qu'on approche du footer :
-     --trame-projets est écrit par ui.ts, de rien à la trame discrète. */
+  /* The dots arrive here while one approaches the footer:
+     --trame-projets is written by ui.ts, from nothing to the discreet grid. */
   background-image: radial-gradient(
     rgba(139, 148, 158, calc(0.16 * var(--trame-projets, 0))) 1px,
     transparent 1.2px
@@ -1649,12 +1649,12 @@ button.chip {
   color: var(--text);
 }
 
-/* Même respiration sous l'en-tête que dans les compétences : les deux
-   sections doivent se lire comme deux pages d'un même document. */
+/* Same breathing room under the heading as in the skills: the two
+   sections must read as two pages of one same document. */
 .section-projets .spec-lead,
 .section-skills .spec-lead {
-  /* L'énoncé se lit, puis le tableau commence : sans cette marge, le
-     premier filet collait au texte. */
+  /* The statement reads, then the table begins: without this margin, the
+     first hairline stuck to the text. */
   margin-bottom: clamp(26px, 5vh, 56px);
 }
 
@@ -1663,9 +1663,9 @@ button.chip {
   margin-bottom: clamp(16px, 3vh, 34px);
 }
 
-/* Les quatre projets en étapes, façon « power path » Axiom : une grille
-   bordée d'un filet clair, chaque étape en colonne — numéro et icône en
-   tête, titre et description au centre, mention et liens en pied. */
+/* The four projects as steps, Axiom "power path" style: a grid
+   bordered by a light hairline, each step in a column — number and icon at the
+   head, title and description in the middle, note and links at the foot. */
 .projet-grille {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1686,8 +1686,8 @@ button.chip {
   border-right: 0;
 }
 
-/* La tête : l'icône dans sa boîte et le numéro d'étape, mono espacé,
-   comme le « stage-01 » d'Axiom. */
+/* The head: the icon in its box and the step number, spaced mono,
+   like Axiom's "stage-01". */
 .projet-tete {
   display: flex;
   justify-content: space-between;
@@ -1702,8 +1702,8 @@ button.chip {
   justify-content: center;
   border: 1px solid rgba(243, 241, 236, 0.12);
   border-radius: var(--radius);
-  /* L'orange des glyphes du bloc compétences : les traits fins grisent
-     sur le noir, éclairci l'œil y retrouve l'orange du site. */
+  /* The orange of the glyphs of the skills block: the thin strokes go gray
+     on black, lightened the eye finds the orange of the site again. */
   color: #ff7133;
 }
 
@@ -1729,7 +1729,7 @@ button.chip {
 
 .projet-titre {
   margin: 0;
-  /* Le h3 d'Axiom (1,5em), un cran au-dessus du corps de lecture. */
+  /* Axiom's h3 (1.5em), one notch above the reading size. */
   font-size: clamp(19px, 1.6vw, 26px);
   font-weight: 600;
   line-height: 1.15;
@@ -1757,8 +1757,8 @@ button.chip {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-dim);
-  /* Une seule ligne, toujours : des mentions sur une ou deux lignes
-     décalaient les pieds de carte entre eux. */
+  /* A single line, always: notes on one or two lines
+     offset the feet of the cards from each other. */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1793,24 +1793,24 @@ button.chip {
   }
 }
 
-/* ---------- pied de page ---------- */
+/* ---------- footer ---------- */
 
-/* Pied de page façon Axiom : la feuille orange revient, encre sombre,
-   sans le grand énoncé. La zone porte le fond du bloc projets — noir —
-   et les points, déjà pleins quand le footer touche l'écran, restent
-   discrets derrière la feuille (ui.ts). */
+/* Footer, Axiom style: the orange sheet returns, dark ink,
+   without the big statement. The zone carries the background of the projects block — black —
+   and the dots, already full when the footer touches the screen, stay
+   discreet behind the sheet (ui.ts). */
 .site-footer {
   position: relative;
-  /* flow-root : contient les marges de la feuille orange. Sans lui, sa
-     marge haute s'effondre à travers la zone et le gris du body perçait
-     entre le bloc projets et le footer. */
+  /* flow-root: contains the margins of the orange sheet. Without it, its
+     top margin collapses through the zone and the gray of the body showed
+     between the projects block and the footer. */
   display: flow-root;
   margin-inline: calc(50% - 50vw);
-  /* Rattrape la respiration du conteneur : le noir va jusqu'au bas de
-     la page, sans laisser percer le gris du body. */
+  /* Catches up the breathing room of the container: the black goes to the bottom of
+     the page, without letting the gray of the body show through. */
   margin-bottom: -64px;
   padding-inline: calc(50vw - 50%);
-  /* Respiration sombre sous la feuille. */
+  /* Dark breathing room under the sheet. */
   padding-bottom: 64px;
   background-color: #0b0c0d;
   background-image: radial-gradient(
@@ -1820,7 +1820,7 @@ button.chip {
   background-size: var(--trame-pas);
 }
 
-/* La feuille orange : la palette sombre vit sur elle, pas sur la zone. */
+/* The orange sheet: the dark palette lives on it, not on the zone. */
 .footer-contenu {
   --bg: #ff4d00;
   --text: #0b0c0d;
@@ -1839,8 +1839,8 @@ button.chip {
   gap: clamp(32px, 5vh, 64px);
 }
 
-/* L'énoncé de gauche, les statistiques et le bouton à droite — le bas du
-   bloc droit (donc le bouton) se cale sur le bas du texte. */
+/* The statement on the left, the statistics and the button on the right — the bottom of the
+   right block (so the button) aligns with the bottom of the text. */
 .footer-haut {
   display: flex;
   justify-content: space-between;
@@ -1873,7 +1873,7 @@ button.chip {
   gap: clamp(20px, 3vh, 32px);
 }
 
-/* Les deux statistiques : étiquette mono, valeur en face. */
+/* The two statistics: mono label, value opposite. */
 .footer-stats {
   margin: 0;
   display: flex;
@@ -1908,7 +1908,7 @@ button.chip {
   background: var(--border);
 }
 
-/* Le corps : la colonne contact, plus large, puis la colonne de liens. */
+/* The body: the contact column, wider, then the links column. */
 .footer-corps {
   display: grid;
   grid-template-columns: 1.75fr 1fr;
@@ -1946,7 +1946,7 @@ button.chip {
   text-decoration: none;
 }
 
-/* Un seul nom par lien, un peu gras. */
+/* A single name per link, slightly bold. */
 .footer-lien {
   font-weight: 500;
 }
@@ -1994,18 +1994,18 @@ button.chip {
   }
 }
 
-/* Fiche technique, façon tableau de spécifications Axiom : étiquette mono
-   minuscule à large approche, valeurs juste à côté dans la fonte de
-   lecture, filets d'un pixel. La colonne des intitulés ne fait que sa
-   largeur : les valeurs commencent tout de suite après, pas au milieu. */
+/* Spec sheet, Axiom specification-table style: tiny mono label
+   with wide tracking, values just beside it in the reading
+   typeface, one-pixel hairlines. The column of labels takes only its
+   width: the values begin right after, not in the middle. */
 .skill-sheet {
   border-top: 1px solid rgba(243, 241, 236, 0.12);
 }
 
 .skill-row {
-  /* Apparition échelonnée : chaque rangée attend son tour pendant que le
-     bloc se révèle. --item-op est la révélation du bloc (0 → 1), --d le
-     rang de la ligne. Pas de déplacement : la mise au point suffit. */
+  /* Staggered appearance: each row waits its turn while the
+     block reveals itself. --item-op is the revelation of the block (0 → 1), --d the
+     rank of the row. No movement: coming into focus is enough. */
   --r: clamp(0, calc((var(--item-op, 1) - var(--d, 0) * 0.07) * 2.8), 1);
   display: grid;
   grid-template-columns: max-content 1fr;
@@ -2018,8 +2018,8 @@ button.chip {
   transition: border-color 0.35s ease;
 }
 
-/* L'intitulé tient le rôle du libellé Axiom : mono, petit, espacé large,
-   en retrait — la valeur, elle, pèse davantage. */
+/* The label plays the role of the Axiom caption: mono, small, widely spaced,
+   held back — the value, for its part, weighs more. */
 .skill-cat {
   margin: 0;
   font-family: var(--font-mono);
@@ -2044,14 +2044,14 @@ button.chip {
   color: var(--text-dim);
 }
 
-/* Les deux premières de chaque famille sont celles sur lesquelles il y a le
-   plus d'heures de vol : elles ressortent, le reste accompagne. */
+/* The first two of each family are the ones with the
+   most flight hours: they stand out, the rest accompanies. */
 .skill-items li:nth-child(-n + 2) {
   color: var(--text);
 }
 
-/* Le point de séparation est décoratif : il vit dans le ::before pour ne pas
-   être lu à voix haute entre chaque technologie. */
+/* The separator dot is decorative: it lives in the ::before so as not to
+   be read aloud between each technology. */
 .skill-items li + li::before {
   content: "·";
   margin-right: 10px;
@@ -2063,28 +2063,28 @@ button.chip {
 }
 
 @media (max-width: 720px) {
-  /* Trop étroit pour deux colonnes : l'intitulé passe au-dessus de la
-     liste. */
+  /* Too narrow for two columns: the label moves above the
+     list. */
   .skill-row {
     grid-template-columns: minmax(0, 1fr);
     gap: 4px;
   }
 }
 
-/* Le texte du profil est un grand énoncé éditorial, façon hero Axiom :
-   grand corps, interligne serré, graisse marquée. */
+/* The profile text is a big editorial statement, Axiom hero style:
+   large size, tight leading, marked weight. */
 .carousel-item-first .section p {
   color: #000000;
   opacity: calc(var(--profil-op, 1) * (1 - var(--profil-out, 0)));
   transform: translateY(calc(22px * (1 - var(--profil-op, 1))));
-  /* Un peu de blur en complément du fondu, léger. */
+  /* A bit of blur in addition to the fade, light. */
   filter: blur(calc(6px * (1 - var(--profil-op, 1))));
   font-size: clamp(26px, 3.2vw, 46px);
-  /* Graisse medium : le 600 rendait trop lourd sur l'orange. */
+  /* Medium weight: the 600 rendered too heavy on the orange. */
   font-weight: 500;
   line-height: 1.15;
   letter-spacing: -0.02em;
-  /* Le texte prend toute la largeur de la page (moins les gouttières). */
+  /* The text takes the whole width of the page (minus the gutters). */
   max-width: none;
   padding-inline: var(--gutter);
 }
@@ -2094,7 +2094,7 @@ button.chip {
   font-weight: 400;
 }
 
-/* ---------- expériences ---------- */
+/* ---------- experiences ---------- */
 
 .timeline {
   position: relative;
@@ -2137,8 +2137,8 @@ button.chip {
   transition: box-shadow 0.3s ease;
 }
 
-/* Ligne de repères en tête de bloc, façon fiche technique : la période à
-   gauche, le chiffre marquant à droite, en petites capitales espacées. */
+/* Landmark line at the head of the block, spec-sheet style: the period on the
+   left, the standout figure on the right, in spaced small capitals. */
 .experience-meta {
   display: flex;
   align-items: center;
@@ -2156,8 +2156,8 @@ button.chip {
   white-space: nowrap;
 }
 
-/* L'accroche mène le bloc : c'est elle qu'on lit en premier, le poste et
-   l'entreprise passent derrière, en appui. */
+/* The hook leads the block: it is what one reads first, the role and
+   the company pass behind, in support. */
 .experience-claim {
   margin: 0 0 10px;
   font-size: var(--fs-lead);
@@ -2176,8 +2176,8 @@ button.chip {
   flex-wrap: wrap;
 }
 
-/* Une seule phrase d'appui, puis l'identification de la mission en pied
-   de bloc — le détail vit dans le PDF, pas ici. */
+/* A single supporting sentence, then the identification of the mission at the foot
+   of the block — the detail lives in the PDF, not here. */
 .experience-summary {
   margin: 0 0 14px;
   font-size: var(--fs-body);
@@ -2209,9 +2209,9 @@ button.chip {
   padding: 1px 10px;
 }
 
-/* Sur fond sombre, la pastille n'a pas de remplissage : seul un filet la
-   dessine. Doit rester après la règle de base — même spécificité, c'est
-   l'ordre qui tranche. */
+/* On dark background, the chip has no fill: only a hairline
+   draws it. Must stay after the base rule — same specificity, it is
+   the order that decides. */
 .section-exp .period {
   background: transparent;
   border-color: var(--border);
@@ -2242,7 +2242,7 @@ button.chip {
   font-weight: 500;
 }
 
-/* ---------- formation / langues / divers ---------- */
+/* ---------- education / languages / misc ---------- */
 
 .edu-list {
   display: flex;
@@ -2293,7 +2293,7 @@ button.chip {
   flex-wrap: wrap;
 }
 
-/* ---------- marquee défilant (pleine largeur) ---------- */
+/* ---------- scrolling marquee (full width) ---------- */
 
 .marquee {
   overflow: hidden;
@@ -2302,7 +2302,7 @@ button.chip {
   user-select: none;
 }
 
-/* Bandeau collé à la déchirure : pas de vide sombre sous lui. */
+/* Banner stuck to the tear: no dark gap under it. */
 .marquee-tight-bottom {
   margin-bottom: 0;
 }
@@ -2333,14 +2333,14 @@ button.chip {
   transition: color 0.25s ease, transform 0.25s ease;
 }
 
-/* Au survol d'un item, le bandeau continue de défiler : seul l'item
-   survolé s'allume en orange et se soulève légèrement. */
+/* On hovering an item, the banner keeps scrolling: only the hovered
+   item lights up in orange and lifts slightly. */
 .marquee-item:hover {
   color: var(--orange);
   transform: scale(1.12);
 }
 
-/* Alternance texte plein / contour, façon typographie éditoriale. */
+/* Alternating solid text / outline, editorial typography style. */
 .marquee-item.outline {
   color: transparent;
   -webkit-text-stroke: 1px rgba(89, 99, 110, 0.5);
@@ -2351,7 +2351,7 @@ button.chip {
   color: var(--orange);
 }
 
-/* Variante display : grands chiffres clés en sans 800. */
+/* Display variant: big key figures in sans 800. */
 .marquee-display .marquee-item {
   font-family: var(--font-sans);
   font-size: var(--fs-h2);
@@ -2399,8 +2399,8 @@ button.chip {
     padding: 0 16px 48px;
   }
 
-  /* Le nom est trop long pour tenir dans la pilule avec la navigation et
-     le bouton : on le retire, la page reste identifiable. */
+  /* The name is too long to fit in the pill with the navigation and
+     the button: it is removed, the page stays identifiable. */
   .site-name {
     display: none;
   }
@@ -2416,12 +2416,12 @@ button.chip {
   }
 }
 
-/* ---------- téléphone ---------- */
+/* ---------- phone ---------- */
 
 @media (max-width: 720px) {
-  /* Sur téléphone : la navbar entière s'efface (nom, liens, bouton),
-     seul le burger reste — nu, sans pilule, calé en haut à droite et
-     toujours en tête de l'application. */
+  /* On phone: the whole navbar fades out (name, links, button),
+     only the burger remains — bare, without a pill, set at the top right and
+     always at the head of the application. */
   .site-name,
   .axiom-btn-nav {
     display: none;
@@ -2449,9 +2449,9 @@ button.chip {
     backdrop-filter: none;
   }
 
-  /* Le bloc parcours empile son intro et le carrousel de fiches : le
-     titre se lit en haut, les fiches défilent dessous. L'ensemble tient
-     dans l'écran épinglé, sans défilement interne. */
+  /* The parcours block stacks its intro and the carousel of cards: the
+     title reads at the top, the cards scroll below. The whole thing fits
+     in the pinned screen, with no internal scrolling. */
   .section-exp .spec-layout {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 1fr);
@@ -2460,22 +2460,22 @@ button.chip {
     padding-block: 14px 10px;
   }
 
-  /* L'intro garde son centrage : le donut, calé sur elle, reste centré
-     à l'écran lui aussi. */
+  /* The intro keeps its centering: the donut, aligned on it, stays centered
+     on screen too. */
   .spec-intro {
     justify-self: center;
     width: fit-content;
   }
 
-  /* La césure à 9em est un réglage de colonne étroite : pleine largeur,
-     le titre coule librement, dans un corps un cran plus bas. */
+  /* The 9em break is a narrow-column setting: at full width,
+     the title flows freely, in a size one notch lower. */
   .spec-intro .spec-headline {
     max-width: none;
     font-size: clamp(24px, 7vw, 30px);
   }
 
-  /* Les fiches reprennent un peu de densité sur petit écran, pour que
-     l'ensemble tienne dans l'écran épinglé. */
+  /* The cards regain a bit of density on small screen, so that
+     the whole thing fits in the pinned screen. */
   .exp-slides .experience {
     padding: clamp(14px, 4vw, 18px);
   }
@@ -2496,27 +2496,27 @@ button.chip {
     flex-basis: 6.5rem;
   }
 
-  /* La pilule de statistiques du bandeau se resserre sur elle-même. */
+  /* The statistics pill of the banner tightens on itself. */
   .bandeau-stat-inner {
     padding: 8px 18px;
     gap: 2px 12px;
     font-size: var(--fs-small);
   }
 
-  /* Le texte du profil descend d'un cran sur la largeur d'un téléphone. */
+  /* The profile text goes down a notch at the width of a phone. */
   .carousel-item-first .section p {
     font-size: clamp(22px, 6.5vw, 30px);
   }
 
-  /* La respiration du conteneur passe à 48px sur mobile : la zone du
-     footer la rattrape d'autant, le noir reste jusqu'en bas de page. */
+  /* The breathing room of the container goes to 48px on mobile: the zone of the
+     footer catches it by the same amount, the black stays to the bottom of the page. */
   .site-footer {
     margin-bottom: -48px;
     padding-bottom: 48px;
   }
 }
 
-/* ---------- impression ---------- */
+/* ---------- print ---------- */
 
 .print-only {
   display: none;

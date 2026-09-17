@@ -1,16 +1,16 @@
-// Scène 3D du hero : globe de particules. Les points suivent une grille
-// latitude/longitude à pas constant ; ceux qui tombent sur une terre émergée
-// sont plus gros et lumineux, les autres forment la poussière des océans.
-// Des arcs de grand cercle s'allument depuis Toulouse.
-// Chargé à la demande (jamais si reduced motion), en pause hors écran.
+// 3D scene of the hero: particle globe. The points follow a
+// latitude/longitude grid with a constant step; those that fall on emerged land
+// are bigger and brighter, the others form the dust of the oceans.
+// Great-circle arcs light up from Toulouse.
+// Loaded on demand (never if reduced motion), paused off screen.
 import * as THREE from "three";
 
 const DEG = Math.PI / 180;
 const LAT_STEP = 1.35;
 
-/* ---------- contours des terres, en [latitude, longitude] ----------
-   Tracés volontairement grossiers : à la taille où le globe s'affiche,
-   seule la silhouette des masses compte. */
+/* ---------- land outlines, in [latitude, longitude] ----------
+   Deliberately coarse: at the size where the globe displays,
+   only the silhouette of the masses matters. */
 
 type Outline = [number, number][];
 
@@ -89,7 +89,7 @@ const LANDMASSES: Outline[] = [
   MADAGASCAR, JAPAN, BRITAIN, IRELAND, NEW_ZEALAND, SUMATRA, BORNEO, NEW_GUINEA,
 ];
 
-/** Lancer de rayon en projection équirectangulaire. */
+/** Ray casting in equirectangular projection. */
 function inside(lat: number, lon: number, outline: Outline): boolean {
   let hit = false;
   for (let i = 0, j = outline.length - 1; i < outline.length; j = i++) {
@@ -106,11 +106,11 @@ function inside(lat: number, lon: number, outline: Outline): boolean {
 }
 
 function isLand(lat: number, lon: number): boolean {
-  if (lat < -63) return true; // Antarctique
+  if (lat < -63) return true; // Antarctica
   return LANDMASSES.some((outline) => inside(lat, lon, outline));
 }
 
-/** Direction d'un point de latitude/longitude, en degrés. */
+/** Direction of a latitude/longitude point, in degrees. */
 function fromLatLon(lat: number, lon: number): THREE.Vector3 {
   const phi = (90 - lat) * DEG;
   const theta = (lon + 180) * DEG;
@@ -121,8 +121,8 @@ function fromLatLon(lat: number, lon: number): THREE.Vector3 {
   );
 }
 
-/** Grille régulière : le nombre de points par rangée suit le cosinus de la
-    latitude, sinon ils s'entassent aux pôles. */
+/** Regular grid: the number of points per row follows the cosine of the
+    latitude, otherwise they pile up at the poles. */
 export function buildPoints(): { land: THREE.Vector3[]; sea: THREE.Vector3[] } {
   const land: THREE.Vector3[] = [];
   const sea: THREE.Vector3[] = [];
@@ -137,8 +137,8 @@ export function buildPoints(): { land: THREE.Vector3[]; sea: THREE.Vector3[] } {
   return { land, sea };
 }
 
-/** Durée d'assemblage : chaque point met ce temps à rejoindre sa place,
-    et les départs sont échelonnés sur STAGGER. */
+/** Assembly duration: each point takes this time to reach its place,
+    and the starts are staggered over STAGGER. */
 const FLY_IN = 1.5;
 const STAGGER = 0.8;
 
@@ -149,8 +149,8 @@ export interface Cloud {
   delay: Float32Array;
 }
 
-/** Nuage de points qui arrive de très loin, chaque point part le long de
-    sa propre direction, bien au-delà du cadre, et converge vers la sphère. */
+/** Cloud of points that arrives from very far away, each point sets off along
+    its own direction, well beyond the frame, and converges towards the sphere. */
 export function pointCloud(
   positions: THREE.Vector3[],
   color: number,
@@ -168,16 +168,16 @@ export function pointCloud(
     target[i * 3 + 1] = p.y;
     target[i * 3 + 2] = p.z;
 
-    // Suite pseudo-aléatoire déterministe : même arrivée à chaque visite.
+    // Deterministic pseudo-random sequence: same arrival on every visit.
     const noise = (n: number): number => {
       const v = Math.sin(i * n) * 43758.5453;
       return v - Math.floor(v);
     };
-    // Écart dans le plan XY du GLOBE — et non de l'écran, contrairement à ce
-    // que disait ce commentaire : le groupe tourne, donc cet écart bascule en
-    // profondeur au fil de la rotation. Les points peuvent ainsi frôler la
-    // caméra ; c'est sans conséquence depuis que la taille ne dépend plus de
-    // la distance (voir le matériau plus bas).
+    // Offset in the XY plane of the GLOBE — and not of the screen, contrary to
+    // what this comment used to say: the group rotates, so this offset tips into
+    // depth as the rotation goes. The points can therefore graze the
+    // camera; that is harmless since the size no longer depends on
+    // the distance (see the material below).
     const angle = noise(12.9898) * Math.PI * 2;
     const away = 4.5 + noise(78.233) * 7;
     start[i * 3] = p.x + Math.cos(angle) * away;
@@ -190,15 +190,15 @@ export function pointCloud(
   geometry.setAttribute("position", new THREE.BufferAttribute(start.slice(), 3));
   const material = new THREE.PointsMaterial({
     color,
-    // Taille en PIXELS, sans atténuation par la distance. Avec l'atténuation,
-    // un point qui passe près de la caméra devient énorme — et c'est ce qui
-    // arrivait pendant l'arrivée : le décalage ci-dessus est appliqué dans le
-    // repère du globe, qui tourne, si bien qu'à l'angle de départ (−1,6 rad)
-    // il se transforme en décalage de PROFONDEUR et amène les points sur la
-    // caméra. Sans atténuation le problème ne peut plus exister, quelle que
-    // soit la rotation, et les points restent fins d'un bout à l'autre.
-    // Sur le globe lui-même la perte est négligeable : l'écart de taille
-    // entre face avant et face arrière n'était que de 1,21×.
+    // Size in PIXELS, with no attenuation by distance. With attenuation,
+    // a point passing near the camera becomes enormous — and that is what
+    // happened during the arrival: the offset above is applied in the
+    // globe's frame, which rotates, so that at the start angle (-1.6 rad)
+    // it turns into a DEPTH offset and brings the points onto the
+    // camera. Without attenuation the problem can no longer exist, whatever
+    // the rotation, and the points stay thin from one end to the other.
+    // On the globe itself the loss is negligible: the size difference
+    // between front face and back face was only 1.21×.
     size,
     sizeAttenuation: false,
     transparent: true,
@@ -208,7 +208,7 @@ export function pointCloud(
   return { points: new THREE.Points(geometry, material), start, target, delay };
 }
 
-/** Avance l'assemblage d'un nuage. Renvoie true tant qu'il reste à bouger. */
+/** Advances a cloud's assembly. Returns true while there is still movement. */
 export function advance(cloud: Cloud, elapsed: number): boolean {
   const attribute = cloud.points.geometry.getAttribute("position") as THREE.BufferAttribute;
   const position = attribute.array as Float32Array;
@@ -227,8 +227,8 @@ export function advance(cloud: Cloud, elapsed: number): boolean {
   return moving;
 }
 
-/** Arc de grand cercle. Il s'élève peu : une liaison réseau longe la
-    surface, elle ne part pas en cloche. */
+/** Great-circle arc. It rises little: a network link hugs the
+    surface, it does not go up like a bell. */
 function arcCurve(from: THREE.Vector3, to: THREE.Vector3): THREE.QuadraticBezierCurve3 {
   const lift = 1 + from.distanceTo(to) * 0.16;
   const control = from.clone().add(to).normalize().multiplyScalar(lift);
@@ -244,25 +244,25 @@ interface Link {
   reverse: boolean;
 }
 
-// Les nœuds du réseau. Toulouse en premier : c'est le seul mis en avant.
+// The network nodes. Toulouse first: it is the only one highlighted.
 const NODES: [number, number][] = [
   [43.6, 1.44], [40.7, -74], [51.5, -0.1], [35.7, 139.7], [-33.9, 151.2],
   [1.35, 103.8], [-23.5, -46.6], [52.5, 13.4], [45.5, -73.6], [25.2, 55.3],
   [-33.9, 18.4], [12.97, 77.6], [37.8, -122.4],
 ];
 
-// Les liaisons du maillage : des échanges de proche en proche, pas un
-// faisceau partant d'un point unique, sinon ça fait gerbe d'artifice.
+// The links of the mesh: hop-by-hop exchanges, not a
+// beam starting from a single point, otherwise it looks like a firework burst.
 const ROUTES: [number, number][] = [
   [0, 2], [0, 7], [0, 9], [2, 1], [1, 8], [1, 12], [12, 3], [3, 5],
   [5, 11], [11, 9], [5, 4], [10, 7], [6, 1], [4, 3], [2, 6],
 ];
 
-/** Longueur du paquet, en nombre de points du tracé. */
+/** Length of the packet, in number of points of the trace. */
 const TRAIL = 20;
 
-/** Orbite satellite : anneau dont la couleur se dégrade le long du trait
-    (vif près du satellite, fondu vers le fond), et le satellite qui tourne. */
+/** Satellite orbit: a ring whose color fades along the line
+    (bright near the satellite, fading towards the background), and the satellite that turns. */
 interface SatelliteOrbit {
   line: THREE.LineLoop;
   colors: THREE.BufferAttribute;
@@ -275,13 +275,13 @@ interface SatelliteOrbit {
 }
 
 const ORBIT_SEGMENTS = 180;
-/** Longueur angulaire de la traînée, de part et d'autre du satellite. */
+/** Angular length of the trail, on either side of the satellite. */
 const ORBIT_TRAIL = 1.35;
 
-/** `eclat` module l'intensité de la traînée. Toutes les orbites au même
-    niveau donneraient un enchevêtrement ; deux niveaux créent une profondeur,
-    quelques trajectoires marquées et d'autres qui n'affleurent que par
-    moments. */
+/** `eclat` modulates the trail's intensity. All orbits at the same
+    level would give a tangle; two levels create a depth,
+    a few marked trajectories and others that only surface
+    at times. */
 function satelliteOrbit(
   radius: number,
   tilt: number,
@@ -304,8 +304,8 @@ function satelliteOrbit(
   line.rotation.x = tilt;
   line.rotation.z = spin;
   line.material.userData.eclat = eclat;
-  // Le satellite est enfant de la ligne : il tourne dans son plan incliné
-  // et suit donc exactement le trait.
+  // The satellite is a child of the line: it turns in its tilted plane
+  // and therefore follows the line exactly.
   const sat = new THREE.Points(
     new THREE.BufferGeometry().setAttribute(
       "position",
@@ -342,13 +342,13 @@ export function initHero3D(): void {
   try {
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   } catch {
-    return; // WebGL indisponible : la page reste parfaitement lisible en 2D.
+    return; // WebGL unavailable: the page stays perfectly readable in 2D.
   }
 
-  // Le canvas couvre tout le premier écran, pas seulement l'emplacement du
-  // globe : c'est ce qui permet aux points d'arriver de hors page. Le globe
-  // est ensuite recadré par la caméra sur l'emplacement réservé (.hero-stage),
-  // qui reste la zone sensible au glissement.
+  // The canvas covers the whole first screen, not only the globe's
+  // slot: that is what allows the points to arrive from off-page. The globe
+  // is then reframed by the camera onto the reserved slot (.hero-stage),
+  // which remains the drag-sensitive area.
   const canvas = renderer.domElement;
   canvas.className = "hero-canvas";
   const layer = document.createElement("div");
@@ -359,11 +359,11 @@ export function initHero3D(): void {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-  // Recul minimal pour que la sphère (diamètre 2) tienne entièrement dans
-  // le champ vertical : 2 / (2 · tan(fov/2)) ≈ 2,6, plus une marge.
+  // Minimal setback so that the sphere (diameter 2) fits entirely in
+  // the vertical field: 2 / (2 · tan(fov/2)) ≈ 2.6, plus a margin.
   camera.position.z = 3;
 
-  // outer : inclinaison + parallaxe souris · spin : rotation continue.
+  // outer: tilt + mouse parallax · spin: continuous rotation.
   const outer = new THREE.Group();
   outer.rotation.x = 0.3;
   const spin = new THREE.Group();
@@ -372,13 +372,13 @@ export function initHero3D(): void {
 
   const { land, sea } = buildPoints();
 
-  // Sphère opaque à peine plus petite : elle masque les points de la face
-  // arrière, ce qui donne au globe son volume.
+  // Opaque sphere just barely smaller: it hides the points of the back
+  // face, which gives the globe its volume.
   const core = new THREE.Mesh(
     new THREE.SphereGeometry(0.985, 64, 48),
     new THREE.MeshBasicMaterial({ color: 0x0d1117 }),
   );
-  // Le noyau ne masque rien tant que le globe n'est pas formé.
+  // The core hides nothing until the globe is formed.
   core.scale.setScalar(0.001);
   spin.add(core);
 
@@ -386,25 +386,25 @@ export function initHero3D(): void {
   const landCloud = pointCloud(land, 0xffffff, 2.6, 1);
   spin.add(seaCloud.points, landCloud.points);
 
-  // Toulouse n'a plus de point propre : les liaisons en partent toujours,
-  // mais sans pastille orange au milieu du semis.
+  // Toulouse no longer has a point of its own: the links still start from it,
+  // but without an orange dot in the middle of the scatter.
   const clouds = [seaCloud, landCloud];
   let assembling = true;
 
-  // Quatre orbites satellites inclinées, chacune avec sa traînée dégradée.
-  // Rayons bornés pour que chaque orbite tienne dans le cadre : la plus
-  // large (diamètre 2,4) reste sous la hauteur visible (~2,4).
+  // Four tilted satellite orbits, each with its own faded trail.
+  // Radii bounded so that each orbit fits in the frame: the widest
+  // one (diameter 2.4) stays under the visible height (~2.4).
   const orbits = [
-    // Les quatre d'origine, pleinement marquées.
+    // The four originals, fully marked.
     satelliteOrbit(1.04, 0.35, 0.2, 0.22),
     satelliteOrbit(1.1, -0.5, -0.15, -0.17),
     satelliteOrbit(1.16, 0.85, 0.5, 0.12),
     satelliteOrbit(1.2, -0.75, 0.85, -0.09),
-    // Quatre intercalées, plus discrètes : elles densifient la coque sans
-    // la saturer. Inclinaisons et rotations choisies pour croiser les
-    // premières plutôt que les doubler. Les vitesses sont volontairement
-    // sans rapport simple entre elles — sinon les satellites finissent par
-    // se synchroniser et le mouvement devient régulier.
+    // Four interleaved, more discreet: they densify the shell without
+    // saturating it. Tilts and rotations chosen to cross the
+    // first ones rather than double them. The speeds are deliberately
+    // without a simple relation between them — otherwise the satellites end up
+    // synchronizing and the motion becomes regular.
     satelliteOrbit(1.065, 1.15, -0.65, 0.15, 0.45),
     satelliteOrbit(1.125, -1.05, 0.95, -0.13, 0.4),
     satelliteOrbit(1.17, 0.6, -1.1, 0.19, 0.5),
@@ -412,14 +412,14 @@ export function initHero3D(): void {
   ];
   orbits.forEach((orbit) => spin.add(orbit.line));
 
-  // Chaque liaison est doublée : un tracé permanent très discret, qui dessine
-  // la topologie, et un court segment lumineux qui la parcourt, le paquet.
+  // Each link is doubled: a very discreet permanent trace, which draws
+  // the topology, and a short luminous segment that travels it, the packet.
   const nodePoints = NODES.map(([lat, lon]) => fromLatLon(lat, lon));
   const links: Link[] = [];
-  // Les matériaux des arcs, gardés pour pouvoir les révéler à la fin. Créés
-  // en ligne et oubliés, ils restaient à 0,35 dès la première image : les
-  // traits orange étaient donc déjà dessinés pendant que les points
-  // convergeaient encore depuis l'extérieur de la page.
+  // The arcs' materials, kept so they can be revealed at the end. Created
+  // inline and forgotten, they stayed at 0.35 from the very first frame: the
+  // orange lines were therefore already drawn while the points
+  // were still converging from outside the page.
   const arcs: THREE.LineBasicMaterial[] = [];
 
   ROUTES.forEach(([a, b], i) => {
@@ -430,7 +430,7 @@ export function initHero3D(): void {
     const arc = new THREE.LineBasicMaterial({
       color: 0xff4d00,
       transparent: true,
-      opacity: 0, // révélé à la fin, une fois le globe formé
+      opacity: 0, // revealed at the end, once the globe is formed
     });
     arcs.push(arc);
     spin.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), arc));
@@ -452,12 +452,12 @@ export function initHero3D(): void {
     });
   });
 
-  // Les nœuds du réseau, en pointillé vert discret.
+  // The network nodes, in a discreet green dotted style.
   const cities = pointCloud(nodePoints.slice(1), 0xff4d00, 3, 0.7);
   spin.add(cities.points);
   clouds.push(cities);
 
-  // La tête de chaque paquet.
+  // The head of each packet.
   const heads = new THREE.Points(
     new THREE.BufferGeometry().setAttribute(
       "position",
@@ -489,15 +489,15 @@ export function initHero3D(): void {
     renderer.setSize(view.width, view.height);
     camera.aspect = view.width / view.height;
 
-    // Recul tel que la sphère (diamètre 2) occupe la hauteur de son
-    // emplacement, alors que le canvas, lui, fait tout l'écran.
-    // Le globe occupe 84 % du cadre : il reste la place pour que les
-    // orbites les plus larges tiennent entièrement dans la fenêtre.
+    // Setback such that the sphere (diameter 2) occupies the height of its
+    // slot, while the canvas itself fills the whole screen.
+    // The globe occupies 84% of the frame: there remains room for the
+    // widest orbits to fit entirely in the window.
     const wanted = Math.min(slot.height, slot.width) * 0.84;
     camera.position.z = view.height / (wanted * HALF_FOV_TAN);
     camera.updateProjectionMatrix();
 
-    // Puis on remonte le globe du centre du canvas vers celui de sa place.
+    // Then we move the globe up from the canvas center to its slot's center.
     const worldPerPixel = (2 * camera.position.z * HALF_FOV_TAN) / view.height;
     const slotCenter = slot.top + slot.height / 2;
     const viewCenter = view.top + view.height / 2;
@@ -508,7 +508,7 @@ export function initHero3D(): void {
   observer.observe(stage);
   observer.observe(layer);
 
-  // État de la rotation à la main.
+  // State of the manual rotation.
   let dragging = false;
   let pointerId = -1;
   let lastX = 0;
@@ -517,9 +517,9 @@ export function initHero3D(): void {
   let dragYaw = 0;
   let dragPitch = 0;
 
-  // Rotation à la main, avec inertie. Un balayage de la largeur du cadre
-  // fait un demi-tour ; l'inclinaison est bornée pour ne pas retourner le
-  // globe. touch-action: pan-y (CSS) laisse le défilement vertical au doigt.
+  // Manual rotation, with inertia. A swipe across the frame's width
+  // does a half-turn; the tilt is bounded so as not to turn the
+  // globe over. touch-action: pan-y (CSS) leaves vertical scrolling to the finger.
   stage.addEventListener("pointerdown", (event) => {
     dragging = true;
     pointerId = event.pointerId;
@@ -556,41 +556,41 @@ export function initHero3D(): void {
   }).observe(stage);
 
   const clock = new THREE.Clock();
-  // L'Europe fait face à la caméra au chargement.
+  // Europe faces the camera on load.
   let autoYaw = -1.6;
 
   renderer.setAnimationLoop(() => {
-    // Pas de garde sur document.hidden : ce drapeau est vrai dans des
-    // contextes où la page est pourtant affichée (panneaux intégrés,
-    // aperçus), et le globe y restait figé. La sortie d'écran (inView)
-    // suffit à ne rien calculer pour rien, et le navigateur ralentit déjà
-    // requestAnimationFrame quand l'onglet passe vraiment au second plan.
+    // No guard on document.hidden: this flag is true in
+    // contexts where the page is nevertheless displayed (embedded panels,
+    // previews), and the globe stayed frozen there. Being off screen (inView)
+    // is enough to avoid computing anything for nothing, and the browser already slows
+    // requestAnimationFrame down when the tab really goes to the background.
     if (!inView) return;
     const t = clock.getElapsedTime();
 
-    // Les points convergent de l'extérieur pour former le globe, puis on
-    // arrête de toucher aux géométries.
+    // The points converge from outside to form the globe, then we
+    // stop touching the geometries.
     if (assembling) {
       let moving = false;
       for (const cloud of clouds) {
         if (advance(cloud, t)) moving = true;
       }
       assembling = moving;
-      // Le noyau grandit avec eux : il ne masque la face arrière qu'une
-      // fois la sphère en place.
+      // The core grows with them: it only hides the back face once
+      // the sphere is in place.
       const formed = Math.min(1, t / (FLY_IN + STAGGER));
       core.scale.setScalar(Math.max(0.001, formed));
     }
 
     if (!dragging) {
-      // Inertie après le relâchement, puis reprise de la rotation lente.
+      // Inertia after release, then resumption of the slow rotation.
       dragYaw += yawVelocity;
       yawVelocity *= 0.94;
       autoYaw += 0.0005;
     }
     spin.rotation.y = autoYaw + dragYaw;
 
-    // Le trafic ne démarre qu'une fois le globe formé.
+    // The traffic only starts once the globe is formed.
     const netTime = t - (FLY_IN + STAGGER);
     if (netTime > 0) {
       const headPos = heads.geometry.getAttribute("position") as THREE.BufferAttribute;
@@ -601,13 +601,13 @@ export function initHero3D(): void {
         const along = link.reverse ? 1 - phase : phase;
         const head = Math.round(along * (link.steps - 1));
 
-        // Fenêtre de tracé : le paquet traîne derrière lui, du côté d'où
-        // il vient.
+        // Drawing window: the packet trails behind itself, on the side it
+        // comes from.
         const first = link.reverse ? head : Math.max(0, head - TRAIL);
         const last = link.reverse ? Math.min(link.steps - 1, head + TRAIL) : head;
         link.packet.geometry.setDrawRange(first, last - first + 1);
 
-        // Il s'estompe en arrivant, pour ne pas buter sur le nœud.
+        // It fades out as it arrives, so as not to bump into the node.
         (link.packet.material as THREE.LineBasicMaterial).opacity =
           0.75 * Math.min(1, phase * 8) * Math.min(1, (1 - phase) * 8);
 
@@ -617,15 +617,15 @@ export function initHero3D(): void {
       headPos.needsUpdate = true;
     }
 
-    // Les arcs du réseau arrivent en dernier, et lentement : le globe se
-    // forme d'abord, nu, puis les liaisons se tracent par-dessus. Départ
-    // décalé d'un quart de seconde après la formation, montée en ~1,1 s —
-    // plus tard et plus posé que les orbites.
+    // The network arcs arrive last, and slowly: the globe forms
+    // first, bare, then the links are drawn over it. Start
+    // offset by a quarter of a second after formation, rise over ~1.1 s —
+    // later and more composed than the orbits.
     const arcOn = Math.min(1, Math.max(0, netTime - 0.25) * 0.9);
     for (const arc of arcs) arc.opacity = 0.35 * arcOn;
 
-    // Orbites satellites : la traînée dégradée suit chaque satellite, qui
-    // parcourt son orbite. L'ensemble n'apparaît qu'une fois le globe formé.
+    // Satellite orbits: the faded trail follows each satellite, which
+    // travels its orbit. The whole thing only appears once the globe is formed.
     const orbitOn = Math.min(1, Math.max(0, netTime) * 2);
     for (const orbit of orbits) {
       orbit.angle += orbit.speed * 0.016;
@@ -633,7 +633,7 @@ export function initHero3D(): void {
       for (let i = 0; i < orbit.count; i++) {
         const a = (i / orbit.count) * Math.PI * 2;
         const d = Math.abs(Math.atan2(Math.sin(a - orbit.angle), Math.cos(a - orbit.angle)));
-        // Dégradé : vif au satellite (0xff6b1f), fondu vers le fond (0x0d1117).
+        // Gradient: bright at the satellite (0xff6b1f), fading towards the background (0x0d1117).
         const f = Math.max(0, 1 - d / ORBIT_TRAIL);
         const s = f * f;
         colors[i * 3] = 0.051 + 0.949 * s;
@@ -644,7 +644,7 @@ export function initHero3D(): void {
       const eclat = orbit.line.material.userData.eclat as number;
       (orbit.line.material as THREE.LineBasicMaterial).opacity = 0.9 * orbitOn * eclat;
       (orbit.sat.material as THREE.PointsMaterial).opacity = orbitOn * eclat;
-      // Coordonnées locales : la rotation de la ligne s'applique au point.
+      // Local coordinates: the line's rotation applies to the point.
       orbit.satPos.setXYZ(0, Math.cos(orbit.angle) * orbit.radius, 0, Math.sin(orbit.angle) * orbit.radius);
       orbit.satPos.needsUpdate = true;
     }

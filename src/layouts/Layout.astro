@@ -10,7 +10,7 @@ interface Props {
 const { title, description } = Astro.props;
 
 const base = import.meta.env.BASE_URL;
-// Construit une URL interne préfixée par la base (ex. '/julien-chapron/projets').
+// Builds an internal URL prefixed with the base (e.g. '/julien-chapron/projets').
 const url = (path: string) =>
   path === "/" ? (base === "/" ? "/" : base + "/") : base === "/" ? path : base + path;
 
@@ -42,7 +42,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
       rel="stylesheet"
     />
-    <!-- Marque JS actif pour les révélations au scroll : sans JS, tout reste visible. -->
+    <!-- Marks JS as active for scroll reveals: without JS, everything stays visible. -->
     <script is:inline>document.documentElement.classList.add("js");</script>
   </head>
   <body>

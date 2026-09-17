@@ -1,38 +1,38 @@
-// Effet de décodage sur les libellés du bloc compétences : chaque caractère
-// défile parmi des glyphes étrangers avant de se fixer, de gauche à droite.
-// Les glyphes, eux, passent à l'orange le temps du brouillage. Déclenché à
-// l'entrée du bloc dans l'écran, rejoué à chaque retour, puis relancé en
-// boucle sur un petit ÉCHANTILLON de libellés : pendant qu'on lit le
-// tableau, quelques compétences se brouillent de temps en temps en
-// japonais avant de revenir au français.
+// Decoding effect on the labels of the skills block: each character
+// cycles through foreign glyphs before locking in, from left to right.
+// The glyphs turn orange for the duration of the scramble. Triggered on
+// the block's entry into the screen, replayed on every return, then relaunched
+// in a loop on a small SAMPLE of labels: while one reads the
+// table, a few skills scramble from time to time in
+// Japanese before returning to French.
 
-/** Réservoir de glyphes. Des idéogrammes, dont l'œil ne tire aucun sens :
-    c'est ce qui donne l'impression d'un texte encore chiffré. */
+/** Glyph reservoir. Ideograms, from which the eye draws no meaning:
+    that is what gives the impression of a text still encrypted. */
 const GLYPHES =
   "日本語漢字仮名一二三四五六七八九十山川田中大小上下左右力刀月火水木金土空海風雷電気機能情報通信";
 
-/** Durée du brouillage d'un caractère, en millisecondes. */
+/** Duration of the scramble of one character, in milliseconds. */
 const BROUILLAGE = 480;
-/** Décalage entre deux caractères voisins : c'est lui qui fait la vague. */
+/** Offset between two neighbouring characters: it is what makes the wave. */
 const PAS_CARACTERE = 40;
-/** Décalage entre deux libellés : la table se décode de haut en bas. */
+/** Offset between two labels: the table decodes from top to bottom. */
 const PAS_LIBELLE = 100;
 
-/* La relance périodique : un petit lot aléatoire se brouille de temps en
-   temps, le reste de la table reste lisible. */
+/* The periodic relaunch: a small random batch scrambles from time to
+   time, the rest of the table stays readable. */
 const TAILLE_LOT = 3;
 const PERIODE_MIN = 2500;
 const PERIODE_MAX = 4000;
 
 const glyphe = (): string => GLYPHES[Math.floor(Math.random() * GLYPHES.length)]!;
 
-/** Le libellé est injecté en HTML pour colorer les glyphes : les caractères
-    français passent donc par cet échappement. */
+/** The label is injected as HTML to color the glyphs: the French
+    characters therefore go through this escaping. */
 const echapper = (s: string): string =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-/** Un caractère qui ne se brouille pas : les séparateurs et les espaces
-    gardent la silhouette du mot lisible pendant tout l'effet. */
+/** A character that does not scramble: separators and spaces
+    keep the silhouette of the word readable throughout the effect. */
 const fixe = (c: string): boolean => /[\s·.,/()+&—-]/.test(c);
 
 interface Libelle {
@@ -47,8 +47,8 @@ export function initDecodage(): void {
   const bloc = document.querySelector<HTMLElement>(".section-skills");
   if (!bloc) return;
 
-  // Les intitulés de famille puis les technologies, dans l'ordre du document :
-  // la vague descend donc la table telle qu'on la lit.
+  // The family headings then the technologies, in document order:
+  // the wave therefore descends the table as one reads it.
   const cibles = Array.from(
     bloc.querySelectorAll<HTMLElement>(".skill-cat, .skill-items li"),
   );
@@ -60,9 +60,9 @@ export function initDecodage(): void {
     depart: i * PAS_LIBELLE,
   }));
 
-  /** Fige la largeur de chaque libellé du LOT sur son texte final. Sans ça,
-      les idéogrammes — deux fois plus larges qu'une lettre latine — feraient
-      enfler puis dégonfler toute la table à chaque image. */
+  /** Freezes the width of each label of the BATCH on its final text. Without this,
+      the ideograms — twice as wide as a Latin letter — would make
+      the whole table swell then deflate on every frame. */
   const figerLesLargeurs = (lot: Libelle[]): void => {
     for (const l of lot) {
       l.el.style.minWidth = "";
@@ -76,8 +76,8 @@ export function initDecodage(): void {
   let animation = 0;
   let cycle = false;
 
-  /** Remet tous les libellés en français et libère la mise en page —
-      l'interruption d'un cycle ne laisse jamais de glyphe derrière elle. */
+  /** Puts all the labels back in French and releases the layout —
+      interrupting a cycle never leaves a glyph behind it. */
   const restaurer = (): void => {
     cancelAnimationFrame(animation);
     cycle = false;
@@ -89,7 +89,7 @@ export function initDecodage(): void {
     }
   };
 
-  /** Joue le brouillage → français sur un lot de libellés. */
+  /** Plays the scramble → French on a batch of labels. */
   const jouer = (lot: Libelle[]): void => {
     restaurer();
     cycle = true;
@@ -110,15 +110,15 @@ export function initDecodage(): void {
           }
           const ouverture = l.depart + i * PAS_CARACTERE;
           if (t < ouverture) {
-            // Pas encore son tour : le caractère reste en français. La
-            // vague de glyphes ne se voit ainsi que là où elle passe, de
-            // gauche à droite — jamais tout le texte d'un coup.
+            // Not its turn yet: the character stays in French. The
+            // wave of glyphs is thus only seen where it passes, from
+            // left to right — never the whole text at once.
             sortie += echapper(c);
           } else if (t < ouverture + BROUILLAGE) {
-            // En cours de brouillage : un glyphe, à l'orange le temps de
-            // l'effet. L'orange du site (#ff4d00) est éclairci : les
-            // idéogrammes sont des tracés fins qui grisent à cette taille
-            // sur fond noir — éclairci, l'œil y retrouve le même orange.
+            // Currently scrambling: a glyph, in orange for the time of
+            // the effect. The site's orange (#ff4d00) is lightened: the
+            // ideograms are fine strokes that grey out at this size
+            // on a black background — lightened, the eye finds the same orange there.
             sortie += `<span style="color:#ff7133">${glyphe()}</span>`;
             enCours = true;
           } else {
@@ -131,7 +131,7 @@ export function initDecodage(): void {
       if (enCours) {
         animation = requestAnimationFrame(image);
       } else {
-        // Terminé : on rend la main à la mise en page.
+        // Done: we hand back control to the layout.
         cycle = false;
         for (const l of lot) {
           l.el.textContent = l.texte;
@@ -145,33 +145,33 @@ export function initDecodage(): void {
     image();
   };
 
-  // Relance en boucle tant que le bloc est à l'écran : un petit lot
-  // aléatoire se brouille, revient au français, et le suivant est
-  // programmé. L'entrée du bloc joue la table entière, comme avant.
+  // Relaunches in a loop as long as the block is on screen: a small random
+  // batch scrambles, returns to French, and the next one is
+  // scheduled. The block's entry plays the whole table, as before.
   let dedans = false;
   let minuterie = 0;
 
   const programmer = (): void => {
     minuterie = window.setTimeout(() => {
-      if (!dedans) return; // sorti de l'écran : la chaîne s'arrête
+      if (!dedans) return; // out of the screen: the chain stops
       if (document.hidden || cycle) {
-        // Onglet en arrière ou cycle en cours : on repousse poliment.
+        // Tab in the background or cycle in progress: we politely postpone it.
         minuterie = window.setTimeout(programmer, 600);
         return;
       }
       const lot = [...libelles]
         .sort(() => Math.random() - 0.5)
         .slice(0, TAILLE_LOT)
-        // Le lot rejoue la petite vague : chaque libellé part après le
-        // précédent. Copies, pour ne pas écraser le départ d'entrée.
+        // The batch replays the small wave: each label starts after the
+        // previous one. Copies, so as not to overwrite the entrance start.
         .map((l, i) => ({ ...l, depart: i * PAS_LIBELLE }));
       jouer(lot);
       programmer();
     }, PERIODE_MIN + Math.random() * (PERIODE_MAX - PERIODE_MIN));
   };
 
-  // Rejoué à chaque entrée du bloc dans l'écran, pas seulement la première :
-  // en remontant la page on revoit l'effet, comme le reste du site.
+  // Replayed on every entry of the block into the screen, not just the first:
+  // scrolling back up shows the effect again, like the rest of the site.
   new IntersectionObserver(
     (entrees) => {
       const visible = entrees[0]?.isIntersecting ?? false;

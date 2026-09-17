@@ -1,10 +1,10 @@
-// La sortie du bloc profil : dès que le texte est centré (rail épinglé),
-// deux gestes de molette (0,65 écran) le font disparaître. Le nuage 3D du
-// parcours (parcours3d.ts) prend le relais juste après : il arrive une fois
-// la phrase partie, sur le bloc vidé.
-/** Course de la sortie du texte du profil, en écrans de rail. Courte : c'est
-    un simple fondu, et tout ce qu'il consomme retarde l'entrée du parcours.
-    specform.ts cale le départ de sa mise en scène juste après. */
+// The profile block's exit: as soon as the text is centered (rail pinned),
+// two wheel gestures (0.65 screen) make it disappear. The parcours 3D
+// cloud (parcours3d.ts) takes over just after: it arrives once the
+// sentence has left, over the emptied block.
+/** Travel of the profile text's exit, in rail screens. Short: it is
+    a simple fade, and everything it consumes delays the parcours entrance.
+    specform.ts sets the start of its staging just after. */
 export const PROFIL_SORTIE = 0.32;
 
 export function initProfilOut(): void {

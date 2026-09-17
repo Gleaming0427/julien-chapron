@@ -12,14 +12,14 @@ import {
   personalProjects,
 } from "../data/cv";
 
-// Bandes défilantes pleine largeur, façon sites éditoriaux primés.
+// Full-width scrolling bands, in the style of award-winning editorial sites.
 const marqueeSkills = [
   "TypeScript", "React.js", "Node.js", "GraphQL", "API REST", "Docker",
   "Kubernetes", "GCP", "AWS Lambda", "DynamoDB", "Astro", "React Native",
   "PostgreSQL", "Firebase", "GitLab CI", "GitHub Actions",
 ];
 
-// Icônes des étapes projets, en trait, posées dans la boîte de tête.
+// Project step icons, drawn as strokes, placed in the head box.
 const iconesProjet: Record<IconeProjet, string> = {
   serveur:
     '<rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>',
@@ -36,9 +36,9 @@ const iconesProjet: Record<IconeProjet, string> = {
   title="Julien Chapron, Développeur Full-Stack"
   description="CV de Julien Chapron, développeur full-stack TypeScript / React / Node.js. Projets personnels et applications."
 >
-  <!-- Partie sombre : le hero occupe le premier écran, le terminal le
-       second. La fenêtre de déchirure est ancrée sur son dernier écran :
-       le contenu sombre défile derrière pendant que la feuille monte. -->
+  <!-- Dark part: the hero fills the first screen, the terminal the
+       second. The tear window is anchored on its last screen: the dark
+       content scrolls behind while the sheet rises. -->
   <div class="dark-zone">
     <Hero />
 
@@ -55,12 +55,12 @@ const iconesProjet: Record<IconeProjet, string> = {
       <Marquee items={marqueeSkills} tightBottom />
     </div>
 
-    <!-- La feuille blanche monte du bas : un simple rectangle en
-         scaleY depuis son bord bas. Le conteneur qui l'enveloppe porte le
-         filtre : le bruit déchiquette le bord haut du rectangle, et comme
-         ce bord traverse un champ de bruit fixe, la déchirure se remodèle
-         à chaque hauteur. L'inset négatif laisse la place à la déformation
-         (scale 220) sans la rogner. -->
+    <!-- The white sheet rises from the bottom: a simple rectangle in
+         scaleY from its bottom edge. The container wrapping it carries the
+         filter: the noise shreds the rectangle's top edge, and since that
+         edge crosses a fixed noise field, the tear reshapes itself at
+         every height. The negative inset leaves room for the distortion
+         (scale 220) without cropping it. -->
     <div class="tear" aria-hidden="true">
       <div class="tear-filter">
         <div class="tear-sheet"></div>
@@ -83,8 +83,8 @@ const iconesProjet: Record<IconeProjet, string> = {
   </svg>
 
   <div class="light-zone">
-    <!-- Le carrousel : cat profil est le premier écran, épinglé au centre,
-         puis la molette fait défiler les blocs 2-5 horizontalement. -->
+    <!-- The carousel: cat profil is the first screen, pinned in the centre,
+         then the wheel scrolls blocks 2-5 horizontally. -->
     <div class="carousel-rail">
       <div class="carousel-sticky">
         <div class="carousel-track">
@@ -161,8 +161,8 @@ const iconesProjet: Record<IconeProjet, string> = {
       </div>
     </div>
 
-    <!-- À partir d'ici, plus de carrousel épinglé : ce sont des sections
-         normales, qu'on atteint en faisant simplement défiler la page. -->
+    <!-- From here on, no more pinned carousel: these are normal
+         sections, reached by simply scrolling the page. -->
   <Section command="cat competences.md" class="section-skills section-apres">
     <p class="spec-eyebrow">compétences</p>
     <h3 class="spec-headline">Spécifications techniques. <span>Ce que j'utilise vraiment.</span></h3>
@@ -191,9 +191,9 @@ const iconesProjet: Record<IconeProjet, string> = {
       Une librairie sur npm, un outil d'analyse de vulnérabilités en open
       source, une application sur le Play Store.
     </p>
-    <!-- Les quatre projets en étapes, façon power path Axiom : une grille
-         bordée d'un filet, chaque étape en colonne — numéro et icône en
-         tête, titre et description au centre, mention en pied. -->
+    <!-- The four projects as steps, Axiom power path style: a grid
+         bordered by a hairline rule, each step in a column — number and icon
+         at the top, title and description in the middle, note at the foot. -->
     <div class="projet-grille">
       {personalProjects.map((project, i) => (
         <article class="projet-etape">
@@ -217,8 +217,8 @@ const iconesProjet: Record<IconeProjet, string> = {
 
     </div>
 
-  <!-- Pied de page façon Axiom : la feuille orange revient, encre sombre,
-       sans le grand énoncé. -->
+  <!-- Footer in the Axiom style: the orange sheet returns, dark ink,
+       without the big statement. -->
   <footer class="site-footer">
     <div class="footer-contenu">
       <div class="footer-haut">

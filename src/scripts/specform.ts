@@ -1,44 +1,44 @@
 import { PROFIL_SORTIE } from "./profilout";
 
-// Pilote de la progression du bloc parcours : --spec-form suit la position
-// du rail (trois étapes de deux gestes de molette chacune). Les modules
-// 3D et le CSS lisent cette variable pour orchestrer la séquence.
+// Driver of the parcours block's progression: --spec-form follows the rail
+// position (three steps of two wheel gestures each). The 3D
+// modules and the CSS read this variable to orchestrate the sequence.
 /* ---------------------------------------------------------------------
-   Chorégraphie du bloc parcours, exprimée en parts de --spec-form.
-   ATTENTION : global.css reprend TITRE_* et CARROUSEL_* en dur (le CSS ne
-   peut pas importer). Si tu touches à ces valeurs, reporte-les là-bas —
-   elles sont signalées par un commentaire qui renvoie ici.
+   Choreography of the parcours block, expressed in shares of --spec-form.
+   WARNING: global.css repeats TITRE_* and CARROUSEL_* as hard values (the CSS
+   cannot import). If you touch these values, carry them over there —
+   they are flagged by a comment that points back here.
 
-   Le rythme visé, à la vitesse de défilement imposée par ui.ts :
-     arrivée des points  4,2 s
-     puis, 2 s plus tard, le titre de gauche
-     puis, 1 s plus tard, le carrousel.
+   The intended rhythm, at the scroll speed imposed by ui.ts:
+     points arrival  4.2 s
+     then, 2 s later, the left-hand title
+     then, 1 s later, the carousel.
    --------------------------------------------------------------------- */
 
-/** Position du rail (en écrans, soit -railTop/vh) où --spec-form démarre.
-    Dérivé de la sortie du texte du profil plutôt que recopié : les deux
-    doivent rester collés, sinon on verrouille la molette pour ne rien
-    montrer (trop tard) ou les deux textes se chevauchent (trop tôt). */
+/** Rail position (in screens, i.e. -railTop/vh) where --spec-form starts.
+    Derived from the profile text's exit rather than copied: the two
+    must stay glued together, otherwise we lock the wheel to show nothing
+    (too late) or the two texts overlap (too early). */
 export const SPEC_DEPART = PROFIL_SORTIE + 0.06;
-/** Course de --spec-form, en écrans de rail. */
+/** Travel of --spec-form, in rail screens. */
 export const SPEC_COURSE = 2.28;
-/** Valeur de --spec-form à partir de laquelle le carrousel des fiches prend
-    la main. Avant ce point, tout est automatique ; après, c'est la molette. */
+/** Value of --spec-form from which the card carousel takes
+    over. Before this point, everything is automatic; after it, the wheel rules. */
 export const SPEC_CARROUSEL = 0.84;
 
-/** Fenêtre d'apparition du titre de gauche (.spec-intro). */
+/** Appearance window of the left-hand title (.spec-intro). */
 export const TITRE_DEBUT = 0.62;
 export const TITRE_FIN = 0.72;
-/** Fenêtre d'apparition du carrousel de fiches (.exp-carousel). */
+/** Appearance window of the card carousel (.exp-carousel). */
 export const CARROUSEL_DEBUT = 0.72;
 export const CARROUSEL_FIN = 0.84;
-/** Vitesse de défilement, en écrans par seconde, que ui.ts doit tenir pour
-    que les intervalles ci-dessus fassent bien 2 s et 1 s. */
+/** Scroll speed, in screens per second, that ui.ts must hold for
+    the intervals above to really be 2 s and 1 s. */
 export const VITESSE = 0.228;
 
-/** Position de rail, en écrans, correspondant à une valeur de --spec-form.
-    Exportée parce que ui.ts vise ces mêmes repères : recopiés là-bas, ils
-    auraient dérivé au premier réglage. */
+/** Rail position, in screens, matching a value of --spec-form.
+    Exported because ui.ts targets these same markers: copied over there, they
+    would have drifted at the first adjustment. */
 export function railPourSpec(valeur: number): number {
   return SPEC_DEPART + valeur * SPEC_COURSE;
 }
@@ -51,8 +51,8 @@ export function initSpecForm(): void {
   const tick = (): void => {
     const vh = window.innerHeight;
     const railTop = rail.getBoundingClientRect().top;
-    // L'étape 1 (explosion de particules) tient 3 gestes de molette, les
-    // étapes 2 et 3 en tiennent 2 chacune : ~2,3 écrans au total.
+    // Step 1 (particle explosion) holds 3 wheel gestures, steps
+    // 2 and 3 hold 2 each: ~2.3 screens in total.
     const progress = Math.min(
       1,
       Math.max(0, (-railTop - vh * SPEC_DEPART) / (vh * SPEC_COURSE)),

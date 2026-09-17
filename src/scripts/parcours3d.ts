@@ -1,61 +1,61 @@
-// La forme 3D du bloc parcours : un donut de points, du même soin que le
-// globe du hero. La séquence entre le bloc profil et le bloc parcours est
-// entièrement pilotée par --spec-form, c'est-à-dire par la POSITION du rail
-// — aucune horloge propre à ce module :
-// 1. les points noirs entrent PAR LE HAUT À DROITE et se rangent sur le tore
-//    (jusqu'à 0,34) ; en remontant, ils y repartent par le même chemin ;
-// 2. un volet noir balaie l'écran depuis la droite, et chaque point
-//    blanchit au moment précis où l'arête du volet le dépasse ;
-// 3. le donut tourne autour de son axe, en continu.
-// La trame du bloc, elle, ne s'efface pas ici : elle reste pleine jusqu'à
-// la sortie, et c'est le bloc compétences qui efface la sienne (ui.ts).
-// Le caractère automatique ne vient donc PAS d'ici : c'est ui.ts qui fait
-// défiler la page toute seule sur cette portion, et la douceur vient de sa
-// courbe d'accélération. Tout se rejoue à l'envers en remontant, sans état
-// à remettre à zéro puisque rien n'est mémorisé.
-// Rendu permanent : le calque couvre toute la zone épinglée. Sans WebGL,
-// parcours-gl n'est pas posé et le fond CSS reste opaque.
+// The 3D form of the parcours block: a donut of points, with the same
+// care as the hero globe. The sequence between the profile block and the
+// parcours block is entirely driven by --spec-form, that is, by the POSITION
+// of the rail — no clock of its own in this module:
+// 1. the black points enter FROM THE TOP RIGHT and line up on the torus
+//    (up to 0.34); scrolling back up, they leave by the same path;
+// 2. a black panel sweeps across the screen from the right, and each point
+//    whitens at the precise moment the panel's edge passes it;
+// 3. the donut spins around its axis, continuously.
+// The block's grid, for its part, does not fade here: it stays full until
+// the exit, and it is the skills block that erases its own (ui.ts).
+// The automatic behaviour therefore does NOT come from here: it is ui.ts that
+// scrolls the page all by itself over this stretch, and the smoothness comes
+// from its acceleration curve. Everything replays backwards on the way up, with
+// no state to reset since nothing is memoized.
+// Permanent rendering: the layer covers the whole pinned area. Without WebGL,
+// parcours-gl is not set and the CSS background stays opaque.
 import * as THREE from "three";
 import { SPEC_COURSE, SPEC_DEPART, TITRE_DEBUT, TITRE_FIN } from "./specform";
 
-/* Les étapes, exprimées en part de --spec-form. Elles s'enchaînent sans se
-   chevaucher avec celles du CSS (titre 0,43 → 0,715 ; carrousel 0,715 →
-   0,835) : les points sont formés et blanchis avant que le titre n'arrive. */
-const FORME_FIN = 0.42;   // fin de l'arrivée des points (4,2 s)
-const NOIR_DEBUT = 0.42;  // le fond bascule pendant l'attente avant le titre
-const NOIR_FIN = 0.54;    // fond noir, points blancs
+/* The steps, expressed in shares of --spec-form. They chain together without
+   overlapping those of the CSS (title 0.43 → 0.715; carousel 0.715 →
+   0.835): the points are formed and whitened before the title arrives. */
+const FORME_FIN = 0.42;   // end of the points' arrival (4.2 s)
+const NOIR_DEBUT = 0.42;  // the background switches during the wait before the title
+const NOIR_FIN = 0.54;    // black background, white points
 
-/* Atténuation des points qui tombent DERRIÈRE le titre. Les points montent à
-   ~0,95 de blanc, exactement la luminance du texte (#f3f1ec) : intacts, ils
-   tiennent la même place visuelle que les lettres et le titre devient
-   illisible (contraste 1,1:1).
-   0,22 : le texte garde 11,2:1 sur les points, même là où une lettre tombe
-   pile sur un point. Les points y descendent à 1,6:1 sur le fond — à peine
-   plus qu'une trame, ce qui est voulu : sous le titre, ils ne doivent plus
-   qu'accompagner.
-   Cette valeur ne coûte plus rien au donut depuis que l'atténuation est
-   LOCALE : elle ne touche que les points couverts par le titre, tandis que
-   tout le pourtour de l'anneau garde sa pleine présence (15,4:1 sur le fond).
-   C'est ce qui permet d'aller si bas — en atténuation globale, 0,32 éteignait
-   le donut entier. */
+/* Attenuation of the points that fall BEHIND the title. The points rise to
+   ~0.95 white, exactly the luminance of the text (#f3f1ec): left untouched, they
+   hold the same visual place as the letters and the title becomes
+   illegible (contrast 1.1:1).
+   0.22: the text keeps 11.2:1 over the points, even where a letter falls
+   right on a point. There the points drop to 1.6:1 over the background — hardly
+   more than a grid, which is intended: under the title, they should only
+   accompany it.
+   This value no longer costs the donut anything since the attenuation is
+   LOCAL: it only touches the points covered by the title, while
+   the whole rim of the ring keeps its full presence (15.4:1 over the background).
+   That is what allows going so low — as a global attenuation, 0.32 switched
+   the entire donut off. */
 const RETRAIT = 0.22;
 
-/** Inclinaison de lecture du donut, en radians. À plat on verrait un cercle.
-    Portée par `spin`, donc elle s'applique aussi aux positions de départ :
-    poserLesDeparts() doit la compenser. */
+/** Reading tilt of the donut, in radians. Flat, we would see a circle.
+    Carried by `spin`, so it also applies to the start positions:
+    poserLesDeparts() must compensate for it. */
 const TILT = 0.95;
 
 const COUNT = 2200;
 const FOV = 42;
 const HALF_FOV_TAN = Math.tan((FOV * Math.PI) / 180 / 2);
 
-/** Suite pseudo-aléatoire déterministe, comme dans hero3d. */
+/** Deterministic pseudo-random sequence, as in hero3d. */
 function graine(i: number, n: number): number {
   const v = Math.sin(i * n) * 43758.5453;
   return v - Math.floor(v);
 }
 
-/** Un point sur la surface d'un donut (tore), ramené dans la sphère unité. */
+/** A point on the surface of a donut (torus), brought back into the unit sphere. */
 function surLeTore(i: number): [number, number, number] {
   const u = graine(i, 1.7) * Math.PI * 2;
   const v = graine(i, 5.3) * Math.PI * 2;
@@ -82,11 +82,11 @@ export function initParcours3D(): void {
   try {
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   } catch {
-    return; // WebGL indisponible : le bloc se lit très bien sans.
+    return; // WebGL unavailable: the block reads very well without it.
   }
-  // Le bloc cède son fond au volet ci-dessous, qui balaie l'écran. Sans
-  // WebGL la classe n'est pas posée et le CSS garde son fond opaque : le
-  // bloc reste noir d'emblée, sans balayage, mais parfaitement lisible.
+  // The block gives up its background to the panel below, which sweeps the
+  // screen. Without WebGL the class is not set and the CSS keeps its opaque
+  // background: the block is black right away, with no sweep, but perfectly readable.
   item.classList.add("parcours-gl");
 
   const canvas = renderer.domElement;
@@ -95,15 +95,15 @@ export function initParcours3D(): void {
   layer.className = "parcours-canvas-layer";
   layer.setAttribute("aria-hidden", "true");
   layer.appendChild(canvas);
-  // Le calque est posé sur la zone épinglée entière : les points sont
-  // visibles dès le bloc profil, pas seulement sur le parcours.
+  // The layer is placed over the entire pinned area: the points are
+  // visible from the profile block onward, not only on the parcours.
   sticky.prepend(layer);
 
-  // Le fond du bloc est un volet noir qui BALAIE depuis la droite, et non
-  // plus un plan qui se fond. C'est un simple élément CSS glissé DERRIÈRE le
-  // calque 3D : le donut est donc dessiné par-dessus lui. En WebGL il aurait
-  // fallu un plan supplémentaire et gérer soi-même son cadrage ; en CSS le
-  // volet occupe l'écran par construction, à tout ratio.
+  // The block's background is a black panel that SWEEPS in from the right, and
+  // no longer a plane that fades in. It is a simple CSS element slid BEHIND the
+  // 3D layer: the donut is therefore drawn over it. In WebGL it would have
+  // taken an extra plane and handling its framing yourself; in CSS the
+  // panel fills the screen by construction, at any aspect ratio.
   const volet = document.createElement("div");
   volet.className = "parcours-fond";
   volet.setAttribute("aria-hidden", "true");
@@ -113,7 +113,7 @@ export function initParcours3D(): void {
   const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 100);
   camera.position.z = 3;
 
-  // groupe : la position de la forme (centre puis gauche) · spin : rotation.
+  // groupe: the form's position (center then left) · spin: rotation.
   const groupe = new THREE.Group();
   const spin = new THREE.Group();
   groupe.add(spin);
@@ -122,9 +122,9 @@ export function initParcours3D(): void {
   const cible = new Float32Array(COUNT * 3);
   const relais = new Float32Array(COUNT * 3);
   const rangement = new Float32Array(COUNT);
-  /* Le vol de chaque point : un écart par rapport à la ligne droite, plus une
-     ondulation. C'est ce qui fait la nuée — sans eux, 2200 trajectoires
-     parfaitement rectilignes et parallèles, donc un mouvement de machine. */
+  /* The flight of each point: a deviation from the straight line, plus an
+     undulation. That is what makes the swarm — without them, 2200 perfectly
+     straight and parallel trajectories, hence machine-like motion. */
   const ecart = new Float32Array(COUNT * 3);
   const onde = new Float32Array(COUNT);
   const phase = new Float32Array(COUNT);
@@ -132,7 +132,7 @@ export function initParcours3D(): void {
 
   for (let i = 0; i < COUNT; i++) {
     const [x, y, z] = surLeTore(i);
-    // Un léger jitter donne sa matière à la surface.
+    // A slight jitter gives the surface its texture.
     const jx = (graine(i, 9.1) - 0.5) * 0.04;
     const jy = (graine(i, 9.7) - 0.5) * 0.04;
     const jz = (graine(i, 11.3) - 0.5) * 0.04;
@@ -140,27 +140,27 @@ export function initParcours3D(): void {
     cible[i * 3 + 1] = y + jy;
     cible[i * 3 + 2] = z + jz;
 
-    // Étalement des départs, large : c'est lui qui donne à l'arrivée sa
-    // durée perçue. Resserré, les 2200 points se posent presque ensemble et
-    // l'arrivée paraît brutale même si elle dure longtemps.
+    // Spreading of the starts, wide: it is what gives the arrival its
+    // perceived duration. Tightened, the 2200 points settle almost together and
+    // the arrival looks brutal even if it lasts a long time.
     rangement[i] = graine(i, 67.9) * 0.8;
 
-    // Direction d'écart : tirée uniformément sur la sphère (d'où l'acos, sans
-    // lequel les directions se tasseraient aux pôles). L'amplitude varie
-    // beaucoup d'un point à l'autre : certains filent presque droit, d'autres
-    // font un large détour. La dérive en profondeur est réduite de moitié —
-    // au-delà, les points passent devant la caméra au lieu de contourner.
+    // Deviation direction: drawn uniformly on the sphere (hence the acos, without
+    // which the directions would bunch up at the poles). The amplitude varies
+    // a lot from one point to the next: some fly almost straight, others
+    // take a wide detour. The depth drift is halved —
+    // beyond that, the points pass in front of the camera instead of going around.
     const th = graine(i, 73.1) * Math.PI * 2;
     const ph = Math.acos(graine(i, 79.3) * 2 - 1);
     const amp = 0.6 + graine(i, 83.7) * 1.8;
     ecart[i * 3] = Math.sin(ph) * Math.cos(th) * amp;
     ecart[i * 3 + 1] = Math.sin(ph) * Math.sin(th) * amp;
     ecart[i * 3 + 2] = Math.cos(ph) * amp * 0.5;
-    onde[i] = 3 + graine(i, 89.1) * 5; // nombre de serpentements sur le trajet
+    onde[i] = 3 + graine(i, 89.1) * 5; // number of serpentines along the path
     phase[i] = graine(i, 97.3) * Math.PI * 2;
 
-    // Les points sont noirs : le nuage se lit comme les points du site
-    // pendant sa traversée du bloc profil orange.
+    // The points are black: the cloud reads like the site's dots
+    // while it crosses the orange profile block.
     teintes[i * 3] = 0;
     teintes[i * 3 + 1] = 0;
     teintes[i * 3 + 2] = 0;
@@ -178,66 +178,66 @@ export function initParcours3D(): void {
     depthWrite: false,
   });
   const nuage = new THREE.Points(geometrie, matiere);
-  // Le nuage est déplacé point par point depuis le script, donc la sphère
-  // englobante que three.js calcule UNE SEULE FOIS — à la création, alors que
-  // les points attendent hors champ en haut à droite — ne correspond plus à
-  // rien ensuite. Elle restait jugée hors du champ de la caméra et l'objet
-  // était écarté à chaque image : le rendu tournait (1120 images) sans un
-  // seul appel de dessin. On désactive donc ce test, plutôt que de recalculer
-  // la sphère à chaque image pour 2200 points qui tiennent de toute façon
-  // tous à l'écran.
+  // The cloud is moved point by point from the script, so the bounding
+  // sphere that three.js computes ONLY ONCE — at creation, while
+  // the points wait off-screen in the top right — no longer matches
+  // anything afterwards. It kept being judged outside the camera's field and the object
+  // was culled on every frame: rendering ran (1120 frames) without a
+  // single draw call. So we disable this test, rather than recomputing
+  // the sphere on every frame for 2200 points that all fit
+  // on screen anyway.
   nuage.frustumCulled = false;
   spin.add(nuage);
 
-  // La forme est posée à sa place dès le départ : la colonne du titre,
-  // sous le texte. Pas de glissement.
+  // The form is placed at its spot from the start: the title's column,
+  // under the text. No sliding.
   let finaleX = 0;
   let finaleY = 0;
-  /* Emprise du titre à l'écran, en fractions (0 = bord gauche/haut). C'est
-     là — et seulement là — que le nuage doit s'effacer. */
+  /* Footprint of the title on screen, in fractions (0 = left/top edge). This is
+     where — and only where — the cloud must fade. */
   let texteL = 0;
   let texteR = 0;
   let texteT = 0;
   let texteB = 0;
 
-  /** Rotation propre du donut, accumulée. Déclarée ICI, avant
-      poserLesDeparts() qui la lit : plus bas, l'appel d'initialisation la
-      touchait dans sa zone morte et le module entier échouait à démarrer. */
+  /** The donut's own rotation, accumulated. Declared HERE, before
+      poserLesDeparts() which reads it: further down, the initialization call
+      touched it in its dead zone and the whole module failed to start. */
   let angle = 0;
 
-  /** Cadrage utilisé au dernier calcul des départs, pour savoir quand le
-      refaire. */
+  /** Framing used at the last computation of the starts, to know when to
+      redo it. */
   let departsPour = { z: 0, aspect: 0, x: 0, y: 0, a: 0 };
 
-  /** Place le nuage d'attente HORS CHAMP EN HAUT À DROITE. Les bornes sont
-      déduites du champ réel de la caméra et du décalage du groupe, jamais
-      devinées : en dur, elles seraient déjà dans l'image sur un écran large,
-      et on verrait les points apparaître au milieu de rien.
-      Appelée à chaque redimensionnement — comme rien n'est mémorisé, revenir
-      en arrière renvoie les points exactement d'où ils sont venus. */
+  /** Places the waiting cloud OFF-SCREEN IN THE TOP RIGHT. The bounds are
+      deduced from the camera's real field and the group's offset, never
+      guessed: hard-coded, they would already be in frame on a wide screen,
+      and you would see the points appear out of nowhere.
+      Called on every resize — since nothing is memoized, going
+      back returns the points exactly from where they came. */
   const poserLesDeparts = (): void => {
     const demiW = camera.position.z * HALF_FOV_TAN * camera.aspect;
     const demiH = camera.position.z * HALF_FOV_TAN;
-    // Le bord droit visible se trouve à demiW - groupe.position.x, puisque le
-    // groupe est décalé vers la gauche.
+    // The visible right edge is at demiW - groupe.position.x, since the
+    // group is shifted to the left.
     const xMin = demiW - finaleX + 0.4;
-    // Le bord haut visible se déduit du décalage vertical du groupe :
-    // sans lui, un donut remonté laissait ses points d'attente en plein
-    // cadre.
+    // The visible top edge is deduced from the group's vertical offset:
+    // without it, a donut moved back up left its waiting points right in
+    // frame.
     const yMin = demiH - finaleY + 0.4;
-    // Les points vivent dans `spin`, qui porte l'inclinaison fixe de lecture.
-    // Écrire directement le décalage voulu dans ce repère ne marche pas : la
-    // rotation l'écrase. Mesuré, des points censés démarrer au-dessus du bord
-    // haut (1,43) se retrouvaient à 0,16 — c'est-à-dire en plein cadre.
-    // On vise donc une position MONDE et on applique la rotation INVERSE.
-    // `spin` applique Rx(TILT) puis Rz(angle) — dans cet ordre, Euler XYZ de
-    // three.js donnant monde = Rx · Rz · local. Pour obtenir une position
-    // MONDE voulue, il faut donc défaire les deux : d'abord Rx, puis Rz.
-    // Ne défaire que l'inclinaison ne suffisait pas : `angle` s'accumule
-    // pendant que le donut tourne, si bien qu'au retour en arrière le nuage
-    // d'attente se retrouvait pivoté d'autant et traversait la page. Le
-    // « parfois » venait de là — la position dépendait du temps passé sur le
-    // bloc 2.
+    // The points live in `spin`, which carries the fixed reading tilt.
+    // Writing the wanted offset directly in that frame does not work: the
+    // rotation crushes it. Measured, points supposed to start above the top
+    // edge (1.43) ended up at 0.16 — that is, right in frame.
+    // So we aim for a WORLD position and apply the INVERSE rotation.
+    // `spin` applies Rx(TILT) then Rz(angle) — in that order, three.js's XYZ Euler
+    // giving world = Rx · Rz · local. To get a wanted
+    // WORLD position, the two must therefore be undone: first Rx, then Rz.
+    // Undoing only the tilt was not enough: `angle` accumulates
+    // while the donut turns, so that on the way back the waiting cloud
+    // ended up rotated by as much and crossed the page. The
+    // "sometimes" came from there — the position depended on the time spent on
+    // block 2.
     const cT = Math.cos(TILT);
     const sT = Math.sin(TILT);
     const cA = Math.cos(angle);
@@ -249,7 +249,7 @@ export function initParcours3D(): void {
       // Rx(-TILT)
       const ay = cT * wy + sT * wz;
       const az = -sT * wy + cT * wz;
-      // puis Rz(-angle)
+      // then Rz(-angle)
       relais[i * 3] = cA * wx + sA * ay;
       relais[i * 3 + 1] = -sA * wx + cA * ay;
       relais[i * 3 + 2] = az;
@@ -269,35 +269,35 @@ export function initParcours3D(): void {
     renderer.setSize(vue.width, vue.height);
     camera.aspect = vue.width / vue.height;
 
-    // La forme (diamètre 2) occupe ~70 % du plus petit côté de l'écran :
-    // sur téléphone elle rapetisse avec la fenêtre, sur bureau elle garde
-    // son échelle actuelle (le plus petit côté y est la hauteur).
+    // The form (diameter 2) occupies ~70% of the screen's smaller side:
+    // on a phone it shrinks with the window, on desktop it keeps
+    // its current scale (the smaller side there is the height).
     const voulu = Math.min(vue.height, vue.width) * 0.7;
     camera.position.z = vue.height / (voulu * HALF_FOV_TAN);
     camera.updateProjectionMatrix();
 
     const mondeParPixel = (2 * camera.position.z * HALF_FOV_TAN) / vue.height;
-    // La colonne du titre, verticalement centrée : le donut reste
-    // derrière le texte, sans descendre.
+    // The title's column, vertically centered: the donut stays
+    // behind the text, without going down.
     finaleX = (place.left + place.width / 2 - (vue.left + vue.width / 2)) * mondeParPixel;
-    // Même logique verticalement : sur téléphone l'intro est en haut du
-    // bloc, le donut monte derrière elle au lieu de rester au centre.
+    // Same logic vertically: on a phone the intro is at the top of the
+    // block, the donut moves up behind it instead of staying centered.
     finaleY = (place.top + place.height / 2 - (vue.top + vue.height / 2)) * mondeParPixel;
     texteL = (place.left - vue.left) / vue.width;
     texteR = (place.right - vue.left) / vue.width;
     texteT = (place.top - vue.top) / vue.height;
     texteB = (place.bottom - vue.top) / vue.height;
 
-    // Le cadrage vient de changer : les départs hors champ aussi.
+    // The framing has just changed: so have the off-screen starts.
     groupe.position.x = finaleX;
     poserLesDeparts();
   };
   resize();
   const observateur = new ResizeObserver(resize);
   observateur.observe(sticky);
-  // Le titre aussi : c'est SA largeur qui fixe le cadrage, et elle change
-  // quand la police d'affichage finit de charger. La zone épinglée, elle,
-  // fait toujours 100vh — l'observer seule ne voyait donc jamais rien.
+  // The title too: it is ITS width that sets the framing, and it changes
+  // when the display font finishes loading. The pinned area, for its part,
+  // is always 100vh — the observer alone therefore never saw anything.
   observateur.observe(intro);
 
   const position = geometrie.getAttribute("position") as THREE.BufferAttribute;
@@ -316,25 +316,25 @@ export function initParcours3D(): void {
       const vh = window.innerHeight;
       const railTop = rail.getBoundingClientRect().top;
 
-      // UNE SEULE horloge pour toute la séquence : la position du rail, lue
-      // avec la formule de specform.ts. Les deux rampes en temps réel qui
-      // pilotaient l'arrivée et la pose ont été supprimées — elles avançaient
-      // à leur propre rythme pendant que le titre et les fondus de blocs
-      // suivaient le défilement, et le max() de ces courbes cassait de pente
-      // là où elles se croisaient : c'était ça, le saut. La douceur ne vient
-      // plus d'un lissage local mais du défilement lui-même, que ui.ts anime
-      // avec une courbe adoucie aux deux bouts.
+      // A SINGLE clock for the whole sequence: the rail's position, read
+      // with the formula from specform.ts. The two real-time ramps that
+      // drove the arrival and the settling have been removed — they advanced
+      // at their own pace while the title and the block fades
+      // followed the scroll, and the max() of those curves broke its slope
+      // where they crossed: that was the jump. The smoothness no longer comes
+      // from a local easing but from the scroll itself, which ui.ts animates
+      // with a curve softened at both ends.
       const spec = Math.min(
         1,
         Math.max(0, (-railTop - vh * SPEC_DEPART) / (vh * SPEC_COURSE)),
       );
 
-      // Le cadrage a-t-il bougé depuis le dernier calcul des départs ? Les
-      // mesures de mise en page se stabilisent après le premier rendu, et une
-      // position d'attente calculée sur un cadrage provisoire tombe DANS le
-      // cadre au lieu d'être hors champ : au retour en arrière, les points se
-      // reposaient en plein milieu de la page. Ce rattrapage rend le calcul
-      // auto-correcteur — il ne dépend plus d'avoir mesuré au bon moment.
+      // Has the framing moved since the last computation of the starts? The
+      // layout measurements settle after the first render, and a
+      // waiting position computed on a provisional framing falls INSIDE the
+      // frame instead of off-screen: on the way back, the points settled
+      // right in the middle of the page. This catch-up makes the computation
+      // self-correcting — it no longer depends on having measured at the right time.
       if (
         departsPour.z !== camera.position.z ||
         departsPour.aspect !== camera.aspect ||
@@ -345,20 +345,20 @@ export function initParcours3D(): void {
         poserLesDeparts();
       }
 
-      // Étape 1 — les points entrent par la gauche et se rangent sur le tore.
+      // Step 1 — the points enter from the left and line up on the torus.
       const avance = Math.min(1, spec / FORME_FIN);
       for (let i = 0; i < COUNT; i++) {
-        // Les coefficients suivent l'étalement : avec un retard pouvant aller
-        // jusqu'à 0,8, il faut 2,0 et 1,2 pour que même le dernier point
-        // atteigne exactement sa place à la fin de l'étape.
+        // The coefficients follow the spread: with a delay of up to
+        // 0.8, it takes 2.0 and 1.2 for even the last point to
+        // reach its place exactly at the end of the step.
         const b = Math.min(1, Math.max(0, (avance * 2 - rangement[i]!) / 1.2));
         const forme = b * b * (3 - 2 * b);
-        // Trajectoire courbe et serpentante plutôt que rectiligne. La cloche
-        // s'annule aux deux bouts : le point part exactement de sa place
-        // d'attente et se pose exactement sur la sienne, l'écart ne vit qu'en
-        // vol. L'ondulation est indexée sur l'AVANCEMENT et non sur le temps,
-        // donc le vol est identique à l'aller et au retour, et rien ne dépend
-        // de la vitesse à laquelle on fait défiler.
+        // Curved and serpentine trajectory rather than straight. The bell
+        // cancels out at both ends: the point leaves exactly from its waiting
+        // spot and settles exactly on its own, the deviation only lives in
+        // flight. The undulation is indexed on the PROGRESS and not on time,
+        // so the flight is identical on the way out and on the way back, and nothing depends
+        // on the speed at which one scrolls.
         const cloche = Math.sin(Math.PI * forme);
         const derive = cloche * (0.6 + 0.4 * Math.sin(forme * onde[i]! + phase[i]!));
         for (let axe = 0; axe < 3; axe++) {
@@ -369,83 +369,83 @@ export function initParcours3D(): void {
       }
       position.needsUpdate = true;
 
-      // Étape 2 — le fond bascule au noir, les points blanchissent.
+      // Step 2 — the background switches to black, the points whiten.
       const brut = Math.min(
         1,
         Math.max(0, (spec - NOIR_DEBUT) / (NOIR_FIN - NOIR_DEBUT)),
       );
       const noir = brut * brut * (3 - 2 * brut);
 
-      // Le fond ne retombe qu'une fois les deux blocs sombres partis, sinon
-      // l'orange percerait entre le parcours et les compétences : pendant
-      // cette bascule, la somme de leurs deux opacités creuse jusqu'à 0,48
-      // (mesuré). D'où la saturation — 2,3 couvre ce creux avec un peu de
-      // marge. Elle était à 3, ce qui noircissait le fond nettement trop tôt.
-      // C'est un produit et non un max : deux courbes douces qui se
-      // multiplient restent douces, là où un max change de branche et casse.
-      // La MONTÉE du volet ne dépend que de la mise en scène, donc de la
-      // position de défilement : instantanée, sans mémoire, impossible à
-      // désaccorder du reste. Elle dépendait de --item-op, qui vient d'un
-      // lissage image par image ; dès que ce lissage traînait, le volet
-      // restait hors champ et le fond orange reparaissait sur le bloc.
-      // --item-op ne sert plus qu'à la DESCENTE : lui seul sait quand les
-      // blocs sombres ont cédé la place au bloc projets, et un retard y est
-      // sans conséquence puisque rien d'autre n'en dépend à ce moment-là.
+      // The background only drops back once the two dark blocks have gone, otherwise
+      // the orange would show through between the parcours and the skills: during
+      // this switch, the sum of their two opacities digs down to 0.48
+      // (measured). Hence the saturation — 2.3 covers that dip with a little
+      // margin. It used to be 3, which blackened the background clearly too early.
+      // It is a product and not a max: two soft curves that
+      // multiply stay soft, whereas a max changes branch and breaks.
+      // The RISE of the panel depends only on the staging, hence on the
+      // scroll position: instantaneous, stateless, impossible to
+      // throw out of sync with the rest. It used to depend on --item-op, which comes from
+      // a frame-by-frame easing; as soon as that easing lagged, the panel
+      // stayed off-screen and the orange background reappeared on the block.
+      // --item-op is now only used for the FALL: it alone knows when the
+      // dark blocks have given way to the projects block, and a delay there is
+      // harmless since nothing else depends on it at that moment.
       const itemOp = Number(item.style.getPropertyValue("--item-op") || "0");
       const skillsOp = Number(itemSkills?.style.getPropertyValue("--item-op") || "0");
       const relache = spec < 1 ? 1 : Math.min(1, (itemOp + skillsOp) * 2.3);
-      // Part de l'écran recouverte par le volet, comptée depuis la droite.
+      // Share of the screen covered by the panel, counted from the right.
       const couverture = noir * relache;
       volet.style.setProperty("--fond-bloc2", couverture.toFixed(4));
 
-      // Chaque point blanchit QUAND L'ARÊTE DU VOLET LE DÉPASSE, pas selon un
-      // horaire commun. Avec un volet, un blanchiment global redonnerait le
-      // défaut déjà corrigé : des points blancs sur la partie encore orange,
-      // à gauche de l'arête. Ici le noir et le blanc arrivent ensemble, point
-      // par point — c'est le balayage lui-même qui fait l'échelonnement, d'où
-      // l'abandon de `rangement` pour cette étape.
-      // Position d'un point à l'écran : rotation.y vaut 0 et rotation.x ne
-      // touche pas à l'axe X, seule la rotation propre du donut (Z) compte.
-      // Le retrait du nuage sous le titre. CALCULÉ AVANT la boucle de
-      // couleurs, qui l'utilise : déclaré après, il levait un
-      // ReferenceError à chaque image, et comme requestAnimationFrame est
-      // rappelé en fin de tick, la boucle mourait dès la première — plus
-      // de volet, plus de donut, le fond orange reparaissait.
-      // Le nuage s'efface à mesure que le titre s'installe au-dessus de lui.
-      // Piloté par `spec`, comme tout le reste : la même horloge unique, donc
-      // le retrait est exactement synchrone avec l'apparition des lettres.
+      // Each point whitens WHEN THE PANEL'S EDGE PASSES IT, not according to a
+      // common schedule. With a panel, a global whitening would bring back the
+      // defect already fixed: white points over the part still orange,
+      // to the left of the edge. Here black and white arrive together, point
+      // by point — it is the sweep itself that does the staggering, hence
+      // dropping `rangement` for this step.
+      // Position of a point on screen: rotation.y is 0 and rotation.x does not
+      // touch the X axis, only the donut's own rotation (Z) counts.
+      // The cloud's withdrawal under the title. COMPUTED BEFORE the color
+      // loop, which uses it: declared after, it raised a
+      // ReferenceError on every frame, and since requestAnimationFrame is
+      // called back at the end of tick, the loop died from the first one — no
+      // more panel, no more donut, the orange background reappeared.
+      // The cloud fades as the title settles over it.
+      // Driven by `spec`, like everything else: the same single clock, so
+      // the withdrawal is exactly synchronous with the appearance of the letters.
       const brutRetrait = Math.min(
         1,
         Math.max(0, (spec - TITRE_DEBUT) / (TITRE_FIN - TITRE_DEBUT)),
       );
-      // Le retrait ne peut jamais dépasser la couverture du volet : sinon les
-      // deux se désaccordent (le retrait suit `spec`, instantané ; la
-      // couverture suit --item-op, qui traîne) et les points se retrouvent à
-      // la fois encore noirs et déjà atténués — invisibles.
+      // The withdrawal can never exceed the panel's coverage: otherwise the
+      // two fall out of sync (the withdrawal follows `spec`, instantaneous; the
+      // coverage follows --item-op, which lags) and the points end up
+      // both still black and already attenuated — invisible.
       const efface =
         Math.min(couverture, brutRetrait * brutRetrait * (3 - 2 * brutRetrait));
-      // L'atténuation est LOCALE, pas globale. Baisser l'opacité de tout le
-      // nuage rendait le titre lisible mais éteignait le donut : à 0,32 son
-      // contraste avec le fond noir tombe à 2,16:1. Seuls les points qui
-      // tombent derrière le titre s'effacent maintenant ; le reste de
-      // l'anneau garde toute sa présence.
+      // The attenuation is LOCAL, not global. Lowering the opacity of the whole
+      // cloud made the title readable but switched the donut off: at 0.32 its
+      // contrast with the black background drops to 2.16:1. Only the points that
+      // fall behind the title fade now; the rest of
+      // the ring keeps its full presence.
       matiere.opacity = 1;
 
       const demiW = camera.position.z * HALF_FOV_TAN * camera.aspect;
-      // Arête du volet, en fraction d'écran. Sa course déborde largement des
-      // deux côtés (1,5 → −0,15), pour deux raisons mesurées. À droite : au
-      // repos les points attendent hors champ vers sx ≈ 1,10, donc une arête
-      // partant de 1,125 les prenait déjà dans son dégradé et ils étaient
-      // gris au lieu de noirs pendant la traversée de l'orange. À gauche :
-      // le dégradé fait 0,2 de large, donc une arête s'arrêtant à 0 laissait
-      // les points d'extrême gauche plafonner à 59 % de blanc.
+      // Panel edge, as a fraction of the screen. Its travel goes well beyond
+      // both sides (1.5 → -0.15), for two measured reasons. On the right: at
+      // rest the points wait off-screen around sx ≈ 1.10, so an edge
+      // starting at 1.125 already caught them in its gradient and they were
+      // grey instead of black while crossing the orange. On the left:
+      // the gradient is 0.2 wide, so an edge stopping at 0 left
+      // the leftmost points capping at 59% white.
       const bord = 1.5 - couverture * 1.65;
       const demiH = camera.position.z * HALF_FOV_TAN;
       const cosA = Math.cos(angle);
       const sinA = Math.sin(angle);
       const cosT = Math.cos(TILT);
       const sinT = Math.sin(TILT);
-      /** Appartenance à une bande [min, max], avec un fondu de MARGE. */
+      /** Membership of a band [min, max], with a MARGIN fade. */
       const MARGE = 0.09;
       const bande = (v: number, min: number, max: number): number =>
         Math.min(1, Math.max(0, Math.min(v - min, max - v) / MARGE + 0.5));
@@ -453,8 +453,8 @@ export function initParcours3D(): void {
         const lx = tableau[i * 3]!;
         const ly = tableau[i * 3 + 1]!;
         const lz = tableau[i * 3 + 2]!;
-        // Position à l'écran. Rotation propre (Z) puis inclinaison (X) ;
-        // rotation.y vaut 0, et X ne touche pas à l'axe des abscisses.
+        // Position on screen. Own rotation (Z) then tilt (X);
+        // rotation.y is 0, and X does not touch the abscissa axis.
         const rx = cosA * lx - sinA * ly;
         const ry = sinA * lx + cosA * ly;
         const sx = 0.5 + (groupe.position.x + rx) / (2 * demiW);
@@ -463,48 +463,48 @@ export function initParcours3D(): void {
         const masque = bande(sx, texteL, texteR) * bande(sy, texteT, texteB);
         const e =
           b * b * (3 - 2 * b) * (1 - efface * masque * (1 - RETRAIT));
-        // Blanc chaud du texte des blocs sombres (#f3f1ec).
+        // Warm white of the dark blocks' text (#f3f1ec).
         couleursArr[i * 3] = e * 0.953;
         couleursArr[i * 3 + 1] = e * 0.945;
         couleursArr[i * 3 + 2] = e * 0.925;
       }
       couleurs.needsUpdate = true;
 
-      // La forme reste derrière le titre, centrée verticalement.
+      // The form stays behind the title, vertically centered.
       groupe.position.x = finaleX;
       groupe.position.y = finaleY;
 
-      // Une fois posé, le donut tourne seul — mais AUTOUR DE SON PROPRE AXE.
-      // Il est dessiné dans le plan XY, son axe de symétrie est donc Z : le
-      // faire tourner autour de Y le présentait par la tranche à chaque
-      // demi-tour (aire apparente tombant à 33 %), ce qui le faisait
-      // littéralement disparaître. Autour de Z la silhouette ne peut plus se
-      // refermer, et la rotation reste lisible : les points sont tirés au
-      // hasard, le nuage n'a aucune symétrie de révolution.
-      // L'ASSIETTE EST FIXE. Elle l'était si peu auparavant que le donut
-      // changeait d'orientation à chaque visite : les angles X et Y étaient
-      // multipliés par `pose`, si bien qu'au moment où la pose s'enclenchait
-      // ils basculaient de 0 vers sin(performance.now() · …) — c'est-à-dire
-      // vers une valeur qui dépend de depuis combien de temps la page est
-      // ouverte. Le donut se formait à plat puis partait en biais, sans
-      // raison visible. Plus aucun balancement : il se forme dans l'assiette
-      // exacte qu'il gardera.
+      // Once settled, the donut spins on its own — but AROUND ITS OWN AXIS.
+      // It is drawn in the XY plane, so its axis of symmetry is Z: making
+      // it rotate around Y presented it edge-on at every
+      // half-turn (apparent area dropping to 33%), which made it
+      // literally disappear. Around Z the silhouette can no longer close
+      // up, and the rotation stays readable: the points are drawn at
+      // random, the cloud has no symmetry of revolution.
+      // THE ATTITUDE IS FIXED. It was so little fixed before that the donut
+      // changed orientation on every visit: the X and Y angles were
+      // multiplied by `pose`, so that at the moment the pose engaged
+      // they swung from 0 to sin(performance.now() · …) — that is,
+      // to a value that depends on how long the page has been
+      // open. The donut formed flat then went off at an angle, with no
+      // visible reason. No more swaying at all: it forms in the exact
+      // attitude it will keep.
       spin.rotation.x = TILT;
       spin.rotation.y = 0;
-      // Seule la rotation sur l'axe du donut demeure — la silhouette ne
-      // bouge donc jamais, c'est le grain du nuage qu'on voit tourner. La
-      // vitesse monte progressivement : aucune rupture à l'enclenchement.
+      // Only the rotation on the donut's axis remains — the silhouette
+      // therefore never moves, it is the grain of the cloud that we see turning. The
+      // speed rises progressively: no break at the engagement.
       const pose = Math.min(1, Math.max(0, (noir - 0.6) / 0.4));
       angle += dt * 0.18 * pose;
       spin.rotation.z = angle;
 
-      // Aucun garde-fou sur document.hidden, ni ici ni autour de l'état.
-      // Ce drapeau est vrai dans des contextes où la page est pourtant bien
-      // affichée (panneaux intégrés, aperçus) : s'en servir y éteignait
-      // complètement le donut, et gelait le volet — donc le fond du bloc.
-      // Le navigateur ralentit déjà requestAnimationFrame de lui-même quand
-      // l'onglet passe réellement en arrière-plan ; c'est suffisant, et c'est
-      // ce que font tous les autres modules du site.
+      // No guard on document.hidden, neither here nor around the state.
+      // This flag is true in contexts where the page is nevertheless fully
+      // displayed (embedded panels, previews): using it there switched
+      // the donut off completely, and froze the panel — hence the block's background.
+      // The browser already slows requestAnimationFrame down by itself when
+      // the tab really goes to the background; that is enough, and it is
+      // what all the other modules of the site do.
       renderer.render(scene, camera);
     }
     requestAnimationFrame(tick);

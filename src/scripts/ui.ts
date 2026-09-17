@@ -1,5 +1,5 @@
-// Petites améliorations UX : défilement fluide (Lenis), barre de progression,
-// révélation des sections, tilt 3D des cartes, retour en haut, copie d'email.
+// Small UX improvements: smooth scrolling (Lenis), progress bar,
+// section reveal, 3D card tilt, back to top, email copy.
 
 import Lenis from "lenis";
 import { SPEC_CARROUSEL, VITESSE, railPourSpec } from "./specform";
@@ -13,7 +13,7 @@ interface LenisInstance {
       offset?: number;
       duration?: number;
       immediate?: boolean;
-      /** Rend la molette inopérante pendant le trajet. */
+      /** Makes the wheel inert for the duration of the journey. */
       lock?: boolean;
       easing?: (t: number) => number;
       onComplete?: () => void;
@@ -28,32 +28,32 @@ declare global {
   }
 }
 
-// À chaque rechargement, on repart en haut de la page : le navigateur ne
-// restaure pas la position de défilement.
+// On every reload, we start at the top of the page: the browser does not
+// restore the scroll position.
 if ("scrollRestoration" in history) {
   history.scrollRestoration = "manual";
 }
 window.scrollTo(0, 0);
 
-// Défilement fluide façon sites primés (Lenis) : uniquement si l'utilisateur
-// n'a pas demandé à réduire les animations.
+// Smooth scrolling, award-winning-site style (Lenis): only if the user
+// has not asked to reduce motion.
 if (!reducedMotion) {
   const lenis = new Lenis({ duration: 1.1 });
   window.lenis = lenis;
 }
 
-/* Trame d'entrée partagée : bien visible quand le bloc entre dans
-   l'écran, elle s'efface ensuite tout doucement avec le scroll et a
-   totalement disparu quand le bloc est en place. Réversible sans état :
-   la position fait tout, dans les deux sens. */
+/* Shared entrance grid: clearly visible when the block enters the
+   screen, it then fades out very gently with the scroll and has
+   completely vanished once the block is in place. Reversible without state:
+   position does everything, in both directions. */
 const skillsBloc = document.querySelector<HTMLElement>(".section-skills");
 const footerBloc = document.querySelector<HTMLElement>(".site-footer");
 const projetsBloc = document.querySelector<HTMLElement>(".section-projets");
 
 function alphaTrame(top: number, vh: number): number {
-  // p : 0 = le bloc entre dans l'écran, 1 = il est posé. Les points
-  // tiennent pleins sur le premier tiers de la montée, puis fondent sur
-  // le reste du trajet.
+  // p: 0 = the block enters the screen, 1 = it has settled. The dots
+  // hold full over the first third of the rise, then melt over
+  // the rest of the journey.
   const p = Math.min(1, Math.max(0, (vh - top) / vh));
   return Math.min(1, Math.max(0, 1 - (p - 0.3) / 0.7));
 }
@@ -64,10 +64,10 @@ function trames(): void {
     const top = skillsBloc.getBoundingClientRect().top;
     skillsBloc.style.setProperty("--trame-skills", alphaTrame(top, vh).toFixed(4));
   }
-  // Les points ARRIVENT dans le bloc projets pendant qu'on approche du
-  // footer : rien sur la première moitié du bloc, puis ils montent à
-  // partir du milieu et sont pleins quand le footer touche l'écran — et
-  // ils restent, discrets, derrière la feuille orange.
+  // The dots ARRIVE in the projects block while the footer is
+  // approached: nothing over the first half of the block, then they rise
+  // from the middle and are full when the footer touches the screen — and
+  // they stay, discreet, behind the orange sheet.
   if (footerBloc) {
     const top = footerBloc.getBoundingClientRect().top;
     const alpha = Math.min(1, Math.max(0, 3 - (2 * top) / vh)).toFixed(4);
@@ -76,13 +76,13 @@ function trames(): void {
   }
 }
 
-// La boucle tourne TOUJOURS : les fondus du carrousel et les effets en
-// dépendent — la préférence « réduire les animations » ne doit pas geler
-// toute la mise en scène (le globe, le nuage, les blocs).
+// The loop ALWAYS runs: the carousel fades and the effects
+// depend on it — the "reduce motion" preference must not freeze
+// the whole staging (the globe, the cloud, the blocks).
 const loop = (time: number) => {
   window.lenis?.raf(time);
-  // Le carrousel glisse vers sa cible à chaque image : quoi que fasse
-  // la molette, le mouvement reste lent et doux, impossible d'aller vite.
+  // The carousel slides toward its target on every frame: whatever the
+  // wheel does, the movement stays slow and gentle, impossible to speed up.
   carouselCurrent += (carouselTarget - carouselCurrent) * 0.03;
   applyCarousel();
   trames();
@@ -90,26 +90,26 @@ const loop = (time: number) => {
 };
 requestAnimationFrame(loop);
 
-// Fonds 3D et 2D : chargés à la demande, dans tous les cas — la
-// préférence « réduire les animations » du système ne doit pas cacher
-// le globe ni le nuage, sinon tout semble mort.
+// 3D and 2D backgrounds: loaded on demand, in every case — the
+// system's "reduce motion" preference must not hide
+// the globe or the cloud, otherwise everything looks dead.
 {
   import("./hero3d")
     .then((module) => module.initHero3D())
     .catch(() => {
-      // WebGL indisponible : la page reste parfaitement lisible en 2D.
+      // WebGL unavailable: the page remains perfectly readable in 2D.
     });
-  // La forme 3D du parcours (nœud torique en points) + le pilote de
-  // progression --spec-form.
+  // The 3D shape of the journey (torus knot in dots) + the --spec-form
+  // progress driver.
   import("./specform")
     .then((module) => module.initSpecForm())
     .catch(() => {});
-  // La sortie du bloc profil : le texte s'efface, puis le nuage 3D du
-  // parcours prend le relais sur le bloc vidé.
+  // The exit from the profile block: the text fades out, then the 3D cloud of
+  // the journey takes over on the emptied block.
   import("./profilout")
     .then((module) => module.initProfilOut())
     .catch(() => {});
-  // Décodage des libellés du bloc compétences, à son entrée à l'écran.
+  // Decoding of the skills block labels, on its entry into the screen.
   import("./decodage")
     .then((module) => module.initDecodage())
     .catch(() => {});
@@ -122,22 +122,22 @@ const progress = document.getElementById("scroll-progress") as HTMLDivElement;
 const progressPct = progress?.querySelector<HTMLElement>(".pct") ?? null;
 const zoneClaire = document.querySelector<HTMLElement>(".light-zone");
 
-// État lissé du carrousel : la cible suit le scroll, la position courante
-// la rattrape lentement (la molette ne peut jamais faire défiler vite).
+// Smoothed carousel state: the target follows the scroll, the current
+// position catches up to it slowly (the wheel can never scroll fast).
 const carouselRail = document.querySelector<HTMLElement>(".carousel-rail");
 const carouselTrack = document.querySelector<HTMLElement>(".carousel-track");
-// Part de la course du rail allouée à chaque passage d'un bloc au suivant,
-// en écrans de scroll. Répartir à parts égales revenait à faire payer au
-// bloc 1, qui n'a qu'un fondu à jouer, le même prix qu'au bloc 2, qui doit
-// loger le défilé des trois fiches d'expérience.
-// Le rail ne contient plus que deux blocs : le profil et le parcours. Les
-// suivants sont redevenus des sections normales, qu'on atteint en faisant
-// défiler la page. Ces deux poids placent l'arrivée du parcours à 2,0 écrans
-// de rail — juste avant que les fiches ne commencent à défiler, à 2,295.
+// Share of the rail's course allotted to each transition from one block to
+// the next, in screens of scroll. Splitting equally meant making block 1,
+// which only has a fade to play, pay the same price as block 2, which has to
+// fit the parade of the three experience cards.
+// The rail now holds only two blocks: the profile and the journey. The
+// following ones are normal sections again, reached by scrolling
+// the page. These two weights place the journey's arrival at 2.0 rail
+// screens — just before the cards start scrolling, at 2.295.
 const POIDS = [0.75, 1.25];
 const POIDS_TOTAL = POIDS.reduce((a, b) => a + b, 0);
 
-/** Avancement du rail (0 → 1) converti en position de bloc (0 → 4). */
+/** Rail progress (0 → 1) converted into block position (0 → 4). */
 function positionBloc(p: number): number {
   let reste = p * POIDS_TOTAL;
   for (let i = 0; i < POIDS.length; i++) {
@@ -147,7 +147,7 @@ function positionBloc(p: number): number {
   return POIDS.length;
 }
 
-/** L'inverse : une position de bloc rendue en avancement du rail. */
+/** The inverse: a block position rendered as rail progress. */
 function railPour(bloc: number): number {
   let acc = 0;
   for (let i = 0; i < POIDS.length; i++) {
@@ -157,18 +157,18 @@ function railPour(bloc: number): number {
   return 1;
 }
 
-/** Position dans le carrousel, exprimée en blocs : 0 = profil, 1 = parcours… */
+/** Position in the carousel, expressed in blocks: 0 = profile, 1 = journey… */
 let carouselTarget = 0;
 let carouselCurrent = 0;
 
 function applyCarousel(): void {
-  // Exposé pour les modules 3D : la même vérité que les fondus des blocs.
+  // Exposed for the 3D modules: the same truth as the block fades.
   (window as unknown as { __carouselCurrent?: number }).__carouselCurrent = carouselCurrent;
   const items = Array.from(document.querySelectorAll<HTMLElement>(".carousel-item"));
   items.forEach((item, i) => {
     const t = carouselTarget;
     const c = carouselCurrent;
-    // Le parcours (i = 1) tient tout le défilé des fiches avant de céder.
+    // The journey (i = 1) holds the whole card parade before giving way.
     const tenue = i === 1 ? 1.0 : 0.95;
     const fadeOut = Math.min(1, Math.max(0, 1 - (t - i - tenue) * 4));
     const arrivee = i;
@@ -177,8 +177,8 @@ function applyCarousel(): void {
     item.style.setProperty("--item-op", Math.min(fadeOut, fadeIn).toFixed(3));
   });
 
-  // L'anneau de points du bloc parcours arrive de la gauche à chaque
-  // apparition du bloc (classe retirée quand le bloc se cache).
+  // The dot ring of the journey block arrives from the left on each
+  // appearance of the block (class removed when the block hides).
   const specForm = document.querySelector<HTMLElement>(".spec-form");
   if (specForm) {
     const formItem = specForm.closest<HTMLElement>(".carousel-item");
@@ -193,15 +193,15 @@ function applyCarousel(): void {
   applyExperiences();
 }
 
-// Numéros de section (1-5) : entrée de la droite vers la gauche au scroll,
-// en continu dans les deux sens.
+// Section numbers (1-5): entrance from right to left on scroll,
+// continuously in both directions.
 const numSections = Array.from(document.querySelectorAll<HTMLElement>(".section"));
 
 const header = document.querySelector<HTMLElement>(".site-header");
 
-// --screen (un « écran » de contenu) vaut la fenêtre moins le header
-// collant. Mesuré plutôt que codé en dur : le header grandit quand la
-// navigation passe à la ligne sur petit écran.
+// --screen (one "screen" of content) equals the window minus the
+// sticky header. Measured rather than hard-coded: the header grows when
+// the navigation wraps on a small screen.
 if (header) {
   const measureHeader = (): void => {
     document.documentElement.style.setProperty("--header-h", `${header.offsetHeight}px`);
@@ -210,27 +210,27 @@ if (header) {
   new ResizeObserver(measureHeader).observe(header);
 }
 
-// La feuille blanche monte sur le dernier écran de la partie sombre.
+// The white sheet rises over the last screen of the dark part.
 const darkZone = document.querySelector<HTMLElement>(".dark-zone");
 const tearSheet = document.querySelector<HTMLElement>(".tear-sheet");
 
-/* ---------- l'interlude profil → parcours se joue tout seul ----------
-   Passé le seuil, la page se déroule d'elle-même jusqu'à l'arrivée complète
-   du bloc parcours : le texte se pose sans qu'on ait à scroller. Au terme
-   exact de cette course, le carrousel des fiches prend le relais et la
-   molette retrouve la main.
+/* ---------- the profile → journey interlude plays itself ----------
+   Past the threshold, the page unwinds on its own until the journey block
+   has fully arrived: the text settles without any need to scroll. At the exact
+   end of that run, the card carousel takes over and the
+   wheel has the hand again.
 
-   On anime la position de DÉFILEMENT, pas l'état interne. Le défilement est
-   déjà la source unique dont dépendent le fond 3D, les fondus de blocs et le
-   carrousel : en le pilotant lui, les trois restent d'accord entre eux, alors
-   que forcer l'état les aurait fait diverger de la position réelle. */
-/* Une simple impulsion de molette suffit à tout lancer : on lit le profil,
-   on pousse une fois, et le donut comme le titre du parcours arrivent seuls.
-   Le seuil de parcours3d (0,65 écran) est franchi PENDANT ce trajet
-   automatique, donc le donut se déclenche de lui-même en cours de route —
-   les deux seuils n'ont plus à être calés l'un sur l'autre. */
-const SEUIL_INTERLUDE = 0.12; // ~90 px : une poussée voulue, pas un frôlement
-const REARMEMENT = 0.02;      // il faut vraiment être revenu en haut du rail
+   We animate the SCROLL position, not the internal state. The scroll is
+   already the single source on which the 3D background, the block fades and the
+   carousel depend: by driving it, the three stay in agreement with each other,
+   whereas forcing the state would have made them diverge from the real position. */
+/* A single wheel impulse is enough to launch everything: we read the profile,
+   we push once, and both the donut and the journey title arrive on their own.
+   The parcours3d threshold (0.65 screen) is crossed DURING this automatic
+   travel, so the donut triggers itself along the way —
+   the two thresholds no longer have to be lined up with each other. */
+const SEUIL_INTERLUDE = 0.12; // ~90 px: a deliberate push, not a brush
+const REARMEMENT = 0.02;      // one must really be back at the top of the rail
 let interludeJoue = false;
 let interludeEnCours = false;
 
@@ -242,23 +242,23 @@ function interlude(railTop: number, vh: number): void {
   if (sortie < REARMEMENT) interludeJoue = false;
   if (interludeJoue || sortie < SEUIL_INTERLUDE) return;
 
-  // Terme de la course : le point où le carrousel des fiches prend la main.
-  // C'est --spec-form qui orchestre l'intérieur du bloc (le titre de gauche
-  // n'apparaît qu'à 0,715, le carrousel à 0,84) — viser carouselTarget = 1,
-  // comme je le faisais, s'arrêtait à 2,01 écrans alors que le titre n'est
-  // lisible qu'à 2,63 : il restait forcément de la molette à donner.
+  // End of the run: the point where the card carousel takes over.
+  // It is --spec-form that orchestrates the inside of the block (the left title
+  // only appears at 0.715, the carousel at 0.84) — aiming for carouselTarget = 1,
+  // as I used to, stopped at 2.01 screens while the title is only
+  // readable at 2.63: there was inevitably wheel left to give.
   const cible = railTop + window.scrollY + railPourSpec(SPEC_CARROUSEL) * vh;
-  // Si la molette a déjà dépassé ce point, ne pas tirer la page en arrière.
+  // If the wheel has already passed this point, do not pull the page back.
   if (window.scrollY >= cible - 2) return;
 
-  // Durée indexée sur la distance réelle : la séquence garde la même vitesse
-  // apparente quelle que soit la hauteur du rail. En dur, elle se mettait à
-  // filer dès qu'on rallongeait le rail.
+  // Duration indexed on the real distance: the sequence keeps the same apparent
+  // speed whatever the height of the rail. Hard-coded, it started
+  // racing as soon as the rail was made longer.
   const distanceEcrans = (cible - window.scrollY) / vh;
-  // La durée n'est plus un réglage libre : c'est la chorégraphie qui impose
-  // la vitesse. Les intervalles voulus entre l'arrivée du donut, le titre et
-  // le carrousel sont fixés en parts de --spec-form ; pour qu'ils durent
-  // vraiment 2 s et 1 s, le défilement doit tenir VITESSE écrans par seconde.
+  // The duration is no longer a free setting: the choreography imposes
+  // the speed. The intended intervals between the arrival of the donut, the title and
+  // the carousel are set in shares of --spec-form; for them to really last
+  // 2 s and 1 s, the scroll must hold VITESSE screens per second.
   const duree = Math.max(2.4, distanceEcrans / VITESSE);
 
   interludeJoue = true;
@@ -266,8 +266,8 @@ function interlude(railTop: number, vh: number): void {
   lenis.scrollTo(cible, {
     duration: duree,
     lock: true,
-    // Départ et arrivée adoucis : la page s'ébranle et se pose au lieu de
-    // filer à vitesse constante.
+    // Smoothed start and arrival: the page sets off and settles instead of
+    // racing at constant speed.
     easing: (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2),
     onComplete: () => {
       interludeEnCours = false;
@@ -283,15 +283,15 @@ function onScroll(): void {
   const lu = max > 0 ? root.scrollTop / max : 0;
   progress.style.setProperty("--scroll-pct", lu.toFixed(4));
   if (progressPct) {
-    // Trois chiffres, complétés par des zéros : la largeur ne bouge jamais.
+    // Three digits, padded with zeros: the width never moves.
     progressPct.textContent = `${String(Math.round(lu * 100)).padStart(3, "0")}%`;
   }
 
-  // Quel fond se trouve DERRIÈRE l'indicateur ? Il est fixe au milieu du bord
-  // droit : il suffit de regarder ce qui occupe ce point. La zone claire est
-  // orange, sauf là où le volet du bloc parcours la recouvre de noir — d'où
-  // la seconde condition, sans laquelle l'encre passerait au noir sur noir
-  // pendant tout le parcours et les compétences.
+  // What background sits BEHIND the indicator? It is fixed at the middle of the
+  // right edge: it is enough to look at what occupies that point. The light zone is
+  // orange, except where the journey block's shutter covers it in black — hence
+  // the second condition, without which the ink would turn black on black
+  // throughout the journey and the skills.
   if (progress && zoneClaire) {
     const cadre = zoneClaire.getBoundingClientRect();
     const milieu = window.innerHeight / 2;
@@ -304,27 +304,27 @@ function onScroll(): void {
   }
 
   const vh = window.innerHeight;
-  // Cat profil est déjà présent avant le scroll : aucun glissement pour
-  // lui (--slide reste à sa valeur par défaut, en place). Les blocs
-  // épinglés sont gérés plus bas.
+  // Cat profil is already present before the scroll: no slide for
+  // it (--slide stays at its default value, in place). Pinned
+  // blocks are handled further down.
 
-  // Le carrousel : cat profil est épinglé au centre pendant le premier
-  // écran du rail, puis la cible avance d'un bloc par écran de scroll.
-  // Le lissage se fait dans la boucle Lenis : quoi qu'on fasse, le
-  // défilement horizontal reste doux.
+  // The carousel: cat profil is pinned at the center during the first
+  // screen of the rail, then the target advances one block per screen of scroll.
+  // The smoothing happens in the Lenis loop: whatever we do, the
+  // horizontal scrolling stays gentle.
   if (carouselRail) {
     const railTop = carouselRail.getBoundingClientRect().top;
-    // La course utile se déduit de la hauteur du rail : en la codant en dur,
-    // elle finissait par ne plus correspondre au CSS.
+    // The useful course is deduced from the height of the rail: hard-coded,
+    // it ended up no longer matching the CSS.
     const course = Math.max(1, carouselRail.offsetHeight - vh * 0.5);
     const p = Math.min(1, Math.max(0, (-railTop - vh * 0.5) / course));
     carouselTarget = positionBloc(p);
-    // Sans Lenis (reduced motion), window.lenis n'existe pas et l'interlude
-    // ne se joue pas : la molette garde la main d'un bout à l'autre.
+    // Without Lenis (reduced motion), window.lenis does not exist and the interlude
+    // does not play: the wheel keeps the hand from start to finish.
     interlude(railTop, vh);
-    // Fondu d'approche, juste équilibre : invisible dans le tiers bas de
-    // la page, le texte se révèle pendant le tiers du milieu et est
-    // pleinement lisible en arrivant au centre.
+    // Approach fade, a fair balance: invisible in the bottom third of
+    // the page, the text reveals itself during the middle third and is
+    // fully readable on reaching the center.
     const approach = Math.min(1, Math.max(0, railTop / vh));
     document.documentElement.style.setProperty("--profil-op", Math.max(0, 1 - approach * 1.5).toFixed(3));
     if (reducedMotion) {
@@ -333,24 +333,24 @@ function onScroll(): void {
     }
   }
 
-  // L'effet démarre quand le centre du bandeau est au milieu de l'écran :
-  // le bandeau a eu toute la page pour se faire lire.
+  // The effect starts when the center of the marquee is at the middle of the screen:
+  // the marquee had the whole page to be read.
   const marquee = darkZone?.querySelector<HTMLElement>(".marquee") ?? null;
   const triggerPage = darkZone && marquee
     ? marquee.getBoundingClientRect().top + window.scrollY + marquee.offsetHeight / 2 - vh / 2
     : Infinity;
   const risen = darkZone ? root.scrollTop - triggerPage : Infinity;
 
-  // Au déclenchement, le pied de la zone sombre n'est plus au bas de
-  // l'écran : on mesure son écart et on descend la feuille d'autant,
-  // pour que le bord déchiré parte pile du bas de l'écran.
+  // At the trigger, the bottom of the dark zone is no longer at the bottom of
+  // the screen: we measure its gap and lower the sheet by as much,
+  // so that the torn edge starts right from the bottom of the screen.
   const darkBottom = darkZone ? darkZone.offsetTop + darkZone.offsetHeight : 0;
   const hang = darkZone && marquee ? Math.max(0, vh - (darkBottom - triggerPage)) : 0;
 
   if (tearSheet) {
-    // La feuille est ancrée vh/2 sous la fenêtre (inset -50vh du CSS) et
-    // grandit deux fois plus vite que le scroll ; le décalage « hang »
-    // la descend pour que son bord parte exactement du bas de l'écran.
+    // The sheet is anchored vh/2 below the window (inset -50vh in the CSS) and
+    // grows twice as fast as the scroll; the "hang" offset
+    // lowers it so that its edge starts exactly from the bottom of the screen.
     const scale = (vh / 2 - hang + risen) / (vh * 2);
     tearSheet.style.setProperty("--tear", Math.min(1, Math.max(0, scale)).toFixed(4));
   }
@@ -371,71 +371,71 @@ window.addEventListener(
 );
 onScroll();
 
-// Carrousel des expériences, piloté par le scroll. La position des fiches
-// est lissée : elle rattrape lentement la cible — à l'apparition du
-// carrousel on est sur la fiche 1, et la molette ne saute jamais de fiche.
+// Experience carousel, driven by the scroll. The position of the cards
+// is smoothed: it slowly catches up to the target — when the carousel
+// appears we are on card 1, and the wheel never jumps a card.
 let fichePosition = 0;
 
-// Carrousel des expériences, piloté par le scroll. Le bloc 2 occupe un
-// quart de la course du rail ; on y loge le passage des trois fiches.
-// Les fiches descendent : la sortante s'en va par le bas, la suivante
-// arrive par le haut.
+// Experience carousel, driven by the scroll. Block 2 occupies a
+// quarter of the rail's course; we fit the passing of the three cards there.
+// The cards go down: the outgoing one leaves through the bottom, the next
+// arrives from the top.
 const expSlides = Array.from(document.querySelectorAll<HTMLElement>(".exp-slides .experience"));
 const expDots = Array.from(document.querySelectorAll<HTMLButtonElement>(".exp-dot"));
 
-/** Position continue dans le carrousel des expériences (0 → n-1). */
+/** Continuous position in the experience carousel (0 → n-1). */
 function applyExperiences(): void {
   if (expSlides.length < 2) return;
   const dernier = expSlides.length - 1;
 
-  // Les fiches restent sur la PREMIÈRE tant que le carrousel n'est pas
-  // pleinement visible (--spec-form < 0,84). Ensuite, chaque carte avance
-  // d'environ deux gestes de molette (0,5 écran). La position est lissée :
-  // le carrousel commence toujours à l'étape 1, jamais à la 2.
+  // The cards stay on the FIRST one as long as the carousel is not
+  // fully visible (--spec-form < 0.84). Then each card advances
+  // by about two wheel gestures (0.5 screen). The position is smoothed:
+  // the carousel always starts at step 1, never at step 2.
   const section = document.querySelector<HTMLElement>(".section-exp");
   const spec = Number(section?.style.getPropertyValue("--spec-form") || "0");
   const railTop = carouselRail.getBoundingClientRect().top;
   const vh = window.innerHeight;
   let cibleFiches = 0;
   if (spec >= SPEC_CARROUSEL) {
-    // Les fiches démarrent PILE là où l'interlude rend la main, pas plus
-    // loin. Ce point était écrit en dur (2,78) et n'a jamais suivi les
-    // déplacements de la fin d'interlude : il restait 0,485 écran de course
-    // morte où l'on scrollait sans que rien ne bouge, soit 1,5 geste gaspillé
-    // avant la première carte. Calé sur la valeur partagée, il ne peut plus
-    // dériver. Ensuite, exactement deux gestes de molette par carte.
+    // The cards start EXACTLY where the interlude hands back, no
+    // further. This point was hard-coded (2.78) and never followed the
+    // shifts of the interlude's end: 0.485 screen of dead course
+    // remained, where one scrolled with nothing moving — 1.5 gestures
+    // wasted before the first card. Tied to the shared value, it can no
+    // longer drift. Then, exactly two wheel gestures per card.
     const depart = railPourSpec(SPEC_CARROUSEL);
     cibleFiches = Math.min(dernier, Math.max(0, (-railTop / vh - depart) / 0.65));
   }
   fichePosition += (cibleFiches - fichePosition) * 0.12;
   const prog = fichePosition;
 
-  // Courbe à paliers : la fiche reste immobile sur les deux tiers de sa
-  // portion de scroll, et bascule sur le tiers du milieu. Sans ça, elle
-  // glisse en permanence et on ne s'arrête jamais sur celle qui est nette.
+  // Stepped curve: the card stays still over the two thirds of its
+  // scroll portion, and flips over the middle third. Without this, it
+  // slides constantly and one never stops on the one that is sharp.
   const indice = Math.floor(prog);
   const reste = prog - indice;
-  const DEBUT = 0.34; // part de course où la fiche ne bouge pas encore
-  const FIN = 0.66;   // part où la suivante est déjà posée
+  const DEBUT = 0.34; // share of the course where the card does not move yet
+  const FIN = 0.66;   // share where the next one is already settled
   const brut = Math.min(1, Math.max(0, (reste - DEBUT) / (FIN - DEBUT)));
-  const bascule = brut * brut * (3 - 2 * brut); // adoucissement aux deux bouts
+  const bascule = brut * brut * (3 - 2 * brut); // easing at both ends
   const posee = Math.min(dernier, indice + bascule);
 
   expSlides.forEach((slide, i) => {
     const loin = Math.abs(posee - i);
-    // Les fiches ne se déplacent pas : elles se substituent l'une à l'autre
-    // sur place, par la seule mise au point. Un glissement, même léger,
-    // faisait bouger la colonne entière à chaque cran de molette.
+    // The cards do not move: they substitute for one another
+    // in place, through focus alone. A slide, even a slight one,
+    // made the whole column move at each wheel notch.
     slide.style.opacity = Math.max(0, 1 - loin * 1.9).toFixed(3);
-    // La fiche courante seule reste cliquable et lisible.
+    // Only the current card stays clickable and readable.
     slide.style.visibility = loin < 0.5 ? "visible" : "hidden";
   });
 
   const actif = Math.round(posee);
   expDots.forEach((dot, i) => {
-    // Remplissage du point et de son trait d'arrivée, en continu. Le premier
-    // point est plein d'entrée de jeu : on est déjà dessus. Les suivants se
-    // remplissent pendant le trajet qui y mène, d'où le décalage de 1.
+    // Fill of the dot and its finish line, continuously. The first
+    // dot is full from the start: we are already on it. The following ones
+    // fill during the travel that leads there, hence the offset of 1.
     const part = Math.min(1, Math.max(0, posee - i + 1));
     dot.style.setProperty("--f", part.toFixed(4));
     dot.classList.toggle("is-active", i === actif);
@@ -443,16 +443,16 @@ function applyExperiences(): void {
   });
 }
 
-// Cliquer une puce fait défiler la page jusqu'à la position correspondante :
-// sans ça, le scroll écraserait le choix à l'image suivante.
+// Clicking a dot scrolls the page to the corresponding position:
+// without this, the scroll would overwrite the choice on the next frame.
 if (expSlides.length > 1 && carouselRail) {
   const dernier = expSlides.length - 1;
   expDots.forEach((dot, i) => {
     dot.addEventListener("click", () => {
       const vh = window.innerHeight;
       const railDoc = carouselRail.getBoundingClientRect().top + window.scrollY;
-      // Même course que dans onScroll : codée en dur, elle cessait de
-      // correspondre dès qu'on touchait à la hauteur du rail.
+      // Same course as in onScroll: hard-coded, it stopped
+      // matching as soon as the rail's height was touched.
       const course = Math.max(1, carouselRail.offsetHeight - vh * 0.5);
       const cible = railDoc + vh * 0.5 + railPour(1 + (i / dernier) * 0.68) * course;
       const lenis = window.lenis;
@@ -473,8 +473,8 @@ if (expSlides.length > 1 && carouselRail) {
   });
 }
 
-// Le burger : le menu vit sur une classe posée sur <html>, fermé par un
-// clic sur un lien ou la touche Échap.
+// The burger: the menu lives on a class set on <html>, closed by a
+// click on a link or the Escape key.
 const burger = document.querySelector<HTMLButtonElement>(".burger");
 const voile = document.querySelector<HTMLElement>(".menu-voile");
 

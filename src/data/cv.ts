@@ -1,18 +1,18 @@
-// Contenu du CV, source : CV_Julien_Chapron_2026.pdf (sept. 2026)
+// CV content, source: CV_Julien_Chapron_2026.pdf (Sept. 2026)
 
 export interface Experience {
-  /** Ce que la mission a produit, en une phrase. C'est l'accroche du bloc :
-      elle annonce un résultat, pas un intitulé de poste. Toujours adossée à
-      un chiffre vérifiable, sinon elle sonne creux sur un CV de dev. */
+  /** What the mission produced, in one sentence. This is the block's hook:
+      it announces a result, not a job title. Always backed by a verifiable
+      figure, otherwise it rings hollow on a developer's CV. */
   claim: string;
-  /** Le chiffre marquant de la mission, affiché en capitales dans l'en-tête
-      du bloc. Il complète l'accroche, il ne la répète pas. */
+  /** The mission's standout figure, shown in capitals in the block's header.
+      It complements the hook, it does not repeat it. */
   metric: string;
-  /** Le chiffre mis en avant dans l'en-tête de la fiche, et son unité. */
+  /** The figure highlighted in the card's header, and its unit. */
   stat: string;
   statUnit: string;
-  /** L'unique phrase d'appui affichée sous l'accroche. Le site vend, le PDF
-      documente : le détail reste dans `bullets`, qui n'est pas affiché ici. */
+  /** The single supporting sentence shown under the hook. The site sells, the
+      PDF documents: the detail stays in `bullets`, which is not shown here. */
   summary: string;
   title: string;
   company: string;
@@ -27,7 +27,7 @@ export interface Link {
   href: string;
 }
 
-/** Icône d'étape du bloc projets, une par projet. */
+/** Step icon for the projects block, one per project. */
 export type IconeProjet = "serveur" | "chapeau" | "telephone" | "ia";
 
 export interface PersonalProject {
@@ -66,15 +66,15 @@ export const identity = {
   availability: "Disponible immédiatement · Remote ou hybride Toulouse",
 };
 
-// « Toujours en équipe » reprend mot pour mot l'accroche du bloc parcours :
-// les deux formulations doivent rester identiques, sinon le site se contredit
-// d'un écran à l'autre.
-// Volontairement sobre. « Sur ma dernière mission » plutôt que « chez
-// Renault » : la mission passait par CELAD. « Des applications de supervision
-// sur une flotte » plutôt que « la supervision de » : il a construit les
-// outils, il ne pilotait pas la flotte. Et « environ » devant le chiffre,
-// qui est un ordre de grandeur. Chaque phrase doit pouvoir être défendue
-// telle quelle en entretien.
+// « Toujours en équipe » repeats word for word the tagline of the journey block:
+// the two phrasings must stay identical, otherwise the site contradicts itself
+// from one screen to the next.
+// Deliberately understated. « Sur ma dernière mission » rather than « chez
+// Renault »: the mission went through CELAD. « Des applications de supervision
+// sur une flotte » rather than « la supervision de »: he built the tools, he
+// was not the one piloting the fleet. And « environ » before the figure,
+// which is an order of magnitude. Every sentence must be defensible
+// as is in an interview.
 export const profile =
   "Sept ans à construire des applications web, toujours en équipe. Sur ma dernière mission : un portail de visualisation d'API suivi par 5 000 ingénieurs Renault, puis des applications de supervision sur une flotte d'environ 200 000 véhicules électriques. Mon métier, c'est surtout d'entrer dans du code existant et de le faire évoluer sans rien casser. À côté, j'aime publier mes propres projets, en lien avec ma veille technique.";
 
@@ -97,17 +97,17 @@ export const experiences: Experience[] = [
     stack: "React.js, Node.js, TypeScript, GraphQL, API REST, Jest, Cypress, Docker, Kubernetes, GCP, GitLab CI, Git, Linux",
   },
   {
-    // Vue.js et non React : vérifié sur le catalogue en ligne, dont la racine
-    // porte la clé interne __vue__ et les classes Vuetify (v-application,
-    // v-navigation-drawer). Aucun marqueur React nulle part. La version —
-    // Vue 2 / Vuetify 2 — correspond à l'époque de la mission, donc il ne
-    // s'agit pas d'une réécriture postérieure. Ne pas « corriger » en React.
-    // « Atmosphériques » plutôt qu'« environnementales » : c'est ce qu'AERIS
-    // héberge réellement — aérosols, ozone, gaz à effet de serre, nuages,
-    // qualité de l'air. Le mot est plus précis, donc plus crédible.
-    // Le chiffre retenu est le nombre de centres fédérés (4), et non la
-    // taille du catalogue : celle-ci a grossi depuis 2022, la revendiquer
-    // aujourd'hui reviendrait à s'attribuer ce qui est arrivé après.
+    // Vue.js and not React: verified on the online catalogue, whose root
+    // carries the internal __vue__ key and the Vuetify classes (v-application,
+    // v-navigation-drawer). No React marker anywhere. The version —
+    // Vue 2 / Vuetify 2 — matches the period of the mission, so this is not a
+    // later rewrite. Do not "correct" it to React.
+    // « Atmosphériques » rather than « environnementales »: that is what AERIS
+    // actually hosts — aerosols, ozone, greenhouse gases, clouds,
+    // air quality. The word is more precise, therefore more credible.
+    // The figure kept is the number of federated centres (4), and not the
+    // size of the catalogue: it has grown since 2022, claiming it
+    // today would mean taking credit for what happened afterwards.
     claim: "Rendre trouvables les données de l'atmosphère.",
     metric: "recherche publique",
     stat: "4",
@@ -124,14 +124,14 @@ export const experiences: Experience[] = [
     ],
   },
   {
-    // Ethics Group n'est pas un éditeur de logiciels : c'est un cabinet de
-    // transformation des organisations et des territoires, spécialisé dans la
-    // concertation publique (concertation CNDP Verkor, plan de gestion du
-    // Canal du Midi, Réseau Express Vélo de Toulouse Métropole, missions
-    // Airbus et Ariane Group). Les applications étaient l'outillage de ce
-    // métier — c'est ce que dit désormais la fiche.
-    // « Temps réel » a été retiré : le terme ne décrit rien. Ce qui compte
-    // est l'effet observable, l'absence de rechargement.
+    // Ethics Group is not a software vendor: it is a firm working on the
+    // transformation of organisations and territories, specialising in
+    // public consultation (CNDP Verkor consultation, Canal du Midi
+    // management plan, Réseau Express Vélo of Toulouse Métropole, Airbus
+    // and Ariane Group assignments). The applications were the tooling for
+    // that business — that is what the card now says.
+    // « Temps réel » was removed: the term describes nothing. What matters
+    // is the observable effect, the absence of a page reload.
     claim: "Outiller la consultation, du questionnaire au résultat.",
     metric: "front et back",
     stat: "3",
