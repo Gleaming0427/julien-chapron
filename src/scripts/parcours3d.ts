@@ -292,6 +292,19 @@ export function initParcours3D(): void {
     // ne change rien, l'intro y étant déjà centrée (l'écart vaut zéro).
     const ecart = (vue.top + vue.height / 2 - (place.top + place.height / 2)) * mondeParPixel;
     finaleY = -ecart;
+    // …but only as far as the frame allows. On a phone the intro sits at the
+    // very top of the block, so this offset sends the donut 300 px below the
+    // middle of the screen: measured on a 390 x 715 window, a ring of 105 px
+    // of radius centred at y = 659, hence cut off by 49 px at the bottom.
+    // Clamping keeps the deliberate placement — the donut stays low, under
+    // the carousel — while guaranteeing the whole silhouette is in frame.
+    // On a wide screen the intro is already centred, this offset is zero and
+    // the clamp never bites.
+    const demiHauteur = camera.position.z * HALF_FOV_TAN;
+    // Outer radius of the torus (R + r) plus the jitter given to the points.
+    const rayon = 0.87 + 0.04;
+    const limite = Math.max(0, demiHauteur - rayon - demiHauteur * 0.06);
+    finaleY = Math.max(-limite, Math.min(limite, finaleY));
     texteL = (place.left - vue.left) / vue.width;
     texteR = (place.right - vue.left) / vue.width;
     texteT = (place.top - vue.top) / vue.height;

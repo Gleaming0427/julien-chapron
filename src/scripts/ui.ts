@@ -388,7 +388,18 @@ function onScroll(): void {
     const hauteur = calque.height || 1;
     // The "hang" offset lowers the start so that the edge sets off from the
     // very bottom of the screen.
-    const scale = (risen - hang + debord) / hauteur;
+    // CROISSANCE: how fast the sheet grows, per pixel of scroll. The torn
+    // edge climbs the screen at (1 + croissance) times the scroll, since the
+    // tear window is itself scrolling up. At 1 the sweep is over in half a
+    // screen of scroll — four notches of a wheel, which reads on a desktop,
+    // but a fraction of a flick on a phone, where the whole effect went by
+    // unseen. Lowering it stretches the sweep: the floor is 0, where the ink
+    // would no longer lead the light zone at all and the edge would stop
+    // reshaping, so the sweep can never last more than one screen of scroll.
+    // 0.35 takes it from half a screen to three quarters, and the ink still
+    // runs up to 190 px ahead of the light zone below it.
+    const croissance = TACTILE ? 0.35 : 1;
+    const scale = (risen * croissance - hang + debord) / hauteur;
     tearSheet.style.setProperty("--tear", Math.min(1, Math.max(0, scale)).toFixed(4));
   }
 }
