@@ -1843,8 +1843,14 @@ button.chip {
 }
 
 @media (max-width: 720px) {
+  /* minmax(0, 1fr) and not 1fr: a 1fr track keeps an automatic minimum of
+     min-content, and the note at its foot is set `white-space: nowrap`. The
+     column therefore claimed 372 px inside a 350 px block — measured, the
+     page was 3 px wider than the screen and became draggable sideways on
+     iOS, where the body no longer clips anything (see further down). The
+     floor is released here, and the note is allowed to wrap just below. */
   .projet-grille {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .projet-etape {
@@ -1854,6 +1860,16 @@ button.chip {
 
   .projet-etape:last-child {
     border-bottom: 0;
+  }
+
+  /* The note is kept on a single line so that the feet of the cards line up
+     from one column to the next. In a single column there is nothing left to
+     line it up with, and the longest of them — "application mobile d'argent
+     de poche", 342 px of text in a 310 px column — was losing its end to an
+     ellipsis. It wraps here, which is also what keeps the column from
+     claiming more width than the screen. */
+  .projet-note {
+    white-space: normal;
   }
 }
 
@@ -2530,11 +2546,17 @@ button.chip {
     padding-block: 14px 10px;
   }
 
-  /* The intro keeps its centering: the donut, aligned on it, stays centered
-     on screen too. */
+  /* The intro lines up on the CARD below it, it is no longer centred on its
+     own width. Measured on a 390 px window: the eyebrow and the title
+     started at 62 px while the card's left edge is at 20 — a 42 px offset
+     that nothing downstream repeats, and which reads as a misalignment on a
+     screen where everything else is flush left.
+     The donut is unaffected: parcours3d centres it on the intro's MIDDLE,
+     and a block stretched across the content width has the same middle as a
+     narrower block centred in it. */
   .spec-intro {
-    justify-self: center;
-    width: fit-content;
+    justify-self: stretch;
+    width: auto;
   }
 
   /* The 9em break is a narrow-column setting: at full width,
@@ -3031,5 +3053,114 @@ button.chip {
   .hero-canvas-layer {
     left: 0;
     right: 0;
+  }
+}
+
+/* ---------- reading indicator on a phone ----------
+   The indicator is fixed at the middle of the right edge: a 64 px rail and
+   its counter, anchored 14 px from the edge. On a desktop the gutters keep
+   it clear of the text; on a phone blocks 1 and 2 run the full width and it
+   falls right ON them — measured on a 390 px window, the text column ends at
+   370 and the indicator starts at 346, so the rail crosses the profile
+   paragraph and the experience card from top to bottom.
+   Same reading, moved to where nothing is drawn: a hairline across the very
+   top of the screen, filled from the left. The ink keeps switching with the
+   background (--encre), and the counter in figures goes — at 10 px, over
+   text, it was noise more than information.
+   PLACÉ EN FIN DE FICHIER À DESSEIN : à spécificité égale, l'ordre tranche,
+   et les règles d'origine sont plus haut. */
+@media (max-width: 720px) {
+  #scroll-progress {
+    left: 0;
+    top: 0;
+    translate: none;
+    display: block;
+    /* 100dvw, comme la barre de navigation : `width: 100%` se cale sur le
+       bloc conteneur initial, plus large que l'écran réel sur mobile. */
+    width: 100dvw;
+    gap: 0;
+  }
+
+  #scroll-progress .rail {
+    width: 100%;
+    height: 2px;
+    background: rgba(var(--encre), 0.16);
+  }
+
+  #scroll-progress .tick {
+    width: 100%;
+    height: 2px;
+    /* La barre se remplit depuis la gauche au lieu de faire descendre un
+       repère : même variable, même source, autre géométrie. */
+    translate: none;
+    transform-origin: left center;
+    scale: var(--scroll-pct, 0) 1;
+  }
+
+  #scroll-progress .pct {
+    display: none;
+  }
+}
+
+/* ---------- block 1 (profile) on a phone ----------
+   The paragraph is a display setting — 25 px, leading 1.15, letterspacing
+   tightened — drawn for a headline of a few words. On a phone the same text
+   runs to fifteen lines edge to edge: at that length the tight leading no
+   longer reads as editorial, the lines stick together. A notch down in size
+   and a normal leading give the block back its air, and the text still
+   fills the screen: measured at 390 x 715, 437 px of text before, 413 after,
+   in a 715 px panel. */
+@media (max-width: 720px) {
+  .carousel-item-first .section p {
+    font-size: clamp(21px, 6vw, 28px);
+    line-height: 1.28;
+    letter-spacing: -0.015em;
+  }
+}
+
+/* ---------- block 2 (parcours) on a phone ---------- */
+@media (max-width: 720px) {
+  /* Vertical rhythm of the pinned panel: the title used to start 12 px from
+     the top edge while 40 px were left unused at the foot. Evened out, the
+     block sits in its screen instead of being pressed against the top. */
+  .section-exp .spec-layout {
+    /* In svh, so the margin gives way on a short screen instead of taking
+       it from the card: measured, a fixed 22 px left only 15 px under the
+       dots on a 553 px panel (an iPhone SE with its toolbar out). */
+    padding-block: clamp(14px, 3svh, 22px) clamp(10px, 2svh, 14px);
+  }
+
+  /* The card and its dots centre themselves in the space the title leaves:
+     on a tall phone the block ran out 109 px above the foot of the panel
+     (measured at 430 x 780), pressed against the title with a void below.
+     Auto margins and not `align-self: center`: they only absorb POSITIVE
+     free space, so on a screen too short for the card they resolve to zero
+     and the block stays hung from the top — centring would have pushed its
+     head under the title. */
+  .exp-carousel {
+    margin-block: auto;
+  }
+
+  /* The watermark figure is set at 140 px and placed at the card's middle
+     height: on a desktop it breathes in the margin left by a two-column
+     layout, on a phone it lands squarely behind the body text — measured, it
+     covers 308 → 448 px of a card that runs 116 → 641, that is the whole of
+     "ce que j'ai livré". It is decoration, and the dots below already say
+     which card is showing, so it goes. */
+  .experience-watermark {
+    display: none;
+  }
+}
+
+/* ---------- block 2 on a really short screen ----------
+   Placed AFTER the phone rhythm on purpose: at equal specificity the order
+   decides. Below 540 px of window — under an iPhone SE showing its toolbar,
+   which measures 553 — the panel's margins give way before the card does:
+   every pixel spent above the title is taken from the bullets. Measured at
+   360 x 520, the block runs 9 px over with the rhythm above and 3 px with
+   this one. */
+@media (max-width: 720px) and (max-height: 540px) {
+  .section-exp .spec-layout {
+    padding-block: 10px 8px;
   }
 }

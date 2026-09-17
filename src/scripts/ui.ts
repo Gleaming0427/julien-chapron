@@ -417,7 +417,8 @@ window.addEventListener(
   },
   { passive: true },
 );
-onScroll();
+/* The first pass is at the VERY END of the module, not here: see the comment
+   that goes with it. */
 
 // Experience carousel, driven by the scroll. The position of the cards
 // is smoothed: it slowly catches up to the target — when the carousel
@@ -542,3 +543,16 @@ if (burger && voile) {
     if (e.key === "Escape") ouvrir(false);
   });
 }
+
+/* ---------- first pass ----------
+   Deliberately the LAST statement of the module. Called right after the
+   scroll listener was registered — its natural place — it took the whole
+   script down as soon as the system asks to reduce motion: on that branch
+   onScroll() settles the carousel itself, hence applyExperiences(), which
+   reads `expSlides` — a constant declared further down, so still undefined
+   at that moment. The script died there, and with it everything set up
+   after: the parcours block stayed on its orange background from end to
+   end, the experience dots did nothing and the burger no longer opened.
+   Nothing above needs this call to happen earlier: it only reads the scroll
+   position and writes the staging. */
+onScroll();

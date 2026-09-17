@@ -16,7 +16,14 @@
 // Permanent rendering: the layer covers the whole pinned area. Without WebGL,
 // parcours-gl is not set and the CSS background stays opaque.
 import * as THREE from "three";
-import { SPEC_COURSE, SPEC_DEPART, TITRE_DEBUT, TITRE_FIN } from "./specform";
+import {
+  CARROUSEL_DEBUT,
+  CARROUSEL_FIN,
+  SPEC_COURSE,
+  SPEC_DEPART,
+  TITRE_DEBUT,
+  TITRE_FIN,
+} from "./specform";
 
 /* The steps, expressed in shares of --spec-form. They chain together without
    overlapping those of the CSS (title 0.43 → 0.715; carousel 0.715 →
@@ -98,6 +105,12 @@ export function initParcours3D(): void {
   // The layer is placed over the entire pinned area: the points are
   // visible from the profile block onward, not only on the parcours.
   sticky.prepend(layer);
+
+  /* Phone: the card covers the whole pinned panel, so the donut can only
+     be BEHIND it. See the fade applied in the loop. Read from a
+     MediaQueryList rather than measured on every frame: the object
+     re-evaluates itself, a getBoundingClientRect would cost a layout. */
+  const etroit = window.matchMedia("(max-width: 720px)");
 
   // The block's background is a black panel that SWEEPS in from the right, and
   // no longer a plane that fades in. It is a simple CSS element slid BEHIND the
@@ -292,6 +305,19 @@ export function initParcours3D(): void {
     // ne change rien, l'intro y étant déjà centrée (l'écart vaut zéro).
     const ecart = (vue.top + vue.height / 2 - (place.top + place.height / 2)) * mondeParPixel;
     finaleY = -ecart;
+    /* Phone: the block stacks, the title at the top and the card below it,
+       and the donut has the screen to itself as long as the card has not
+       arrived (it fades out as soon as it does, see the loop). Kept low, it
+       left about 400 px of void between the title and itself — measured on
+       a 390 x 715 window, the title ends at 109 and the ring only starts at
+       475. It is therefore centred in the band the title leaves free, which
+       reads as a composition instead of a shape pushed against the bottom
+       edge. Nothing changes on a wide screen, where the donut sits behind
+       the left-hand column and the cards beside it. */
+    if (etroit.matches) {
+      const milieuLibre = (place.bottom + vue.bottom) / 2;
+      finaleY = (vue.top + vue.height / 2 - milieuLibre) * mondeParPixel;
+    }
     // …but only as far as the frame allows. On a phone the intro sits at the
     // very top of the block, so this offset sends the donut 300 px below the
     // middle of the screen: measured on a 390 x 715 window, a ring of 105 px
@@ -366,6 +392,26 @@ export function initParcours3D(): void {
       ) {
         poserLesDeparts();
       }
+
+      /* The donut's retreat on a phone. There, the card takes the whole
+         panel: the donut has nowhere left to sit beside it, and since the
+         block fades in AS A WHOLE — the 3D layer lives in the pinned area,
+         under the items — it showed through the card while it arrived and
+         crossed its text (measured on a 390 x 715 window: the ring runs
+         from 1030 to 1290 px of a card that ends at 641, drawn over the
+         last bullet and the poste/mission line).
+         So it fades out exactly as the carousel settles, on the SAME
+         landmarks as the CSS opacity of .exp-carousel. Nothing is
+         memoized: scrolling back up brings the donut back with the rest.
+         On a wide screen the cards sit in the right-hand column, the donut
+         behind the left-hand one, and nothing is taken away from it. */
+      const arrivee = Math.min(
+        1,
+        Math.max(0, (spec - CARROUSEL_DEBUT) / (CARROUSEL_FIN - CARROUSEL_DEBUT)),
+      );
+      layer.style.opacity = etroit.matches
+        ? (1 - arrivee * arrivee * (3 - 2 * arrivee)).toFixed(3)
+        : "1";
 
       // Step 1 — the points enter from the left and line up on the torus.
       const avance = Math.min(1, spec / FORME_FIN);
