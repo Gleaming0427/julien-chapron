@@ -272,7 +272,9 @@ export function initParcours3D(): void {
     // The form (diameter 2) occupies ~70% of the screen's smaller side:
     // on a phone it shrinks with the window, on desktop it keeps
     // its current scale (the smaller side there is the height).
-    const voulu = Math.min(vue.height, vue.width) * 0.7;
+    // 0,62 et non 0,7 : le donut frôlait le bas du cadre, sans marge pour
+    // respirer.
+    const voulu = Math.min(vue.height, vue.width) * 0.62;
     camera.position.z = vue.height / (voulu * HALF_FOV_TAN);
     camera.updateProjectionMatrix();
 
@@ -282,7 +284,14 @@ export function initParcours3D(): void {
     finaleX = (place.left + place.width / 2 - (vue.left + vue.width / 2)) * mondeParPixel;
     // Same logic vertically: on a phone the intro is at the top of the
     // block, the donut moves up behind it instead of staying centered.
-    finaleY = (place.top + place.height / 2 - (vue.top + vue.height / 2)) * mondeParPixel;
+    // Le donut se place volontairement PLUS BAS que le titre, pas centré sur
+    // lui. `ecart` est le décalage qui le centrerait — l'axe Y de l'écran
+    // descend, celui de la scène monte, d'où cet ordre des termes — et on
+    // l'inverse sciemment pour obtenir le rendu retenu.
+    // Ne pas « corriger » ce signe : il est délibéré, et sur grand écran il
+    // ne change rien, l'intro y étant déjà centrée (l'écart vaut zéro).
+    const ecart = (vue.top + vue.height / 2 - (place.top + place.height / 2)) * mondeParPixel;
+    finaleY = -ecart;
     texteL = (place.left - vue.left) / vue.width;
     texteR = (place.right - vue.left) / vue.width;
     texteT = (place.top - vue.top) / vue.height;

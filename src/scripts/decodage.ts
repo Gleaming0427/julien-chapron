@@ -6,10 +6,14 @@
 // table, a few skills scramble from time to time in
 // Japanese before returning to French.
 
-/** Glyph reservoir. Ideograms, from which the eye draws no meaning:
-    that is what gives the impression of a text still encrypted. */
+/** Réservoir de glyphes : des KANA, pas des kanji. Les idéogrammes que
+    contenait cette liste sont communs au japonais et au chinois, et se
+    lisent donc comme du chinois. Les katakana — l'écriture réservée aux
+    mots venus de l'étranger, donc au vocabulaire technique — ne laissent
+    aucune ambiguïté, et leur tracé anguleux convient au registre du bloc.
+    Quelques hiragana s'y mêlent pour casser la régularité. */
 const GLYPHES =
-  "日本語漢字仮名一二三四五六七八九十山川田中大小上下左右力刀月火水木金土空海風雷電気機能情報通信";
+  "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンあかさたなはまやらわをんきしちにひみりゐゑ";
 
 /** Duration of the scramble of one character, in milliseconds. */
 const BROUILLAGE = 480;

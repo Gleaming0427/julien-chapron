@@ -44,7 +44,12 @@
   /* Real header height, measured on load: a content
      "screen" is the window height minus this sticky bar. */
   --header-h: 57px;
+  /* svh = hauteur de la fenêtre BARRE D'ADRESSE AFFICHÉE, donc la plus
+     petite. Sur iOS, 100vh vaut la hauteur barre masquée : tout bloc en
+     100vh y dépasse sous la barre d'outils, et son bas devient invisible.
+     La ligne en vh reste comme repli pour les navigateurs sans svh. */
   --screen: calc(100vh - var(--header-h));
+  --screen: calc(100svh - var(--header-h));
 }
 
 * {
@@ -217,6 +222,7 @@ body {
   right: 0;
   bottom: 0;
   height: 100vh;
+  height: 100svh;
   overflow: hidden;
   z-index: 2;
   pointer-events: none;
@@ -292,7 +298,8 @@ code {
 .container {
   max-width: none;
   margin: 0;
-  padding: 0 var(--gutter) 64px;
+  /* Compense la hauteur de la barre, désormais hors du flux. */
+  padding: var(--header-h) var(--gutter) 64px;
 }
 
 /* ---------- header ---------- */
@@ -303,11 +310,35 @@ code {
    gutter, and the page passes underneath. */
 /* The navbar follows the scroll on desktop and tablet; on
    phone it leaves the place to the burger alone. */
+/* `fixed` et non `sticky`. Safari iOS casse le collant dès qu'un ancêtre
+   porte overflow: clip — c'est le cas du body de ce site (overflow-x: clip,
+   nécessaire aux blocs pleine largeur). Le header y redescendait donc avec la
+   page. En fixe, la barre ne dépend plus d'aucun ancêtre.
+   Sortie du flux, elle ne réserve plus sa hauteur : .container la reprend en
+   padding, via la même variable mesurée --header-h. La géométrie est donc
+   identique à celle du collant. */
 .site-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  /* 100dvw et non right: 0 ni width: 100%. Mesuré : ces deux-là se calent
+     sur le bloc conteneur initial, plus large que l'écran réel sur mobile —
+     la barre débordait alors de 47 px et le bouton de menu passait hors
+     champ. 100dvw suit la largeur effectivement visible. */
+  width: 100dvw;
   z-index: 10;
   padding: 12px var(--gutter);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+/* La barre ne se montre qu'en haut de page. Dès qu'on descend, elle se
+   retire vers le haut : elle n'a plus à se défendre contre les fonds qui
+   défilent sous elle, et l'écran reste entier pour le contenu.
+   Exception : menu ouvert, elle doit évidemment rester là. */
+html.defile:not(.menu-ouvert) .site-header {
+  opacity: 0;
+  transform: translateY(-100%);
+  pointer-events: none;
 }
 
 /* Menu open: the header moves above the veil so the burger
@@ -510,9 +541,13 @@ html.menu-ouvert .menu-voile {
    Two explicit inks settle the case plainly. */
 #scroll-progress {
   position: fixed;
-  right: clamp(14px, 1.8vw, 26px);
+  /* Ancré sur 100dvw et non sur `right`. Mesuré : `right` se cale sur le
+     bloc conteneur initial, plus large que l'écran réel sur mobile — le
+     compteur sortait de 33 px et créait un débordement horizontal. Même
+     cause et même remède que pour la barre de navigation. */
+  left: 100dvw;
   top: 50%;
-  translate: 0 -50%;
+  translate: calc(-100% - clamp(14px, 1.8vw, 26px)) -50%;
   z-index: 60;
   display: flex;
   flex-direction: column;
@@ -1070,7 +1105,10 @@ button.chip {
 .carousel-sticky {
   position: sticky;
   top: 0;
+  /* C'est ici que le défaut se voyait : en 100vh, le bas du bloc — donc les
+     puces du carrousel — passait sous la barre d'outils de Safari iOS. */
   height: 100vh;
+  height: 100svh;
   overflow: hidden;
 }
 
@@ -1603,6 +1641,7 @@ button.chip {
      In normal flow the height would follow the content (559 px), far less
      than the section that precedes. */
   min-height: 100vh;
+  min-height: 100svh;
   align-content: center;
   /* Just one notch above the parcours shutter (#0b0c0d): the seam
      between the two dark screens must be felt more than it is seen.
@@ -1631,6 +1670,7 @@ button.chip {
    dotted grid: a full screen, plain, the content centered. */
 .section-projets.section-apres {
   min-height: 100vh;
+  min-height: 100svh;
   align-content: center;
   --bg: #0b0c0d;
   --text: #f3f1ec;
@@ -2396,7 +2436,13 @@ button.chip {
 
 @media (max-width: 640px) {
   .container {
-    padding: 0 16px 48px;
+    /* La gouttière DOIT valoir --gutter : les sections pleine largeur
+       l'annulent avec margin-inline: calc(-1 * var(--gutter)). Avec 16 px
+       ici et -20 là, elles débordaient de 4 px de chaque côté — assez pour
+       rendre la page déplaçable latéralement sur un navigateur sans
+       overflow: clip. Et le padding haut compense la barre, sortie du flux
+       depuis son passage en position fixe. */
+    padding: var(--header-h) var(--gutter) 48px;
   }
 
   /* The name is too long to fit in the pill with the navigation and
@@ -2624,5 +2670,219 @@ button.chip {
   a {
     color: #000;
     text-decoration: none;
+  }
+}
+
+/* ---------- confort tactile ----------
+   Apple recommande 44 px de côté pour une cible au doigt. Plusieurs
+   commandes du site passaient largement dessous : les puces du carrousel
+   à 12 px, le bouton de menu à 40, les boutons de la barre à 33-38.
+
+   PLACÉ EN FIN DE FICHIER À DESSEIN. Ces sélecteurs ont la même spécificité
+   que les règles de mise en page mobile situées plus haut ; posé avant elles,
+   ce bloc perdait silencieusement — le bouton de menu restait à 40 px et
+   l'écart des puces à 54. À spécificité égale, c'est l'ordre qui tranche. */
+@media (pointer: coarse) {
+  /* La zone tactile s'étend sans déplacer le point visible : il garde ses
+     12 px, mais devient atteignable sur 44. */
+  .exp-dot::after {
+    content: "";
+    position: absolute;
+    inset: -16px;
+  }
+
+  .burger {
+    width: 44px;
+    height: 44px;
+    /* L'ICÔNE doit s'aligner sur la même gouttière que le texte à gauche,
+       pas le bouton. Deux choses l'en éloignaient : l'écart de 16 px que la
+       grille laisse après la dernière colonne, et les 11 px de marge interne
+       du bouton autour de son icône de 22 px. Mesuré, l'icône tombait à 47 px
+       du bord quand « Home » démarre à 20. On annule les deux. */
+    margin-right: -27px;
+  }
+
+  .axiom-btn,
+  .site-name,
+  .nav-link {
+    min-height: 44px;
+  }
+
+  /* Les puces s'espacent un peu : deux cibles de 44 px côte à côte ne
+     doivent pas se chevaucher. */
+  .exp-dots {
+    --lien: 46px;
+  }
+}
+
+/* ---------- bandeau : empilé sur téléphone ----------
+   Sur grand écran, la pastille de chiffres est posée PAR-DESSUS le bandeau
+   défilant (position: absolute, inset: 0) : elle est étroite, le bandeau
+   respire de part et d'autre. Sous 720 px elle occupe toute la largeur et
+   le masque entièrement — mesuré, les deux faisaient exactement la même
+   hauteur et la même emprise.
+   On les empile donc : les chiffres d'abord, le bandeau dessous, chacun
+   entier. Placé en fin de fichier à dessein — à spécificité égale, c'est
+   l'ordre qui tranche, et les règles d'origine sont plus haut. */
+@media (max-width: 720px) {
+  .bandeau-block {
+    height: auto;
+    min-height: 30vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(16px, 3vh, 28px);
+  }
+
+  .bandeau-stat {
+    position: static;
+    inset: auto;
+  }
+
+  .bandeau-stat-inner {
+    /* La pastille se cale sur son contenu : étirée sur toute la largeur,
+       elle redeviendrait un bloc plein qui ne se lit plus comme une
+       étiquette. */
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
+    padding: 10px 18px;
+  }
+}
+
+/* ---------- lisibilité sur téléphone ----------
+   Sous 720 px, la composante vw des clamp() ne pèse plus rien (1,111vw
+   ≈ 4 px à 390 px de large) : c'est le PLANCHER de chaque échelle qui
+   gouverne, et il avait été choisi pour qu'une fenêtre de bureau étroite
+   ne devienne pas ridicule — pas pour la lecture au téléphone. Le texte de
+   fond y tombait donc à 14,5 px, sous le seuil de confort de 16 px.
+   On ne peut pas relever les planchers eux-mêmes : à 16 px, --fs-body
+   resterait figé jusqu'à 1440 px et écraserait toute l'échelle fluide du
+   bureau. D'où cette surcharge, limitée au téléphone.
+   En fin de fichier à dessein : à spécificité égale, l'ordre tranche. */
+@media (max-width: 720px) {
+  :root {
+    --fs-small: 13px;
+    --fs-body: 16px;
+    --fs-text: 17px;
+    --fs-lead: 18px;
+  }
+}
+
+/* ---------- fiche d'expérience compactée sur téléphone ----------
+   En remontant le corps de texte à 16 px, la fiche est passée de 564 à
+   632 px et repoussait les puces du carrousel hors de l'écran. On récupère
+   la hauteur sur les marges et sur le tableau poste/mission/période, jamais
+   sur le corps du texte : c'est lui qu'on vient de rendre lisible. */
+@media (max-width: 720px) {
+  .exp-slides .experience {
+    padding: 14px;
+  }
+
+  .exp-part {
+    margin-bottom: 10px;
+  }
+
+  .exp-spec-row {
+    padding-block: 5px;
+  }
+
+  .exp-stat {
+    margin-bottom: 4px;
+  }
+
+  .exp-dots {
+    margin-top: 10px;
+  }
+}
+
+/* Sur téléphone, le bloc parcours doit loger l'intro ET la fiche ET les
+   puces dans un seul écran : mesuré, 827 px de contenu pour 844 disponibles,
+   soit 3 px sous les puces — assez pour qu'elles disparaissent dès que la
+   barre d'outils de Safari se déplie.
+   La phrase d'appui de l'intro est ce qu'on peut retirer sans rien perdre :
+   la fiche juste en dessous dit la même chose, en plus concret et avec des
+   chiffres. On garde l'œil-de-bœuf et le titre, qui annoncent le bloc. */
+@media (max-width: 720px) {
+  .section-exp .spec-intro .spec-lead {
+    display: none;
+  }
+
+  .section-exp .spec-headline {
+    margin-bottom: 0;
+  }
+}
+
+/* ---------- orientation : portrait seulement ----------
+   Le site est bâti sur des blocs d'un écran de haut, avec une chorégraphie
+   épinglée. Couché, un téléphone n'en montre plus qu'une bande de 390 px :
+   le donut, la fiche et les puces ne tiennent plus ensemble.
+   La condition combine les deux : `pointer: coarse` pour ne viser que les
+   appareils tactiles — un écran de bureau large et court est lui aussi en
+   « landscape » et ne doit rien voir — et l'orientation. */
+.rotation {
+  display: none;
+}
+
+@media (pointer: coarse) and (orientation: landscape) {
+  .rotation {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 14px;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    padding: 24px;
+    text-align: center;
+    background: #0b0c0d;
+    background-image: var(--trame);
+    background-size: var(--trame-pas);
+    color: #f3f1ec;
+  }
+
+  .rotation-icone {
+    width: 56px;
+    height: 56px;
+    color: #ff4d00;
+  }
+
+  .rotation-titre {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .rotation-texte {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(243, 241, 236, 0.62);
+  }
+
+  /* Rien ne doit défiler derrière le voile. */
+  body {
+    overflow: hidden;
+  }
+}
+
+/* ---------- pas de débordement latéral sur téléphone ----------
+   Le calque 3D du hero déborde de 12vw de chaque côté sur grand écran, pour
+   que son bord ne remonte pas dans le champ pendant la formation du globe.
+   Sur téléphone, ces 12vw font 47 px et c'est exactement l'excédent mesuré
+   de scrollWidth (437 pour 390 visibles).
+   On ne peut pas se reposer sur overflow-x: clip du body : il demande
+   Safari 16.4, et en dessous la valeur est ignorée — la page devient alors
+   déplaçable latéralement. `hidden` serait supporté partout, mais il crée un
+   conteneur de défilement qui casserait position: sticky, donc le carrousel.
+   On retire donc le débordement à la source ; le bord haut et bas, lui,
+   garde ses marges, c'est celui qui posait problème au scroll. */
+@media (max-width: 720px) {
+  .hero-canvas-layer {
+    left: 0;
+    right: 0;
   }
 }

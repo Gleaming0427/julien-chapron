@@ -229,8 +229,17 @@ const tearSheet = document.querySelector<HTMLElement>(".tear-sheet");
    The parcours3d threshold (0.65 screen) is crossed DURING this automatic
    travel, so the donut triggers itself along the way —
    the two thresholds no longer have to be lined up with each other. */
+/** Écran tactile : pas de souris, donc pas de molette à verrouiller. */
+const TACTILE = window.matchMedia("(pointer: coarse)").matches;
+
 const SEUIL_INTERLUDE = 0.12; // ~90 px: a deliberate push, not a brush
-const REARMEMENT = 0.02;      // one must really be back at the top of the rail
+// Réarmement à 0,10 : dès qu'on est revenu au-dessus du point de
+// déclenchement, l'interlude peut rejouer. À 0,02 il fallait retomber à 2 %
+// d'écran du tout début du rail — un retour partiel, le geste normal, le
+// laissait désarmé et redescendre ne déclenchait plus rien. La bande entre
+// 0,10 et 0,12 suffit à éviter tout va-et-vient : une fois parti, le
+// défilement saute à 2,6 écrans, très loin du seuil.
+const REARMEMENT = 0.1;      // one must really be back at the top of the rail
 let interludeJoue = false;
 let interludeEnCours = false;
 
@@ -259,13 +268,22 @@ function interlude(railTop: number, vh: number): void {
   // the speed. The intended intervals between the arrival of the donut, the title and
   // the carousel are set in shares of --spec-form; for them to really last
   // 2 s and 1 s, the scroll must hold VITESSE screens per second.
-  const duree = Math.max(2.4, distanceEcrans / VITESSE);
+  // Au tactile, la séquence est écourtée : neuf secondes pendant lesquelles
+  // le doigt ne répond pas ne se lisent pas comme une mise en scène, mais
+  // comme une page figée.
+  const duree = TACTILE
+    ? Math.min(4.5, Math.max(2.4, distanceEcrans / VITESSE))
+    : Math.max(2.4, distanceEcrans / VITESSE);
 
   interludeJoue = true;
   interludeEnCours = true;
   lenis.scrollTo(cible, {
     duration: duree,
-    lock: true,
+    // Le verrou n'a de sens qu'à la molette. Au doigt, il transforme chaque
+    // geste ignoré en soupçon de bug : on laisse donc la main reprendre le
+    // dessus dès qu'on touche l'écran, et la séquence se joue seule si on
+    // ne touche à rien.
+    lock: !TACTILE,
     // Smoothed start and arrival: the page sets off and settles instead of
     // racing at constant speed.
     easing: (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2),
@@ -280,6 +298,9 @@ let ticking = false;
 function onScroll(): void {
   const root = document.documentElement;
   const max = root.scrollHeight - root.clientHeight;
+  // La barre de navigation ne vit qu'en haut de page.
+  root.classList.toggle("defile", root.scrollTop > 40);
+
   const lu = max > 0 ? root.scrollTop / max : 0;
   progress.style.setProperty("--scroll-pct", lu.toFixed(4));
   if (progressPct) {
