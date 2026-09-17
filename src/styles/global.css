@@ -229,12 +229,22 @@ body {
 }
 
 /* Slack for the distortion: without it, the noise would move
-   the material outside the filter's frame and the edge would be cut clean. */
+   the material outside the filter's frame and the edge would be cut clean.
+   It used to be half a screen on all four sides, which made the filtered
+   surface about 1234 x 1559 CSS px on a phone — some 25 megapixels once
+   multiplied by an iPhone's device ratio of 3. Safari gives up above that:
+   it drops the filter, and the sheet rises with a clean straight edge, which
+   is exactly the effect one no longer saw on the phone. feTurbulence over
+   that surface would not have been affordable anyway.
+   The slack only has to absorb the displacement, and feDisplacementMap moves
+   the material by at most scale/2, so 110 px. 160 px covers it with margin,
+   for a filtered surface eight times smaller. The sheet's travel no longer
+   depends on this value: ui.ts reads the geometry back instead of assuming
+   it. */
 .tear-filter {
   position: absolute;
-  /* Half a screen of margin: the sheet can grow for twice as long,
-     the sweep stays visible across its whole run. */
-  inset: calc(-50vh);
+  --tear-slack: 160px;
+  inset: calc(-1 * var(--tear-slack));
   filter: url(#ink-edge);
 }
 
@@ -2783,26 +2793,112 @@ button.chip {
   }
 }
 
-/* ---------- fiche d'expérience compactée sur téléphone ----------
-   En remontant le corps de texte à 16 px, la fiche est passée de 564 à
-   632 px et repoussait les puces du carrousel hors de l'écran. On récupère
-   la hauteur sur les marges et sur le tableau poste/mission/période, jamais
-   sur le corps du texte : c'est lui qu'on vient de rendre lisible. */
+/* ---------- experience card on a phone ----------
+   The previous budget was drawn against 844 px, the iPhone's full height —
+   the height one NEVER gets. Safari always keeps its toolbar out at first,
+   so the pinned panel is 100svh, about 715 px on that same phone. Measured
+   against the real figure, the block ran to 773 px: the bottom of the card
+   and the carousel's dots fell outside the panel, and everything above them
+   looked crammed.
+   The height is taken back from the spacing, from the decorative figure and
+   from the poste/mission/période table — never from the body text, which is
+   what was just made legible. The body text only gives way on a genuinely
+   short screen, and it does so gradually: the svh term of the clamp only
+   bites below ~730 px of window, and never goes under 13 px. */
 @media (max-width: 720px) {
-  .exp-slides .experience {
-    padding: 14px;
+  .section-exp .spec-layout {
+    gap: clamp(10px, 2.2vh, 16px);
+    padding-block: 12px 8px;
   }
 
-  .exp-part {
+  /* The lead sentence goes: the card right below says the same thing, more
+     concretely and with figures. The eyebrow and the title stay, they
+     announce the block. */
+  .section-exp .spec-intro .spec-lead {
+    display: none;
+  }
+
+  .section-exp .spec-headline {
+    margin-bottom: 0;
+    font-size: clamp(22px, 6.4vw, 27px);
+  }
+
+  .exp-slides .experience {
+    padding: 12px;
+  }
+
+  .exp-eyebrow {
     margin-bottom: 10px;
   }
 
-  .exp-spec-row {
-    padding-block: 5px;
-  }
-
+  /* The standout figure is decoration as much as information: it can lose a
+     third of its size without losing its role. */
   .exp-stat {
     margin-bottom: 4px;
+  }
+
+  .exp-stat-num {
+    font-size: 32px;
+  }
+
+  .experience-claim {
+    margin-bottom: 8px;
+    line-height: 1.22;
+  }
+
+  .exp-part {
+    margin-top: 10px;
+    margin-bottom: 0;
+  }
+
+  .exp-label {
+    margin-bottom: 6px;
+  }
+
+  .exp-part .experience-summary {
+    font-size: clamp(13px, 2.2svh, 16px);
+    line-height: 1.42;
+  }
+
+  .experience-points {
+    gap: 5px;
+  }
+
+  .experience-points li {
+    padding-left: 16px;
+    font-size: clamp(13px, 2.2svh, 16px);
+    line-height: 1.42;
+  }
+
+  /* Poste / mission / période: three ruled rows cost 96 px for text set at
+     10 px, which nobody reads on a phone anyway. Stripped of their rules and
+     of their labels they cost 55 px and gain a point of size — and the labels
+     are not missed, the three values read by themselves.
+     No separator between them: the mission wraps at this width, and a
+     mid-dot then opens a line instead of joining two. */
+  .exp-spec {
+    margin-top: 10px;
+  }
+
+  .exp-spec-row {
+    display: block;
+    gap: 0;
+    padding: 1px 0;
+    border: 0;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .exp-spec-row:first-child {
+    border-top: 0;
+  }
+
+  .exp-spec dt {
+    display: none;
+  }
+
+  .exp-spec dd {
+    color: var(--text-dim);
   }
 
   .exp-dots {
@@ -2810,20 +2906,33 @@ button.chip {
   }
 }
 
-/* Sur téléphone, le bloc parcours doit loger l'intro ET la fiche ET les
-   puces dans un seul écran : mesuré, 827 px de contenu pour 844 disponibles,
-   soit 3 px sous les puces — assez pour qu'elles disparaissent dès que la
-   barre d'outils de Safari se déplie.
-   La phrase d'appui de l'intro est ce qu'on peut retirer sans rien perdre :
-   la fiche juste en dessous dit la même chose, en plus concret et avec des
-   chiffres. On garde l'œil-de-bœuf et le titre, qui annoncent le bloc. */
-@media (max-width: 720px) {
-  .section-exp .spec-intro .spec-lead {
+/* ---------- really short screens (SE, mini, phone with a large text size) ----------
+   Measured on a 375 x 553 window — an iPhone SE with its toolbar out — the
+   compacted block still ran 32 px over and pushed its own title off the top
+   of the panel. Below 640 px of window the running poste/mission/période line
+   goes: it is the only piece the card can lose whole without the reading
+   breaking, since the eyebrow already carries the employer and the period is
+   in the text. The figure and the title give up a couple of sizes with it. */
+@media (max-width: 720px) and (max-height: 640px) {
+  .exp-spec {
     display: none;
   }
 
+  .exp-stat-num {
+    font-size: 26px;
+  }
+
+  .exp-eyebrow,
+  .experience-claim {
+    margin-bottom: 6px;
+  }
+
   .section-exp .spec-headline {
-    margin-bottom: 0;
+    font-size: clamp(19px, 5.4vw, 23px);
+  }
+
+  .exp-part {
+    margin-top: 8px;
   }
 }
 

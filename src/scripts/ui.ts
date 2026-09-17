@@ -213,6 +213,8 @@ if (header) {
 // The white sheet rises over the last screen of the dark part.
 const darkZone = document.querySelector<HTMLElement>(".dark-zone");
 const tearSheet = document.querySelector<HTMLElement>(".tear-sheet");
+const tearWindow = document.querySelector<HTMLElement>(".tear");
+const tearFilter = document.querySelector<HTMLElement>(".tear-filter");
 
 /* ---------- the profile → journey interlude plays itself ----------
    Past the threshold, the page unwinds on its own until the journey block
@@ -371,11 +373,22 @@ function onScroll(): void {
   const darkBottom = darkZone ? darkZone.offsetTop + darkZone.offsetHeight : 0;
   const hang = darkZone && marquee ? Math.max(0, vh - (darkBottom - triggerPage)) : 0;
 
-  if (tearSheet) {
-    // The sheet is anchored vh/2 below the window (inset -50vh in the CSS) and
-    // grows twice as fast as the scroll; the "hang" offset
-    // lowers it so that its edge starts exactly from the bottom of the screen.
-    const scale = (vh / 2 - hang + risen) / (vh * 2);
+  if (tearSheet && tearWindow && tearFilter) {
+    // The sheet fills its wrapper and grows from the wrapper's bottom edge,
+    // which hangs below the tear window by the slack the CSS gives it. So
+    // where the torn edge lands is: tear x wrapperHeight - overhang, counted
+    // up from the bottom of the window.
+    // Both terms are MEASURED, not assumed. They used to be hard-coded as
+    // vh/2 and 2vh, which locked the CSS into a slack of exactly half a
+    // screen — a slack so large that Safari iOS dropped the filter and the
+    // torn edge came up perfectly straight.
+    const fenetre = tearWindow.getBoundingClientRect();
+    const calque = tearFilter.getBoundingClientRect();
+    const debord = calque.bottom - fenetre.bottom;
+    const hauteur = calque.height || 1;
+    // The "hang" offset lowers the start so that the edge sets off from the
+    // very bottom of the screen.
+    const scale = (risen - hang + debord) / hauteur;
     tearSheet.style.setProperty("--tear", Math.min(1, Math.max(0, scale)).toFixed(4));
   }
 }

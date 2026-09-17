@@ -60,7 +60,7 @@ const iconesProjet: Record<IconeProjet, string> = {
          filter: the noise shreds the rectangle's top edge, and since that
          edge crosses a fixed noise field, the tear reshapes itself at
          every height. The negative inset leaves room for the distortion
-         (scale 220) without cropping it. -->
+         (scale 220, so 110 px of travel) without cropping it. -->
     <div class="tear" aria-hidden="true">
       <div class="tear-filter">
         <div class="tear-sheet"></div>
@@ -68,7 +68,16 @@ const iconesProjet: Record<IconeProjet, string> = {
     </div>
   </div>
 
-  <svg width="0" height="0" aria-hidden="true" style="position:absolute;pointer-events:none">
+  <!-- A one-pixel box, clipped, rather than width="0" height="0": Safari has
+       a long history of ignoring filters referenced from a zero-sized SVG,
+       and there the sheet comes up with a clean straight edge. The defs are
+       never painted, so the box costs nothing. -->
+  <svg
+    width="1"
+    height="1"
+    aria-hidden="true"
+    style="position:absolute;top:0;left:0;width:1px;height:1px;clip-path:inset(50%);pointer-events:none"
+  >
     <defs>
       <filter id="ink-edge" x="-10%" y="-10%" width="120%" height="120%">
         <feTurbulence type="fractalNoise" baseFrequency="0.015 0.02" numOctaves="3" seed="7" result="noise"></feTurbulence>
