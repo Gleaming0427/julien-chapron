@@ -1097,6 +1097,20 @@ button.chip {
   height: 450vh;
   margin-top: 8px;
   margin-inline: calc(-1 * var(--gutter));
+  /* The pinned panel is 100svh tall, the height of the window with the toolbar
+     SHOWING. On iOS the toolbar retracts as one scrolls: the window grows to
+     100lvh while the panel does not move — a band a few dozen pixels tall is
+     uncovered at the bottom, and the light zone's orange showed through it for
+     the whole of block 2. Growing the panel would push the carousel's dots
+     back under the toolbar when it is out: the very defect just fixed. So the
+     rail takes the panel's colour — orange until the shutter is drawn, dark
+     afterwards — and the uncovered band melts into it. */
+  background-color: var(--orange);
+  background-color: color-mix(
+    in srgb,
+    #0b0c0d calc(var(--fond-bloc2, 0) * 100%),
+    var(--orange)
+  );
 }
 
 /* Full screen, pinned at the very top: the background of the block thus passes
@@ -2813,6 +2827,25 @@ button.chip {
   }
 }
 
+/* ---------- iOS: nothing may clip above the carousel ----------
+   `overflow-x: clip` on the body is the reason the navbar, sticky at first,
+   used to scroll away with the page on the iPhone: Safari refuses to stick as
+   soon as an ancestor clips. The header was moved to `fixed`, but
+   .carousel-sticky cannot do the same — and it sits under the very same body.
+   With the pinning broken, the 450vh rail scrolls past in one go: the donut,
+   the title and the cards fly by without ever settling, and the light zone's
+   orange shows under the panel.
+   The clipping only earns its keep where a classic scrollbar widens 100vw
+   beyond the visible width — that is, on the desktop. On a touch screen the
+   scrollbars are overlays: measured, 100vw there is exactly the visible width,
+   no full-bleed block sticks out, and the 3D layer's overhang is already
+   removed at the source further down. */
+@media (pointer: coarse) {
+  body {
+    overflow-x: visible;
+  }
+}
+
 /* ---------- orientation : portrait seulement ----------
    Le site est bâti sur des blocs d'un écran de haut, avec une chorégraphie
    épinglée. Couché, un téléphone n'en montre plus qu'une bande de 390 px :
@@ -2869,18 +2902,23 @@ button.chip {
   }
 }
 
-/* ---------- pas de débordement latéral sur téléphone ----------
-   Le calque 3D du hero déborde de 12vw de chaque côté sur grand écran, pour
-   que son bord ne remonte pas dans le champ pendant la formation du globe.
-   Sur téléphone, ces 12vw font 47 px et c'est exactement l'excédent mesuré
-   de scrollWidth (437 pour 390 visibles).
-   On ne peut pas se reposer sur overflow-x: clip du body : il demande
-   Safari 16.4, et en dessous la valeur est ignorée — la page devient alors
-   déplaçable latéralement. `hidden` serait supporté partout, mais il crée un
-   conteneur de défilement qui casserait position: sticky, donc le carrousel.
-   On retire donc le débordement à la source ; le bord haut et bas, lui,
-   garde ses marges, c'est celui qui posait problème au scroll. */
-@media (max-width: 720px) {
+/* ---------- no lateral overflow on touch screens ----------
+   The hero's 3D layer hangs 12vw past each side on a large screen, so that its
+   edge never rises into view while the globe forms. On a phone those 12vw are
+   47 px, and that is exactly the measured excess of scrollWidth (437 for 390
+   visible).
+   We cannot lean on the body's overflow-x: clip: it needs Safari 16.4, and
+   below that the value is ignored — the page then becomes draggable sideways.
+   `hidden` would be supported everywhere, but it creates a scroll container
+   that would break position: sticky, hence the carousel.
+   So the overhang is removed at the source; the top and bottom edges keep
+   their margins, and it was the sides that scrolling suffered from.
+   The condition targets EVERY touch screen, not just the phone: on a tablet in
+   portrait (768 px) those 12vw are 92 px, exactly the measured scrollWidth
+   overflow. The body no longer clips anything on touch — it was breaking the
+   carousel's pinning under Safari iOS — so nothing catches that overhang
+   downstream any more. */
+@media (max-width: 720px), (pointer: coarse) {
   .hero-canvas-layer {
     left: 0;
     right: 0;

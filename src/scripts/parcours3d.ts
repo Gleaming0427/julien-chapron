@@ -405,7 +405,11 @@ export function initParcours3D(): void {
       const relache = spec < 1 ? 1 : Math.min(1, (itemOp + skillsOp) * 2.3);
       // Share of the screen covered by the panel, counted from the right.
       const couverture = noir * relache;
-      volet.style.setProperty("--fond-bloc2", couverture.toFixed(4));
+      // Written on the RAIL, not on the panel: the property is inherited, so
+      // the panel reads it as before, and the rail — which is what one glimpses
+      // under the pinned panel when the iOS toolbar retracts — can take its
+      // colour from it.
+      rail.style.setProperty("--fond-bloc2", couverture.toFixed(4));
 
       // Each point whitens WHEN THE PANEL'S EDGE PASSES IT, not according to a
       // common schedule. With a panel, a global whitening would bring back the

@@ -317,8 +317,11 @@ function onScroll(): void {
     const cadre = zoneClaire.getBoundingClientRect();
     const milieu = window.innerHeight / 2;
     const dansLaZoneClaire = cadre.top <= milieu && cadre.bottom >= milieu;
+    // The panel's coverage is written on the rail (see parcours3d): that is
+    // where it is read from, the panel itself only inherits it.
     const volet = Number(
-      document.querySelector<HTMLElement>(".parcours-fond")?.style.getPropertyValue("--fond-bloc2") ||
+      carouselRail?.style.getPropertyValue("--fond-bloc2") ||
+        document.querySelector<HTMLElement>(".parcours-fond")?.style.getPropertyValue("--fond-bloc2") ||
         "0",
     );
     progress.classList.toggle("sur-clair", dansLaZoneClaire && volet < 0.5);
