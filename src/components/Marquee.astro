@@ -6,9 +6,11 @@ interface Props {
   direction?: "left" | "right";
   /** mono (défaut) : stack technique · display : grands chiffres éditoriaux. */
   variant?: "mono" | "display";
+  /** Colle le bord inférieur (pour le bandeau juste au-dessus de la déchirure). */
+  tightBottom?: boolean;
 }
 
-const { items, direction = "left", variant = "mono" } = Astro.props;
+const { items, direction = "left", variant = "mono", tightBottom = false } = Astro.props;
 
 // Contenu statique (pas d'entrée utilisateur) : le set:html est sans risque.
 // Un item sur deux est en contour (outline), façon typographie éditoriale.
@@ -26,6 +28,7 @@ const half = items
     "marquee",
     direction === "right" && "marquee-right",
     variant === "display" && "marquee-display",
+    tightBottom && "marquee-tight-bottom",
   ]}
   aria-hidden="true"
 >

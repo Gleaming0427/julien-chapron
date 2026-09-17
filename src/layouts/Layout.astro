@@ -14,13 +14,6 @@ const base = import.meta.env.BASE_URL;
 const url = (path: string) =>
   path === "/" ? (base === "/" ? "/" : base + "/") : base === "/" ? path : base + path;
 
-const nav = [
-  { href: "/", label: "CV" },
-  { href: "/projets", label: "Projets" },
-  { href: "/apps", label: "Apps" },
-];
-
-const current = Astro.url.pathname.replace(base, "/").replace(/\/+$/, "") || "/";
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
 
@@ -29,6 +22,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
@@ -45,52 +39,61 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
       rel="stylesheet"
     />
     <!-- Marque JS actif pour les révélations au scroll : sans JS, tout reste visible. -->
     <script is:inline>document.documentElement.classList.add("js");</script>
   </head>
   <body>
-    <a class="skip-link" href="#main">Aller au contenu</a>
-    <div id="scroll-progress" aria-hidden="true"></div>
+    <div id="scroll-progress" aria-hidden="true">
+      <span class="rail"><span class="tick"></span></span>
+      <span class="pct">000%</span>
+    </div>
 
     <header class="site-header">
       <div class="inner">
-        <a class="site-name" href={url("/")}><span class="prompt">$</span> ~/julien-chapron</a>
-        <nav class="site-nav" aria-label="Navigation principale">
-          {
-            nav.map((item) => (
-              <a
-                class={current === item.href ? "active" : undefined}
-                href={url(item.href)}
-                aria-current={current === item.href ? "page" : undefined}
-              >
-                {item.label}
-              </a>
-            ))
-          }
-        </nav>
+        <a class="site-name" href={url("/")}>
+          <span class="nav-text-col">
+            <span class="nav-text-row">Home</span>
+            <span class="nav-text-row" aria-hidden="true">Home</span>
+          </span>
+        </a>
+        <a class="axiom-btn axiom-btn-nav" href={`mailto:${identity.email}`}>
+          <span class="axiom-btn-text-col">
+            <span class="axiom-btn-text-row">Contactez-moi</span>
+            <span class="axiom-btn-text-row" aria-hidden="true">Contactez-moi</span>
+          </span>
+          <span class="axiom-btn-arrow-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h17.4" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
+          </span>
+        </a>
+        <button class="burger" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="20" y2="17" />
+          </svg>
+        </button>
       </div>
     </header>
+
+    <div class="menu-voile" aria-hidden="true">
+      <nav class="menu" aria-label="Navigation principale">
+        <a class="menu-lien" href={url("/")}>Accueil</a>
+        <a class="axiom-btn" href={`mailto:${identity.email}`}>
+          <span class="axiom-btn-text-col">
+            <span class="axiom-btn-text-row">Contactez-moi</span>
+            <span class="axiom-btn-text-row" aria-hidden="true">Contactez-moi</span>
+          </span>
+          <span class="axiom-btn-arrow-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h17.4" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
+          </span>
+        </a>
+      </nav>
+    </div>
 
     <main class="container" id="main" tabindex="-1">
       <slot />
     </main>
-
-    <footer class="site-footer">
-      <div class="inner">
-        <div class="footer-links">
-          <a href={identity.github} target="_blank" rel="noopener noreferrer">GitHub</a>
-          <a href={identity.npm} target="_blank" rel="noopener noreferrer">npm</a>
-          <a href={`mailto:${identity.email}`}>{identity.email}</a>
-          <a href={identity.phoneHref}>{identity.phone}</a>
-        </div>
-        <div>© 2026 Julien Chapron — {identity.role} · <span class="prompt">$</span> exit 0<span class="cursor"></span></div>
-      </div>
-    </footer>
-
-    <button id="to-top" type="button" aria-label="Revenir en haut de page">↑</button>
 
     <script>
       import "../scripts/ui";

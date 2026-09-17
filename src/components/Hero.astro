@@ -4,19 +4,13 @@ import { identity } from "../data/cv";
 const base = import.meta.env.BASE_URL;
 const pdfUrl = base === "/" ? "/CV_Julien_Chapron.pdf" : `${base}/CV_Julien_Chapron.pdf`;
 
-// Séquence de démarrage typée puis invite de commande — voir src/scripts/terminal.ts.
-const bootLines = [
-  { cmd: "whoami", out: [`${identity.name} — ${identity.role} · ${identity.experience}`] },
-  { cmd: "cat .stack", out: [identity.headline] },
-  { cmd: "./status", out: [`✓ ${identity.availability}`] },
-];
 ---
 
 <section class="hero">
   <!-- En-tête sobre réservé à l'impression du CV. -->
   <div class="print-only">
     <h1>{identity.name}</h1>
-    <p class="print-role">{identity.role} · {identity.experience}</p>
+    <p class="print-role">{identity.role}</p>
     <p class="print-contact">
       {identity.location} · {identity.phone} · {identity.email} · {identity.githubLabel}
     </p>
@@ -28,50 +22,24 @@ const bootLines = [
       <div class="hero-title">
         <p class="hero-overline"><span class="prompt">$</span> qui suis-je</p>
         <h1 class="hero-name">{identity.name}</h1>
-        <p class="hero-sub">Développeur <em>full-stack</em> — 7 ans d'expérience · remote ou hybride Toulouse</p>
-      </div>
-      <div class="hero-links">
-        <a class="chip" href={pdfUrl}>⬇ CV (PDF)</a>
-        <a class="chip" href={identity.phoneHref}>☎ {identity.phone}</a>
-        <a class="chip" href={`mailto:${identity.email}`}>✉ {identity.email}</a>
-        <button class="chip" type="button" data-copy={identity.email}>⧉ copier l'email</button>
-        <a class="chip" href={identity.github} target="_blank" rel="noopener noreferrer">⌥ {identity.githubLabel}</a>
-        <a class="chip" href={identity.npm} target="_blank" rel="noopener noreferrer">⌘ {identity.npmLabel}</a>
+        <p class="hero-sub">Développeur <em>full-stack</em> · remote ou hybride Toulouse</p>
+        <div class="hero-actions">
+          <a class="axiom-btn" href={pdfUrl} download="CV_Julien_Chapron.pdf">
+            <span class="axiom-btn-text-col">
+              <span class="axiom-btn-text-row">Télécharger mon CV</span>
+              <span class="axiom-btn-text-row" aria-hidden="true">Télécharger mon CV</span>
+            </span>
+            <span class="axiom-btn-arrow-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h17.4" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
+            </span>
+          </a>
+        </div>
       </div>
     </div>
 
     <div class="hero-stage" aria-hidden="true">
-      <div class="hero-stage-label"><span class="prompt">$</span> render --wireframe --follow-cursor</div>
+      <div class="hero-stage-label"><span class="hero-dot"></span> disponible · Toulouse</div>
     </div>
   </div>
 
-  <div class="terminal-window">
-    <div class="terminal-bar">
-      <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
-      <span class="title">guest@julien-chapron — zsh</span>
-    </div>
-    <div class="terminal-body" id="term-body">
-      <div class="terminal-output" id="term-output"></div>
-      <div class="term-input-line">
-        <span class="prompt">guest@julien-chapron:~$</span>
-        <input
-          id="term-input"
-          type="text"
-          autocomplete="off"
-          autocapitalize="off"
-          spellcheck="false"
-          enterkeyhint="go"
-          disabled
-          placeholder='tapez "help"'
-          aria-label="Terminal interactif — tapez help pour la liste des commandes"
-        />
-      </div>
-    </div>
-  </div>
-
-  <script type="application/json" id="terminal-boot" is:inline set:html={JSON.stringify(bootLines)}></script>
 </section>
-
-<script>
-  import "../scripts/terminal";
-</script>

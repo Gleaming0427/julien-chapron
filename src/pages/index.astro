@@ -3,27 +3,14 @@ import Layout from "../layouts/Layout.astro";
 import Hero from "../components/Hero.astro";
 import Marquee from "../components/Marquee.astro";
 import Section from "../components/Section.astro";
-import Tag from "../components/Tag.astro";
-import ProjectCard from "../components/ProjectCard.astro";
+import type { IconeProjet } from "../data/cv";
 import {
+  identity,
   profile,
   experiences,
   skills,
   personalProjects,
-  education,
-  languages,
-  before,
 } from "../data/cv";
-
-// Variante de couleur des tags selon la catégorie de compétence.
-const skillVariants: Record<string, string> = {
-  "Langages": "lang",
-  "Front-end": "front",
-  "Back-end": "back",
-  "Cloud & infrastructure": "cloud",
-  "Tests & CI/CD": "test",
-  "Méthodes": "method",
-};
 
 // Bandes défilantes pleine largeur, façon sites éditoriaux primés.
 const marqueeSkills = [
@@ -32,88 +19,263 @@ const marqueeSkills = [
   "PostgreSQL", "Firebase", "GitLab CI", "GitHub Actions",
 ];
 
-const marqueeStats = [
-  "7 ans d'expérience", "5 000 ingénieurs Renault", "200 000 véhicules électriques",
-  "15 versions npm", "11 dépôts", "librairie open source", "disponible immédiatement",
-];
+// Icônes des étapes projets, en trait, posées dans la boîte de tête.
+const iconesProjet: Record<IconeProjet, string> = {
+  serveur:
+    '<rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>',
+  chapeau:
+    '<path d="M4.5 11.5c.5-2.9 3.6-5 7.5-5s7 2.1 7.5 5"/><circle cx="8.5" cy="15.5" r="2.4"/><circle cx="15.5" cy="15.5" r="2.4"/><path d="M10.9 15.5h2.2"/><path d="M6.1 15.5H3.5"/><path d="M17.9 15.5h2.6"/>',
+  telephone:
+    '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>',
+  ia: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>',
+};
+
 ---
 
 <Layout
-  title="Julien Chapron — Développeur Full-Stack"
-  description="CV de Julien Chapron, développeur full-stack TypeScript / React / Node.js, 7 ans d'expérience. Projets personnels et applications."
+  title="Julien Chapron, Développeur Full-Stack"
+  description="CV de Julien Chapron, développeur full-stack TypeScript / React / Node.js. Projets personnels et applications."
 >
-  <Hero />
+  <!-- Partie sombre : le hero occupe le premier écran, le terminal le
+       second. La fenêtre de déchirure est ancrée sur son dernier écran :
+       le contenu sombre défile derrière pendant que la feuille monte. -->
+  <div class="dark-zone">
+    <Hero />
 
-  <Marquee items={marqueeSkills} />
+    <div class="bandeau-block">
+      <div class="bandeau-stat" aria-hidden="true">
+        <span class="bandeau-stat-inner">
+          <span>+7 ans d'exp</span>
+          <span class="sep">·</span>
+          <span>+15 apps en production</span>
+          <span class="sep">·</span>
+          <span>+35 dépôts de production</span>
+        </span>
+      </div>
+      <Marquee items={marqueeSkills} tightBottom />
+    </div>
 
-  <Section command="cat profil.md" index="01">
+    <!-- La feuille blanche monte du bas : un simple rectangle en
+         scaleY depuis son bord bas. Le conteneur qui l'enveloppe porte le
+         filtre : le bruit déchiquette le bord haut du rectangle, et comme
+         ce bord traverse un champ de bruit fixe, la déchirure se remodèle
+         à chaque hauteur. L'inset négatif laisse la place à la déformation
+         (scale 220) sans la rogner. -->
+    <div class="tear" aria-hidden="true">
+      <div class="tear-filter">
+        <div class="tear-sheet"></div>
+      </div>
+    </div>
+  </div>
+
+  <svg width="0" height="0" aria-hidden="true" style="position:absolute;pointer-events:none">
+    <defs>
+      <filter id="ink-edge" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.015 0.02" numOctaves="3" seed="7" result="noise"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="220" xChannelSelector="R" yChannelSelector="G" result="displaced"></feDisplacementMap>
+        <feGaussianBlur in="displaced" stdDeviation="1.8" result="presmooth"></feGaussianBlur>
+        <feComponentTransfer in="presmooth" result="cut">
+          <feFuncA type="discrete" tableValues="0 0 0 0 0 1 1 1 1 1"></feFuncA>
+        </feComponentTransfer>
+        <feGaussianBlur in="cut" stdDeviation="0.4"></feGaussianBlur>
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="light-zone">
+    <!-- Le carrousel : cat profil est le premier écran, épinglé au centre,
+         puis la molette fait défiler les blocs 2-5 horizontalement. -->
+    <div class="carousel-rail">
+      <div class="carousel-sticky">
+        <div class="carousel-track">
+          <div class="carousel-item carousel-item-first">
+  <Section command="cat profil.md">
     <p>{profile}</p>
   </Section>
+          </div>
+          <div class="carousel-item carousel-item-dark">
+  <Section command="experience --all" class="section-exp">
+    <div class="spec-layout">
+    <div class="spec-intro">
+      <p class="spec-eyebrow">parcours</p>
+      <h3 class="spec-headline">Sept ans en production. <span>Toujours en équipe.</span></h3>
+      <p class="spec-lead">Trois missions, de la recherche publique à la voiture électrique connectée.</p>
+    </div>
+    <div class="exp-carousel">
+      <div class="exp-slides">
+        {
+          experiences.map((exp, i) => (
+            <article class:list={["experience", i === 0 && "is-active"]} data-slide={i}>
+              <span class="experience-watermark" aria-hidden="true">{`0${i + 1}`}</span>
+              <div class="experience-body">
+                <p class="exp-eyebrow"><span class="exp-mark" aria-hidden="true"></span>{exp.metric}</p>
 
-  <Section command="experience --all" index="02">
-    <div class="timeline">
+                <div class="exp-stat">
+                  <span class="exp-stat-num">{exp.stat}</span>
+                  <span class="exp-stat-unit">{exp.statUnit}</span>
+                </div>
+                <p class="experience-claim">{exp.claim}</p>
+
+                <div class="exp-part">
+                  <p class="exp-label">Le contexte</p>
+                  <p class="experience-summary">{exp.summary}</p>
+                </div>
+
+                <div class="exp-part">
+                  <p class="exp-label">Ce que j'ai livré</p>
+                  <ul class="experience-points">
+                    {exp.bullets.map((point) => <li>{point}</li>)}
+                  </ul>
+                </div>
+
+                <dl class="exp-spec">
+                  <div class="exp-spec-row"><dt>Poste</dt><dd>{exp.title}</dd></div>
+                  <div class="exp-spec-row"><dt>Mission</dt><dd>{exp.company}</dd></div>
+                  <div class="exp-spec-row"><dt>Période</dt><dd>{exp.period}</dd></div>
+                </dl>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+      <div class="exp-dots" role="tablist" aria-label="Choisir une expérience">
+        {
+          experiences.map((exp, i) => (
+            <button
+              type="button"
+              class:list={["exp-dot", i === 0 && "is-active"]}
+              data-go={i}
+              role="tab"
+              aria-selected={i === 0 ? "true" : "false"}
+            >
+              <span class="visually-hidden">{exp.company}</span>
+            </button>
+          ))
+        }
+      </div>
+    </div>
+    </div>
+  </Section>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- À partir d'ici, plus de carrousel épinglé : ce sont des sections
+         normales, qu'on atteint en faisant simplement défiler la page. -->
+  <Section command="cat competences.md" class="section-skills section-apres">
+    <p class="spec-eyebrow">compétences</p>
+    <h3 class="spec-headline">Spécifications techniques. <span>Ce que j'utilise vraiment.</span></h3>
+    <p class="spec-lead">
+      Sur chaque ligne, les deux premières sont celles où j'ai le plus
+      d'heures de vol.
+    </p>
+    <div class="skill-sheet">
       {
-        experiences.map((exp) => (
-          <article class="experience">
-            <div class="experience-head">
-              <h3>{exp.title} — <span class="company">{exp.company}</span></h3>
-              <span class="period">{exp.period}</span>
+        skills.map((group, i) => (
+          <div class="skill-row" style={`--d:${i}`}>
+            <h4 class="skill-cat">{group.category}</h4>
+            <ul class="skill-items">
+              {group.skills.map((skill) => <li>{skill}</li>)}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </Section>
+
+  <Section command="ls ~/projets-personnels" class="section-apres section-projets">
+    <p class="spec-eyebrow">projets</p>
+    <h3 class="spec-headline">Projets personnels. <span>Trois publiés, un prototype.</span></h3>
+    <p class="spec-lead">
+      Une librairie sur npm, un outil d'analyse de vulnérabilités en open
+      source, une application sur le Play Store.
+    </p>
+    <!-- Les quatre projets en étapes, façon power path Axiom : une grille
+         bordée d'un filet, chaque étape en colonne — numéro et icône en
+         tête, titre et description au centre, mention en pied. -->
+    <div class="projet-grille">
+      {personalProjects.map((project, i) => (
+        <article class="projet-etape">
+          <div class="projet-tete">
+            <span class="projet-icone" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={iconesProjet[project.icon]}></svg>
+            </span>
+            <span class="projet-mesure">projet-0{i + 1}</span>
+          </div>
+          <div class="projet-corps">
+            <h4 class="projet-titre">{project.name}</h4>
+            <p class="projet-texte">{project.description}</p>
+          </div>
+          <footer class="projet-pied">
+            <p class="projet-note">{project.tagline}</p>
+          </footer>
+        </article>
+      ))}
+    </div>
+  </Section>
+
+    </div>
+
+  <!-- Pied de page façon Axiom : la feuille orange revient, encre sombre,
+       sans le grand énoncé. -->
+  <footer class="site-footer">
+    <div class="footer-contenu">
+      <div class="footer-haut">
+        <div class="footer-propos">
+          <h2>Disponible pour votre équipe.</h2>
+          <p>Dites-moi ce que vous construisez, on regarde ensemble ce que j'y apporte.</p>
+        </div>
+        <div class="footer-droite">
+          <dl class="footer-stats">
+            <div class="footer-stat">
+              <dt>expérience</dt>
+              <dd>7 ans</dd>
             </div>
-            <p class="context">{exp.context}</p>
-            <ul>
-              {exp.bullets.map((bullet) => <li>{bullet}</li>)}
-            </ul>
-            {exp.stack && (
-              <div class="stack"><strong>Environnement technique :</strong> {exp.stack}</div>
-            )}
-          </article>
-        ))
-      }
-    </div>
-  </Section>
+            <div class="footer-stat">
+              <dt>apps en production</dt>
+              <dd>+15</dd>
+            </div>
+          </dl>
+          <a class="axiom-btn axiom-btn-dark" href={`mailto:${identity.email}`}>
+            <span class="axiom-btn-text-col">
+              <span class="axiom-btn-text-row">Contactez-moi</span>
+              <span class="axiom-btn-text-row" aria-hidden="true">Contactez-moi</span>
+            </span>
+            <span class="axiom-btn-arrow-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h17.4" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
+            </span>
+          </a>
+        </div>
+      </div>
 
-  <Section command="cat competences.md" index="03">
-    <div class="skills-grid">
-      {
-        skills.map((group) => (
-          <div class="skill-group">
-            <h3>## {group.category}</h3>
-            <ul>
-              {group.skills.map((skill) => <li><Tag label={skill} variant={skillVariants[group.category]} /></li>)}
-            </ul>
-          </div>
-        ))
-      }
-    </div>
-  </Section>
+      <div class="footer-separateur" aria-hidden="true"></div>
 
-  <Section command="ls ~/projets-personnels" index="04">
-    <div class="cards">
-      {personalProjects.map((project) => <ProjectCard project={project} />)}
-    </div>
-  </Section>
+      <div class="footer-corps">
+        <div class="footer-col">
+          <p class="footer-titre">contact</p>
+          <ul class="footer-liste">
+            <li><a href={identity.phoneHref}>{identity.phone}</a></li>
+            <li><a href={`mailto:${identity.email}`}>{identity.email}</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <p class="footer-titre">ailleurs</p>
+          <ul class="footer-liste">
+            <li>
+              <a class="footer-lien" href={identity.github} target="_blank" rel="noopener noreferrer">GitHub</a>
+            </li>
+            <li>
+              <a class="footer-lien" href={identity.npm} target="_blank" rel="noopener noreferrer">npm</a>
+            </li>
+          </ul>
+        </div>
+      </div>
 
-  <Section command="cat formation.md" index="05">
-    <div class="edu-list">
-      {
-        education.map((item) => (
-          <div class="edu-item">
-            <h3>{item.title}</h3>
-            <span class="detail">{item.detail}</span>
-          </div>
-        ))
-      }
+      <div class="footer-bas">
+        <p>© 2026 {identity.name}</p>
+        <p>{identity.role} · Toulouse</p>
+      </div>
     </div>
-    <div class="lang-list">
-      {
-        languages.map((lang) => (
-          <span class="tag"><strong>{lang.name}</strong> — {lang.level}</span>
-        ))
-      }
-    </div>
-    <div class="aside">
-      <span class="icon">💬</span>{before}
-    </div>
-  </Section>
-  <Marquee items={marqueeStats} direction="right" variant="display" />
+  </footer>
 </Layout>

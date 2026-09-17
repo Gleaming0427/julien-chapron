@@ -2,17 +2,16 @@
 interface Props {
   /** Commande affichée dans le titre, façon terminal. */
   command: string;
-  /** Numéro éditorial en filigrane (01, 02…). */
-  index?: string;
+  /** Classe(s) supplémentaires, fusionnées sur la section. */
+  class?: string;
 }
 
-const { command, index } = Astro.props;
+const { command, class: extraClass } = Astro.props;
 ---
 
-<section class="section reveal">
+<section class:list={["section", extraClass]}>
   <h2 class="section-title">
-    <span><span class="prompt">$</span> <span class="cmd">{command}</span></span>
-    {index && <span class="section-index" aria-hidden="true">{index}</span>}
+    <span class="prompt">$</span> <span class="cmd">{command}</span>
   </h2>
   <slot />
 </section>

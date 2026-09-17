@@ -1,6 +1,19 @@
-// Contenu du CV — source : CV_Julien_Chapron_2026.pdf (sept. 2026)
+// Contenu du CV, source : CV_Julien_Chapron_2026.pdf (sept. 2026)
 
 export interface Experience {
+  /** Ce que la mission a produit, en une phrase. C'est l'accroche du bloc :
+      elle annonce un résultat, pas un intitulé de poste. Toujours adossée à
+      un chiffre vérifiable, sinon elle sonne creux sur un CV de dev. */
+  claim: string;
+  /** Le chiffre marquant de la mission, affiché en capitales dans l'en-tête
+      du bloc. Il complète l'accroche, il ne la répète pas. */
+  metric: string;
+  /** Le chiffre mis en avant dans l'en-tête de la fiche, et son unité. */
+  stat: string;
+  statUnit: string;
+  /** L'unique phrase d'appui affichée sous l'accroche. Le site vend, le PDF
+      documente : le détail reste dans `bullets`, qui n'est pas affiché ici. */
+  summary: string;
   title: string;
   company: string;
   period: string;
@@ -14,6 +27,9 @@ export interface Link {
   href: string;
 }
 
+/** Icône d'étape du bloc projets, une par projet. */
+export type IconeProjet = "serveur" | "chapeau" | "telephone" | "ia";
+
 export interface PersonalProject {
   name: string;
   tagline: string;
@@ -21,16 +37,7 @@ export interface PersonalProject {
   description: string;
   stack: string;
   links: Link[];
-}
-
-export interface App {
-  name: string;
-  emoji: string;
-  type: string;
-  status: string;
-  description: string;
-  stack: string;
-  links: Link[];
+  icon: IconeProjet;
 }
 
 export interface SkillGroup {
@@ -59,46 +66,91 @@ export const identity = {
   availability: "Disponible immédiatement · Remote ou hybride Toulouse",
 };
 
+// « Toujours en équipe » reprend mot pour mot l'accroche du bloc parcours :
+// les deux formulations doivent rester identiques, sinon le site se contredit
+// d'un écran à l'autre.
+// Volontairement sobre. « Sur ma dernière mission » plutôt que « chez
+// Renault » : la mission passait par CELAD. « Des applications de supervision
+// sur une flotte » plutôt que « la supervision de » : il a construit les
+// outils, il ne pilotait pas la flotte. Et « environ » devant le chiffre,
+// qui est un ordre de grandeur. Chaque phrase doit pouvoir être défendue
+// telle quelle en entretien.
 export const profile =
-  "Développeur full-stack depuis 7 ans, principalement sur des applications web internes : TypeScript, React et Node.js, en API REST et GraphQL, avec conteneurisation Docker / Kubernetes et intégration continue. Quatre ans chez Renault sur des outils internes destinés aux ingénieurs : documentation de l'API des véhicules électriques et supervision de flotte, dans des équipes de 1 à 11 développeurs. Depuis 2026, je développe et publie mes propres projets en TypeScript et Node.js, dont une librairie serverless publiée sur npm. Certification AWS Solutions Architect Associate (SAA-C03) en préparation, examen prévu au troisième trimestre 2026.";
+  "Sept ans à construire des applications web, toujours en équipe. Sur ma dernière mission : un portail de visualisation d'API suivi par 5 000 ingénieurs Renault, puis des applications de supervision sur une flotte d'environ 200 000 véhicules électriques. Mon métier, c'est surtout d'entrer dans du code existant et de le faire évoluer sans rien casser. À côté, j'aime publier mes propres projets, en lien avec ma veille technique.";
 
 export const experiences: Experience[] = [
   {
+    claim: "200 000 véhicules électriques sous supervision.",
+    metric: "5 000 utilisateurs",
+    stat: "200 000",
+    statUnit: "véhicules",
+    summary: "Quatre ans sur des outils internes pour les véhicules électriques, en équipes de 3 à 11 développeurs et sur plus de 20 dépôts.",
     title: "Développeur Full-Stack",
     company: "CELAD, mission Renault Ampere Software Technology",
     period: "2022 – 2026",
-    context: "Automobile, véhicule électrique — outils internes : documentation d'API et supervision de flotte · Full remote",
+    context: "Automobile, véhicule électrique, outils internes : documentation d'API et supervision de flotte · Full remote",
     bullets: [
-      "Portail de documentation de l'API du véhicule, utilisé par 5 000 ingénieurs Renault : développement front-end React.js et back-end Node.js / TypeScript, en API REST et GraphQL. Équipe de 3 à 11 développeurs, interventions sur 11 dépôts.",
-      "Deux applications back-end de gestion de flotte, de 100 000 à 200 000 véhicules électriques : envoi de configurations à distance aux véhicules, récupération et traitement des données remontées. Équipe de 1 à 3 développeurs, puis seul sur ce périmètre de 2025 à 2026, sur 7 à 8 dépôts.",
-      "Tests unitaires et tests d'intégration (Jest, Cypress), participation aux revues de code.",
-      "Déploiements Docker / Kubernetes et pipelines d'intégration continue GitLab CI.",
-      "Sur GCP : ajout de bases de données et de Cloud Functions dans une architecture existante, et diagnostic d'incidents en production lors d'une migration interne d'architecture.",
+      "Portail de documentation de l'API véhicule, suivi par 5 000 ingénieurs Renault.",
+      "Deux back-ends de flotte : configuration à distance et traitement des données remontées.",
+      "Déploiements Docker / Kubernetes, intégration continue GitLab CI, tests Jest et Cypress.",
     ],
     stack: "React.js, Node.js, TypeScript, GraphQL, API REST, Jest, Cypress, Docker, Kubernetes, GCP, GitLab CI, Git, Linux",
   },
   {
+    // Vue.js et non React : vérifié sur le catalogue en ligne, dont la racine
+    // porte la clé interne __vue__ et les classes Vuetify (v-application,
+    // v-navigation-drawer). Aucun marqueur React nulle part. La version —
+    // Vue 2 / Vuetify 2 — correspond à l'époque de la mission, donc il ne
+    // s'agit pas d'une réécriture postérieure. Ne pas « corriger » en React.
+    // « Atmosphériques » plutôt qu'« environnementales » : c'est ce qu'AERIS
+    // héberge réellement — aérosols, ozone, gaz à effet de serre, nuages,
+    // qualité de l'air. Le mot est plus précis, donc plus crédible.
+    // Le chiffre retenu est le nombre de centres fédérés (4), et non la
+    // taille du catalogue : celle-ci a grossi depuis 2022, la revendiquer
+    // aujourd'hui reviendrait à s'attribuer ce qui est arrivé après.
+    claim: "Rendre trouvables les données de l'atmosphère.",
+    metric: "recherche publique",
+    stat: "4",
+    statUnit: "centres fédérés",
+    summary: "Le catalogue du pôle AERIS, qui rassemble les données atmosphériques de quatre centres : satellite, sol, aéroporté et campagnes de mesure.",
     title: "Développeur Front-End",
-    company: "CNRS, Laboratoire AERIS",
+    company: "CNRS, pôle de données AERIS",
     period: "2022",
-    context: "Recherche publique, données environnementales · Toulouse",
+    context: "Recherche publique, données atmosphériques · Toulouse",
     bullets: [
-      "Évolution de l'interface du catalogue de données environnementales : développement de composants React.js et intégration de données.",
+      "Évolutions de l'interface de recherche : facettes par paramètre, instrument, plateforme et emprise géographique.",
+      "Composants Vue.js réutilisables pour le reste du catalogue.",
+      "Intégration des jeux de données du pôle dans l'interface.",
     ],
   },
   {
+    // Ethics Group n'est pas un éditeur de logiciels : c'est un cabinet de
+    // transformation des organisations et des territoires, spécialisé dans la
+    // concertation publique (concertation CNDP Verkor, plan de gestion du
+    // Canal du Midi, Réseau Express Vélo de Toulouse Métropole, missions
+    // Airbus et Ariane Group). Les applications étaient l'outillage de ce
+    // métier — c'est ce que dit désormais la fiche.
+    // « Temps réel » a été retiré : le terme ne décrit rien. Ce qui compte
+    // est l'effet observable, l'absence de rechargement.
+    claim: "Outiller la consultation, du questionnaire au résultat.",
+    metric: "front et back",
+    stat: "3",
+    statUnit: "ans",
+    summary: "Trois ans chez un cabinet de transformation des organisations et des territoires, sur ses applications de consultation et de diagnostic.",
     title: "Développeur Full-Stack",
     company: "Ethics Group",
-    period: "2018 – 2021",
-    context: "Édition logicielle, sondages et tests de personnalité · Toulouse",
+    period: "2019 – 2021",
+    context: "Conseil en transformation, applications de consultation et de diagnostic · Toulouse",
     bullets: [
-      "Applications web de sondages et de tests de personnalité : front-end Vue.js (Vuex), back-end Laravel (PHP), fonctionnalités temps réel en WebSocket, conception et intégration de bases MySQL.",
+      "Applications de questionnaires et de tests de personnalité, du front-end au back-end.",
+      "Front-end Vue.js avec Vuex, back-end Laravel, bases MySQL conçues et intégrées.",
+      "Réponses poussées au navigateur en WebSocket : les résultats évoluent sans rechargement.",
     ],
   },
 ];
 
 export const skills: SkillGroup[] = [
-  { category: "Langages", skills: ["TypeScript", "JavaScript (ES2024)", "Python", "PHP", "SQL"] },
+  { category: "Langages", skills: ["TypeScript", "JavaScript", "Python", "PHP", "SQL"] },
   { category: "Front-end", skills: ["React.js", "React Native", "Vue.js (Vuex)", "Astro", "HTML / CSS"] },
   { category: "Back-end", skills: ["Node.js (Express)", "API REST", "GraphQL", "Laravel", "PostgreSQL", "MySQL"] },
   { category: "Cloud & infrastructure", skills: ["Docker", "Kubernetes", "GCP", "AWS Lambda", "DynamoDB", "SST", "Firebase", "Linux"] },
@@ -111,8 +163,9 @@ export const personalProjects: PersonalProject[] = [
     name: "api-gateway-core",
     tagline: "librairie publiée sur npm",
     kind: "open source",
+    icon: "serveur",
     description:
-      "Toolkit d'API gateway serverless : limitation de débit token-bucket avec store enfichable, validation de jetons JWT RS256, validation de schémas typée et erreurs typées. Logique sans dépendance à un fournisseur cloud, couverte par des tests, avec intégration continue et déploiement multi-région. 15 versions publiées entre mai et juin 2026.",
+      "Toolkit d'API gateway serverless : limitation de débit token-bucket, validation de jetons JWT et erreurs typées, sans dépendance à un fournisseur cloud.",
     stack: "TypeScript, Node.js (ESM), Zod, jose, SST, AWS Lambda, DynamoDB, GitHub Actions",
     links: [
       { label: "@armored1486/api-gateway-core · MIT", href: "https://www.npmjs.com/package/@armored1486/api-gateway-core" },
@@ -121,8 +174,9 @@ export const personalProjects: PersonalProject[] = [
   },
   {
     name: "cve-triage",
-    tagline: "détection de vulnérabilités exploitables",
+    tagline: "détection de vulnérabilités",
     kind: "open source",
+    icon: "chapeau",
     description:
       "Trouve les CVE qui comptent vraiment dans votre code : recoupées contre OSV/GHSA, analysées par reachability, avec correctifs exacts.",
     stack: "Python, Mistral AI",
@@ -130,10 +184,11 @@ export const personalProjects: PersonalProject[] = [
   },
   {
     name: "Pims Pocket",
-    tagline: "application mobile de gestion d'argent de poche",
+    tagline: "application mobile d'argent de poche",
     kind: "projet personnel",
+    icon: "telephone",
     description:
-      "Double interface parent / enfant : architecture multi-rôles avec règles de sécurité Firestore, authentification enfant par code et PIN, synchronisation temps réel et migration de données idempotente en production.",
+      "Double interface parent / enfant : architecture multi-rôles, authentification par code et PIN, synchronisation temps réel et règles de sécurité Firestore.",
     stack: "React Native (Expo Router), TypeScript, Zustand, Firebase, NativeWind",
     links: [
       { label: "Google Play", href: "https://play.google.com/store/apps/details?id=com.pimspocket.app" },
@@ -144,59 +199,11 @@ export const personalProjects: PersonalProject[] = [
     name: "Lecture de plateau de jeu par vision IA",
     tagline: "preuve de concept",
     kind: "preuve de concept",
+    icon: "ia",
     description:
-      "Application full-stack lisant un plateau de jeu physique à partir d'une photo : identification du numéro, de la couleur et des jetons de chaque carte, via extraction structurée par modèle de vision.",
+      "Application full-stack lisant un plateau de jeu à partir d'une photo : numéro, couleur et jetons de chaque carte, extraits par un modèle de vision.",
     stack: "TypeScript, Node.js / Express, React / Vite, GPT-4o Vision",
     links: [],
-  },
-];
-
-export const apps: App[] = [
-  {
-    name: "Pims Pocket",
-    emoji: "💰",
-    type: "Application mobile",
-    status: "sur le Play Store",
-    description:
-      "Gestion d'argent de poche à double interface parent / enfant : sécurité Firestore multi-rôles, code + PIN enfant, synchronisation temps réel.",
-    stack: "React Native (Expo Router) · TypeScript · Firebase",
-    links: [
-      { label: "Google Play", href: "https://play.google.com/store/apps/details?id=com.pimspocket.app" },
-      { label: "GitHub", href: "https://github.com/Gleaming0427/pims-pocket" },
-    ],
-  },
-  {
-    name: "Lecture de plateau de jeu par vision IA",
-    emoji: "🎲",
-    type: "Preuve de concept · vision IA",
-    status: "POC",
-    description:
-      "Lecture d'un plateau de jeu physique à partir d'une photo : identification du numéro, de la couleur et des jetons de chaque carte.",
-    stack: "TypeScript · Node.js / Express · GPT-4o Vision",
-    links: [],
-  },
-  {
-    name: "api-gateway-core",
-    emoji: "🔌",
-    type: "Librairie npm",
-    status: "open source · MIT",
-    description:
-      "Toolkit d'API gateway serverless : rate limiting token-bucket, validation JWT RS256, schémas typés. 15 versions publiées en mai–juin 2026.",
-    stack: "TypeScript · SST · AWS Lambda · DynamoDB",
-    links: [
-      { label: "npm", href: "https://www.npmjs.com/package/@armored1486/api-gateway-core" },
-      { label: "GitHub", href: "https://github.com/Gleaming0427/api-gateway" },
-    ],
-  },
-  {
-    name: "cve-triage",
-    emoji: "🛡️",
-    type: "Agent IA · CLI",
-    status: "open source",
-    description:
-      "Trouve les CVE qui comptent vraiment dans votre code : recoupées contre OSV/GHSA, analysées par reachability, avec correctifs exacts.",
-    stack: "Python · Mistral AI",
-    links: [{ label: "GitHub", href: "https://github.com/Gleaming0427/cve-triage" }],
   },
 ];
 

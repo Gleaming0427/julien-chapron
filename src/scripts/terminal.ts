@@ -87,24 +87,32 @@ async function boot(): Promise<void> {
     await wait(250);
   }
   const hint = printLine("term-hint");
-  hint.textContent = '# tapez "help" pour la liste des commandes — ou cliquez dans le terminal';
+  hint.textContent = '# tapez "help" pour la liste des commandes, ou cliquez dans le terminal';
   booted = true;
   input.disabled = false;
-  input.focus();
+
+  // Le terminal occupe le deuxième écran : lui donner le focus alors qu'on
+  // est encore sur le hero ferait sauter la page jusqu'à lui. On ne le prend
+  // que s'il est déjà sous les yeux, et jamais en faisant défiler, sinon
+  // l'invite reste là, à un clic (c'est ce que dit l'indication ci-dessus).
+  const box = body.getBoundingClientRect();
+  if (box.top < window.innerHeight && box.bottom > 0) {
+    input.focus({ preventScroll: true });
+  }
 }
 
 const HELP: string[] = [
-  "help     — liste des commandes",
-  "whoami   — qui je suis",
-  "contact  — coordonnées",
-  "stack    — stack technique",
-  "ls       — sections du site",
-  "cv       — aller au CV",
-  "projets  — page projets",
-  "apps     — page apps",
-  "pdf      — télécharger le CV (PDF)",
-  "clear    — vider le terminal",
-  "exit     — fermer la session",
+  "help    , liste des commandes",
+  "whoami  , qui je suis",
+  "contact , coordonnées",
+  "stack   , stack technique",
+  "ls      , sections du site",
+  "cv      , aller au CV",
+  "projets , page projets",
+  "apps    , page apps",
+  "pdf     , télécharger le CV (PDF)",
+  "clear   , vider le terminal",
+  "exit    , fermer la session",
 ];
 
 function run(command: string): void {
@@ -114,7 +122,7 @@ function run(command: string): void {
       HELP.forEach(printText);
       break;
     case "whoami":
-      printText("Julien Chapron — Développeur Full-Stack · 7 ans d'expérience");
+      printText("Julien Chapron, Développeur Full-Stack · 7 ans d'expérience");
       break;
     case "contact":
       printText("📍 Lacroix-Falgarde (31), Toulouse");
@@ -156,16 +164,16 @@ function run(command: string): void {
       output.replaceChildren();
       break;
     case "sudo":
-      printText("Permission denied — this incident will be reported. 🙃");
+      printText("Permission denied, this incident will be reported. 🙃");
       break;
     case "exit":
-      printText("logout — rafraîchissez la page pour relancer la session 😉");
+      printText("logout, rafraîchissez la page pour relancer la session 😉");
       input.blur();
       break;
     case "":
       break;
     default:
-      printText(`bash: ${name}: commande inconnue — tapez "help"`);
+      printText(`bash: ${name}: commande inconnue, tapez "help"`);
   }
 }
 
