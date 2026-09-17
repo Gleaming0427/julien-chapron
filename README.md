@@ -1,34 +1,30 @@
-# julien-chapron
+# Julien Chapron — CV en ligne
 
-Site CV en ligne : **https://gleaming0427.github.io/julien-chapron/**
+**https://gleaming0427.github.io/julien-chapron/**
 
-Construit avec [Astro](https://astro.build) (statique), thème « terminal » sombre, déployé sur GitHub Pages.
+Site CV d'une page, construit avec [Astro](https://astro.build) et déployé sur GitHub Pages.
 
-## Pages
+## La page, de haut en bas
 
-- `/` — CV complet (profil, expériences, compétences, projets personnels, formation) avec un mini-terminal interactif dans le hero : tapez `help`
-- `/projets` — repositories GitHub + projets personnels
-- `/apps` — galerie des applications & outils
-
-Le CV est aussi téléchargeable en PDF (`public/CV_Julien_Chapron.pdf`) et la page s'imprime proprement (Ctrl/Cmd + P).
+- **Profil** : accroche qui disparaît au scroll
+- **Parcours** : nuage de points 3D (tore), noir puis blanc, qui arrive tout seul entre le profil et les expériences
+- **Expériences** : carrousel de fiches épinglé au scroll
+- **Compétences** : tableau en liserés fins, avec un décodage japonais rejoué en boucle sur quelques lignes (vague de gauche à droite, en orange)
+- **Projets** : grille 4 colonnes pleine hauteur, icônes orange, textes équilibrés, sans liens
+- **Footer** : feuille orange arrondie sur fond noir tramé, bouton « Contactez-moi »
+- **Trame de fond** : les petits points apparaissent et disparaissent en douceur entre les blocs, puis reviennent à l'approche du footer
+- **Responsive** : menu burger fixé en haut sur téléphone, navbar sur tablette et ordinateur, donut 3D adapté à l'écran
 
 ## Développement
 
 ```sh
 npm install
-npm run dev        # http://localhost:4321/julien-chapron/
-npm run build      # build statique dans dist/
+npm run dev    # http://localhost:4321/julien-chapron/
+npm run build  # build statique dans dist/
 ```
 
-## Déploiement
+Tout push sur `main` est déployé automatiquement (GitHub Actions → GitHub Pages).
 
-Tout push sur `main` déclenche le workflow `.github/workflows/deploy.yml` (GitHub Actions → GitHub Pages). Rien d'autre à faire.
+## Contenu du CV
 
-## Mettre à jour le contenu
-
-- **CV** : modifier [src/data/cv.ts](src/data/cv.ts) (tout le contenu est typé)
-- **Repos GitHub** : `npm run fetch-repos` puis commit — régénère `src/data/repos.json` depuis l'API GitHub
-
-## Licence
-
-Voir [LICENSE](LICENSE).
+Tout le contenu est dans [src/data/cv.ts](src/data/cv.ts).
