@@ -1112,7 +1112,15 @@ button.chip {
      absolute screens and do not move with this value.
      The negative margins cancel the gutters of the light zone:
      the 100vw items fit exactly in the screen. */
-  height: 450vh;
+  /* 580vh, mesuré et non choisi. Le panneau reste épinglé sur (hauteur - 1
+     écran), soit 4,8 écrans ici. Les fiches démarrent à 2,895 écrans de rail
+     et coûtent 0,65 écran chacune : la troisième est donc atteinte à 4,195,
+     et il reste 0,605 écran pour la tenir avant que le bloc se libère.
+     À 450vh l'épinglage ne durait que 3,5 écrans : il ne restait que 0,605
+     écran APRÈS le départ des fiches, de quoi en afficher 1,93 sur 3. La
+     troisième n'arrivait jamais — le bloc se décollait et descendait pendant
+     qu'on l'attendait. */
+  height: 580vh;
   margin-top: 8px;
   margin-inline: calc(-1 * var(--gutter));
   /* The pinned panel is 100svh tall, the height of the window with the toolbar
