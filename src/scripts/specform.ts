@@ -1,4 +1,4 @@
-import { PROFIL_SORTIE } from "./profilout";
+import { PROFIL_PALIER, PROFIL_SORTIE } from "./profilout";
 
 // Driver of the parcours block's progression: --spec-form follows the rail
 // position (three steps of two wheel gestures each). The 3D
@@ -19,7 +19,7 @@ import { PROFIL_SORTIE } from "./profilout";
     Derived from the profile text's exit rather than copied: the two
     must stay glued together, otherwise we lock the wheel to show nothing
     (too late) or the two texts overlap (too early). */
-export const SPEC_DEPART = PROFIL_SORTIE + 0.06;
+export const SPEC_DEPART = PROFIL_PALIER + PROFIL_SORTIE + 0.06;
 /** Travel of --spec-form, in rail screens. */
 export const SPEC_COURSE = 2.28;
 /** Value of --spec-form from which the card carousel takes

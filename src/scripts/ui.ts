@@ -3,6 +3,7 @@
 
 import Lenis from "lenis";
 import { SPEC_CARROUSEL, VITESSE, railPourSpec } from "./specform";
+import { PROFIL_PALIER } from "./profilout";
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -272,14 +273,20 @@ const tearFilter = document.querySelector<HTMLElement>(".tear-filter");
 /** Touch screen: no mouse, so no wheel to lock. */
 const TACTILE = window.matchMedia("(pointer: coarse)").matches;
 
-const SEUIL_INTERLUDE = 0.12; // ~90 px: a deliberate push, not a brush
+/* The interlude takes over exactly where the text starts to leave, never
+   before. At 0.12 screen it fired while the sentence was still whole on
+   screen and 38 % faded, and from there the page carried you off for two and
+   a half screens with the wheel locked: there was no reading the profile
+   block unless you happened to stop on the right pixel. Tied to the plateau
+   rather than set on its own, so the two cannot drift apart. */
+const SEUIL_INTERLUDE = PROFIL_PALIER;
 // Rearm at 0.10: as soon as one is back above the trigger point, the
 // interlude can replay. At 0.02 one had to fall back to 2 % of a screen
 // from the very start of the rail — a partial return, the normal gesture,
 // left it disarmed and scrolling back down no longer triggered anything.
 // The band between 0.10 and 0.12 is enough to avoid any back-and-forth:
 // once launched, the scroll jumps to 2.6 screens, far from the threshold.
-const REARMEMENT = 0.1;      // one must really be back at the top of the rail
+const REARMEMENT = PROFIL_PALIER * 0.55; // one must really be back at the top of the rail
 let interludeJoue = false;
 let interludeEnCours = false;
 
