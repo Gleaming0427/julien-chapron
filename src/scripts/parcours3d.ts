@@ -52,7 +52,8 @@ const RETRAIT = 0.22;
     poserLesDeparts() must compensate for it. */
 const TILT = 0.95;
 
-const COUNT = 2200;
+/** Point count on desktop; phones run at half (see initParcours3D). */
+const COUNT_BASE = 2200;
 /** Outer radius of the torus (R + r), plus the jitter given to the points. */
 const RAYON_EXT = 0.91;
 /** Phone: what is left between the ring and the edge of the screen. */
@@ -89,12 +90,22 @@ export function initParcours3D(): void {
     document.querySelector<HTMLElement>(".section-skills")?.closest<HTMLElement>(".carousel-item") ?? null;
   if (!section || !intro || !sticky || !rail || !item) return;
 
+  /* Phone media query, read once and used by every mobile downgrade:
+     antialias off, capped pixel ratio, half the points. The MediaQueryList
+     re-evaluates itself — a getBoundingClientRect would cost a layout. */
+  const etroit = window.matchMedia("(max-width: 720px)");
+
   let renderer: THREE.WebGLRenderer;
   try {
-    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    /* Antialias off on phone: on iOS Safari it means MSAA x4, which can
+       blow the tab's memory budget for a point cloud that does not need it. */
+    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: !etroit.matches });
   } catch {
     return; // WebGL unavailable: the block reads very well without it.
   }
+  /* Half the points on phone: the ring spans the whole width there, so the
+     density reads the same at half the count, for half the memory and CPU. */
+  const COUNT = etroit.matches ? COUNT_BASE / 2 : COUNT_BASE;
   // The block gives up its background to the panel below, which sweeps the
   // screen. Without WebGL the class is not set and the CSS keeps its opaque
   // background: the block is black right away, with no sweep, but perfectly readable.
@@ -109,12 +120,6 @@ export function initParcours3D(): void {
   // The layer is placed over the entire pinned area: the points are
   // visible from the profile block onward, not only on the parcours.
   sticky.prepend(layer);
-
-  /* Phone: the card covers the whole pinned panel, so the donut can only
-     be BEHIND it. See the fade applied in the loop. Read from a
-     MediaQueryList rather than measured on every frame: the object
-     re-evaluates itself, a getBoundingClientRect would cost a layout. */
-  const etroit = window.matchMedia("(max-width: 720px)");
 
   // The block's background is a black panel that SWEEPS in from the right, and
   // no longer a plane that fades in. It is a simple CSS element slid BEHIND the
@@ -281,7 +286,9 @@ export function initParcours3D(): void {
     const place = intro.getBoundingClientRect();
     if (vue.width < 1 || vue.height < 1 || place.height < 1) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    /* Cap the drawing-buffer resolution: 2 on desktop, 1.5 on phone — iOS
+       Safari's memory watchdog reloads tabs that over-allocate WebGL. */
+    const dpr = Math.min(window.devicePixelRatio || 1, etroit.matches ? 1.5 : 2);
     renderer.setPixelRatio(dpr);
     renderer.setSize(vue.width, vue.height);
     camera.aspect = vue.width / vue.height;
@@ -317,12 +324,12 @@ export function initParcours3D(): void {
     finaleX = (place.left + place.width / 2 - (vue.left + vue.width / 2)) * mondeParPixel;
     // Same logic vertically: on a phone the intro is at the top of the
     // block, the donut moves up behind it instead of staying centered.
-    // Le donut se place volontairement PLUS BAS que le titre, pas centré sur
-    // lui. `ecart` est le décalage qui le centrerait — l'axe Y de l'écran
-    // descend, celui de la scène monte, d'où cet ordre des termes — et on
-    // l'inverse sciemment pour obtenir le rendu retenu.
-    // Ne pas « corriger » ce signe : il est délibéré, et sur grand écran il
-    // ne change rien, l'intro y étant déjà centrée (l'écart vaut zéro).
+    // The donut is deliberately placed LOWER than the title, not centered on
+    // it. `ecart` is the offset that would center it — the screen's Y axis
+    // points down, the scene's points up, hence this order of terms — and it
+    // is deliberately reversed to get the chosen rendering.
+    // Do not "fix" this sign: it is deliberate, and on a large screen it
+    // changes nothing, the intro already being centered there (the offset is zero).
     const ecart = (vue.top + vue.height / 2 - (place.top + place.height / 2)) * mondeParPixel;
     finaleY = -ecart;
     /* Phone: dead centre of the panel, both ways. The block stacks there —

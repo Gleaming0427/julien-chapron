@@ -269,16 +269,16 @@ const tearFilter = document.querySelector<HTMLElement>(".tear-filter");
    The parcours3d threshold (0.65 screen) is crossed DURING this automatic
    travel, so the donut triggers itself along the way —
    the two thresholds no longer have to be lined up with each other. */
-/** Écran tactile : pas de souris, donc pas de molette à verrouiller. */
+/** Touch screen: no mouse, so no wheel to lock. */
 const TACTILE = window.matchMedia("(pointer: coarse)").matches;
 
 const SEUIL_INTERLUDE = 0.12; // ~90 px: a deliberate push, not a brush
-// Réarmement à 0,10 : dès qu'on est revenu au-dessus du point de
-// déclenchement, l'interlude peut rejouer. À 0,02 il fallait retomber à 2 %
-// d'écran du tout début du rail — un retour partiel, le geste normal, le
-// laissait désarmé et redescendre ne déclenchait plus rien. La bande entre
-// 0,10 et 0,12 suffit à éviter tout va-et-vient : une fois parti, le
-// défilement saute à 2,6 écrans, très loin du seuil.
+// Rearm at 0.10: as soon as one is back above the trigger point, the
+// interlude can replay. At 0.02 one had to fall back to 2 % of a screen
+// from the very start of the rail — a partial return, the normal gesture,
+// left it disarmed and scrolling back down no longer triggered anything.
+// The band between 0.10 and 0.12 is enough to avoid any back-and-forth:
+// once launched, the scroll jumps to 2.6 screens, far from the threshold.
 const REARMEMENT = 0.1;      // one must really be back at the top of the rail
 let interludeJoue = false;
 let interludeEnCours = false;
@@ -308,14 +308,13 @@ function interlude(railTop: number, vh: number): void {
   // the speed. The intended intervals between the arrival of the donut, the title and
   // the carousel are set in shares of --spec-form; for them to really last
   // 2 s and 1 s, the scroll must hold VITESSE screens per second.
-  // Au tactile, la séquence est écourtée : neuf secondes pendant lesquelles
-  // le doigt ne répond pas ne se lisent pas comme une mise en scène, mais
-  // comme une page figée.
-  // Au tactile la séquence était plafonnée à 4,5 s, pour une course qui en
-  // demande une douzaine : les points du donut arrivaient deux fois et demie
-  // trop vite, en un jet qu'on ne lit pas. Le plafond visait une page qui ne
-  // répond plus, mais le verrou est déjà levé au doigt (lock ci-dessous) —
-  // on peut donc laisser la scène prendre son temps sans rien bloquer.
+  // On touch the sequence is cut short: nine seconds during which the
+  // finger does not answer do not read as staging, but as a frozen page.
+  // On touch the sequence used to be capped at 4.5 s, for a travel that
+  // needs a dozen: the donut's points arrived two and a half times too
+  // fast, in a jet one cannot read. The cap targeted a page that no longer
+  // responds, but the lock is already released to the finger (lock below) —
+  // so the scene can take its time without blocking anything.
   const duree = TACTILE
     ? Math.min(8, Math.max(2.4, distanceEcrans / VITESSE))
     : Math.max(2.4, distanceEcrans / VITESSE);
@@ -324,10 +323,10 @@ function interlude(railTop: number, vh: number): void {
   interludeEnCours = true;
   lenis.scrollTo(cible, {
     duration: duree,
-    // Le verrou n'a de sens qu'à la molette. Au doigt, il transforme chaque
-    // geste ignoré en soupçon de bug : on laisse donc la main reprendre le
-    // dessus dès qu'on touche l'écran, et la séquence se joue seule si on
-    // ne touche à rien.
+    // The lock only makes sense on the wheel. To the finger, it turns every
+    // ignored gesture into a suspicion of bug: the hand therefore takes
+    // back control as soon as it touches the screen, and the sequence
+    // plays by itself if nothing is touched.
     lock: !TACTILE,
     // Smoothed start and arrival: the page sets off and settles instead of
     // racing at constant speed.

@@ -6,12 +6,12 @@
 // table, a few skills scramble from time to time in
 // Japanese before returning to French.
 
-/** Réservoir de glyphes : des KANA, pas des kanji. Les idéogrammes que
-    contenait cette liste sont communs au japonais et au chinois, et se
-    lisent donc comme du chinois. Les katakana — l'écriture réservée aux
-    mots venus de l'étranger, donc au vocabulaire technique — ne laissent
-    aucune ambiguïté, et leur tracé anguleux convient au registre du bloc.
-    Quelques hiragana s'y mêlent pour casser la régularité. */
+/** Glyph reservoir: KANA, not kanji. The ideograms this list used to hold
+    are common to Japanese and Chinese, and therefore read as Chinese. The
+    katakana — the script reserved for words from abroad, hence for
+    technical vocabulary — leave no ambiguity, and their angular strokes
+    suit the block's register. A few hiragana mix in to break the
+    regularity. */
 const GLYPHES =
   "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンあかさたなはまやらわをんきしちにひみりゐゑ";
 

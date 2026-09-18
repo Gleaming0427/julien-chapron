@@ -41,20 +41,19 @@
 
   --radius: 8px;
   --gutter: clamp(20px, 3vw, 56px);
-  /* Respiration sous le pied de page. Le conteneur la réserve, la zone du
-     pied la rattrape d'autant pour que le noir descende jusqu'au bas de la
-     page : les deux doivent rester égales, d'où cette valeur unique — elles
-     étaient écrites en double, et en double aussi dans la version
-     téléphone. 64 px laissaient une bande noire vide de 79 px sous la
-     carte orange, marge de la carte comprise. */
+  /* Breathing room under the footer. The container reserves it, the footer
+     zone takes it back equally so the black runs down to the bottom of the
+     page: the two must stay equal, hence this single value — they used to
+     be written twice, and twice again in the phone version. 64 px left a
+     79 px empty black band under the orange card, card margin included. */
   --pied-bas: 10px;
   /* Real header height, measured on load: a content
      "screen" is the window height minus this sticky bar. */
   --header-h: 57px;
-  /* svh = hauteur de la fenêtre BARRE D'ADRESSE AFFICHÉE, donc la plus
-     petite. Sur iOS, 100vh vaut la hauteur barre masquée : tout bloc en
-     100vh y dépasse sous la barre d'outils, et son bas devient invisible.
-     La ligne en vh reste comme repli pour les navigateurs sans svh. */
+  /* svh = the window height with the address bar VISIBLE, so the smallest
+     one. On iOS, 100vh equals the height with the bar hidden: any 100vh
+     block overflows under the toolbar and its bottom becomes invisible.
+     The vh line remains as a fallback for browsers without svh. */
   --screen: calc(100vh - var(--header-h));
   --screen: calc(100svh - var(--header-h));
 }
@@ -315,7 +314,7 @@ code {
 .container {
   max-width: none;
   margin: 0;
-  /* Compense la hauteur de la barre, désormais hors du flux. */
+  /* Makes up for the bar's height, now out of the flow. */
   padding: var(--header-h) var(--gutter) var(--pied-bas);
 }
 
@@ -327,31 +326,33 @@ code {
    gutter, and the page passes underneath. */
 /* The navbar follows the scroll on desktop and tablet; on
    phone it leaves the place to the burger alone. */
-/* `fixed` et non `sticky`. Safari iOS casse le collant dès qu'un ancêtre
-   porte overflow: clip — c'est le cas du body de ce site (overflow-x: clip,
-   nécessaire aux blocs pleine largeur). Le header y redescendait donc avec la
-   page. En fixe, la barre ne dépend plus d'aucun ancêtre.
-   Sortie du flux, elle ne réserve plus sa hauteur : .container la reprend en
-   padding, via la même variable mesurée --header-h. La géométrie est donc
-   identique à celle du collant. */
+/* `fixed` and not `sticky`. Safari iOS breaks the sticky as soon as an
+   ancestor carries overflow: clip — which is the case of this site's body
+   (overflow-x: clip, needed by the full-width blocks). The header therefore
+   scrolled back down with the page there. Fixed, the bar no longer depends
+   on any ancestor.
+   Out of the flow, it no longer reserves its height: .container takes it
+   back as padding, through the same measured --header-h variable. The
+   geometry is thus identical to the sticky's. */
 .site-header {
   position: fixed;
   top: 0;
   left: 0;
-  /* 100dvw et non right: 0 ni width: 100%. Mesuré : ces deux-là se calent
-     sur le bloc conteneur initial, plus large que l'écran réel sur mobile —
-     la barre débordait alors de 47 px et le bouton de menu passait hors
-     champ. 100dvw suit la largeur effectivement visible. */
+  /* 100dvw and not right: 0 nor width: 100%. Measured: those two align on
+     the initial containing block, wider than the real screen on mobile —
+     the bar then overflowed by 47 px and the menu button went out of
+     frame. 100dvw tracks the effectively visible width. */
   width: 100dvw;
   z-index: 10;
   padding: 12px var(--gutter);
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
-/* La barre ne se montre qu'en haut de page. Dès qu'on descend, elle se
-   retire vers le haut : elle n'a plus à se défendre contre les fonds qui
-   défilent sous elle, et l'écran reste entier pour le contenu.
-   Exception : menu ouvert, elle doit évidemment rester là. */
+/* The bar only shows at the top of the page. As soon as one scrolls down,
+   it withdraws upward: it no longer has to defend itself against the
+   backgrounds scrolling under it, and the screen stays whole for the
+   content.
+   Exception: menu open, it obviously has to stay. */
 html.defile:not(.menu-ouvert) .site-header {
   opacity: 0;
   transform: translateY(-100%);
@@ -558,10 +559,10 @@ html.menu-ouvert .menu-voile {
    Two explicit inks settle the case plainly. */
 #scroll-progress {
   position: fixed;
-  /* Ancré sur 100dvw et non sur `right`. Mesuré : `right` se cale sur le
-     bloc conteneur initial, plus large que l'écran réel sur mobile — le
-     compteur sortait de 33 px et créait un débordement horizontal. Même
-     cause et même remède que pour la barre de navigation. */
+  /* Anchored on 100dvw and not on `right`. Measured: `right` aligns on the
+     initial containing block, wider than the real screen on mobile — the
+     counter stuck out by 33 px and created a horizontal overflow. Same
+     cause and same remedy as for the navigation bar. */
   left: 100dvw;
   top: 50%;
   translate: calc(-100% - clamp(14px, 1.8vw, 26px)) -50%;
@@ -1136,8 +1137,8 @@ button.chip {
 .carousel-sticky {
   position: sticky;
   top: 0;
-  /* C'est ici que le défaut se voyait : en 100vh, le bas du bloc — donc les
-     puces du carrousel — passait sous la barre d'outils de Safari iOS. */
+  /* This is where the defect showed: at 100vh, the bottom of the block —
+     the carousel dots with it — slid under Safari iOS's toolbar. */
   height: 100vh;
   height: 100svh;
   overflow: hidden;
@@ -1703,9 +1704,9 @@ button.chip {
   min-height: 100vh;
   min-height: 100svh;
   align-content: center;
-  /* Le pied vient juste après : les 84 px que la section garde en bas
-     s'ajoutaient à la marge de la carte orange, soit 91 px de noir vide
-     entre les deux. */
+  /* The footer comes right after: the 84 px the section kept at the bottom
+     added to the orange card's margin — 91 px of empty black between the
+     two. */
   padding-bottom: clamp(28px, 4.5vh, 56px);
   --bg: #0b0c0d;
   --text: #f3f1ec;
@@ -1983,12 +1984,12 @@ button.chip {
 .footer-contenu {
   --bg: #ff4d00;
   --text: #0b0c0d;
-  /* 0,80 et non 0,62. Mesuré sur l'orange #ff4d00, l'encre à 62 % donne
-     3,41:1 — sous les 4,5:1 que demande le texte courant, et ça touchait
-     quatre éléments : la phrase d'accroche, les libellés des statistiques,
-     les titres de colonnes et la ligne légale. 0,77 suffit tout juste
-     (4,51), 0,80 donne 4,73 avec un peu de marge, et la nuance reste
-     franchement plus douce que l'encre pleine, qui est à 5,89. */
+  /* 0.80 and not 0.62. Measured on the orange #ff4d00, 62 % ink gives
+     3.41:1 — below the 4.5:1 that body text asks for, and it touched four
+     elements: the tagline, the statistics labels, the column titles and
+     the legal line. 0.77 just barely suffices (4.51), 0.80 gives 4.73 with
+     a little margin, and the shade stays clearly softer than the full ink,
+     which sits at 5.89. */
   --text-dim: rgba(11, 12, 13, 0.8);
   --border: rgba(11, 12, 13, 0.22);
   --border-strong: rgba(11, 12, 13, 0.5);
@@ -1997,15 +1998,15 @@ button.chip {
   border-radius: clamp(18px, 2vw, 28px);
   background: var(--bg);
   color: var(--text);
-  /* Mesuré sur 1009 x 768 : 69 px de padding haut pour 31 en bas, et un
-     écart de 38 px répété trois fois, dont deux de part et d'autre d'un
-     filet d'un pixel — 214 px de vide pour 259 px de contenu. Le haut garde
-     une petite avance, celle qui convient à une carte de ce genre, mais on
-     est descendu deux fois : le vide occupe désormais 27 % de la carte au
-     lieu de 45, pour le même contenu. */
-  /* Le bas reprend de l'air : la ligne légale se retrouvait collée au bord
-     de la carte. Le haut, lui, reste resserré — c'est l'écart entre les
-     deux qui posait problème au départ, pas le bas. */
+  /* Measured at 1009 x 768: 69 px of top padding for 31 at the bottom, and
+     a 38 px gap repeated three times, two of them on either side of a
+     one-pixel hairline — 214 px of void for 259 px of content. The top
+     keeps a small lead, the one that suits a card of this kind, but it was
+     lowered twice: the void now takes 27 % of the card instead of 45, for
+     the same content. */
+  /* The bottom gets its air back: the legal line ended up stuck to the
+     card's edge. The top stays tight — it was the gap between the two that
+     was the problem in the first place, not the bottom. */
   padding-block: clamp(20px, 2.8vh, 34px) clamp(48px, 6vh, 76px);
   /* Narrower than the page gutter: inside a card of its own, the text does
      not need the margin the full-width blocks take. */
@@ -2130,13 +2131,13 @@ button.chip {
   text-decoration: none;
 }
 
-/* Cibles tactiles. Mesurés sur téléphone, ces quatre liens faisaient 17 px
-   de haut pour un minimum de 44 : visables au pouce à peu près une fois sur
-   deux. La hauteur est portée à 44 et l'écart entre les éléments tombe à
-   zéro — le pas passe ainsi de 37 à 44 px, donc aucune zone n'en recouvre
-   une autre, et la colonne ne grandit que de 14 px.
-   Au pointeur fin, rien ne change : la souris n'a pas besoin de ça et la
-   mise en page du bureau reste au pixel près. */
+/* Touch targets. Measured on a phone, these four links were 17 px tall for
+   a 44 px minimum: tappable with a thumb about one time out of two. The
+   height goes to 44 and the gap between the items drops to zero — the
+   spacing thus goes from 37 to 44 px, so no zone overlaps another, and the
+   column only grows by 14 px.
+   With a fine pointer, nothing changes: the mouse does not need this and
+   the desktop layout stays pixel-exact. */
 @media (pointer: coarse) {
   .footer-liste {
     gap: 0;
@@ -2604,12 +2605,12 @@ button.chip {
 
 @media (max-width: 640px) {
   .container {
-    /* La gouttière DOIT valoir --gutter : les sections pleine largeur
-       l'annulent avec margin-inline: calc(-1 * var(--gutter)). Avec 16 px
-       ici et -20 là, elles débordaient de 4 px de chaque côté — assez pour
-       rendre la page déplaçable latéralement sur un navigateur sans
-       overflow: clip. Et le padding haut compense la barre, sortie du flux
-       depuis son passage en position fixe. */
+    /* The gutter MUST equal --gutter: the full-width sections cancel it
+       with margin-inline: calc(-1 * var(--gutter)). With 16 px here and
+       -20 there, they overflowed by 4 px on each side — enough to make the
+       page draggable sideways on a browser without overflow: clip. And the
+       top padding makes up for the bar, out of the flow since it became
+       fixed. */
     padding: var(--header-h) var(--gutter) var(--pied-bas);
   }
 
@@ -2661,6 +2662,13 @@ button.chip {
     border: 0;
     background: transparent;
     backdrop-filter: none;
+  }
+
+  /* The blur pill is also a heavy compositor on iOS: a plain translucent
+     background reads the same and costs nothing. */
+  .bandeau-stat-inner {
+    backdrop-filter: none;
+    background: rgba(22, 27, 34, 0.86);
   }
 
   /* The parcours block stacks its intro and the carousel of cards: the
@@ -2728,18 +2736,18 @@ button.chip {
     font-size: clamp(22px, 6.5vw, 30px);
   }
 
-  /* Une seule valeur à reprendre : le conteneur et la zone du pied la
-     partagent (voir --pied-bas). */
+  /* A single value to keep in step: the container and the footer zone
+     share it (see --pied-bas). */
   :root {
     --pied-bas: 8px;
   }
 
-  /* Sur téléphone la carte débordait de 26 px de chaque côté : les 20 px de
-     gouttière du conteneur plus ses 6 px de marge. À cette largeur c'est
-     beaucoup de noir perdu de part et d'autre. Une marge négative la fait
-     passer sous la gouttière — elle reste dans la zone, qui est pleine
-     largeur, donc rien ne dépasse de l'écran — et son padding intérieur
-     suit. Bord de carte à 10 px du bord de l'écran, texte à 26. */
+  /* On a phone the card overflowed by 26 px on each side: the container's
+     20 px gutter plus its own 6 px margin. At this width that is a lot of
+     lost black on both sides. A negative margin slips it under the gutter —
+     it stays inside the zone, which is full width, so nothing sticks out
+     of the screen — and its inner padding follows. Card edge at 10 px from
+     the screen edge, text at 26. */
   .footer-contenu {
     margin-inline: calc(-1 * var(--gutter) + 10px);
     padding-inline: 16px;
@@ -2774,8 +2782,8 @@ button.chip {
     display: block;
   }
 
-  /* Le nom n'est plus un <h1> — la page n'en garde qu'un, celui du hero —
-     mais il garde son allure de titre sur la feuille imprimée. */
+  /* The name is no longer an <h1> — the page keeps only one, the hero's —
+     but it keeps its title look on the printed sheet. */
   .print-nom {
     font-size: 20px;
     font-weight: 700;
@@ -2860,18 +2868,18 @@ button.chip {
   }
 }
 
-/* ---------- confort tactile ----------
-   Apple recommande 44 px de côté pour une cible au doigt. Plusieurs
-   commandes du site passaient largement dessous : les puces du carrousel
-   à 12 px, le bouton de menu à 40, les boutons de la barre à 33-38.
+/* ---------- touch comfort ----------
+   Apple recommends a 44 px side for a finger target. Several controls of
+   the site sat well below it: the carousel dots at 12 px, the menu button
+   at 40, the bar buttons at 33-38.
 
-   PLACÉ EN FIN DE FICHIER À DESSEIN. Ces sélecteurs ont la même spécificité
-   que les règles de mise en page mobile situées plus haut ; posé avant elles,
-   ce bloc perdait silencieusement — le bouton de menu restait à 40 px et
-   l'écart des puces à 54. À spécificité égale, c'est l'ordre qui tranche. */
+   PLACED AT THE END OF THE FILE ON PURPOSE. These selectors have the same
+   specificity as the mobile layout rules higher up; placed before them,
+   this block silently lost — the menu button stayed at 40 px and the dots'
+   spacing at 54. At equal specificity, order decides. */
 @media (pointer: coarse) {
-  /* La zone tactile s'étend sans déplacer le point visible : il garde ses
-     12 px, mais devient atteignable sur 44. */
+  /* The touch zone extends without moving the visible dot: it keeps its
+     12 px, but becomes reachable over 44. */
   .exp-dot::after {
     content: "";
     position: absolute;
@@ -2881,11 +2889,11 @@ button.chip {
   .burger {
     width: 44px;
     height: 44px;
-    /* L'ICÔNE doit s'aligner sur la même gouttière que le texte à gauche,
-       pas le bouton. Deux choses l'en éloignaient : l'écart de 16 px que la
-       grille laisse après la dernière colonne, et les 11 px de marge interne
-       du bouton autour de son icône de 22 px. Mesuré, l'icône tombait à 47 px
-       du bord quand « Home » démarre à 20. On annule les deux. */
+    /* The ICON must align on the same gutter as the text on the left, not
+       the button. Two things kept it away: the 16 px gap the grid leaves
+       after the last column, and the button's 11 px of internal margin
+       around its 22 px icon. Measured, the icon landed 47 px from the edge
+       while "Home" starts at 20. Both are cancelled. */
     margin-right: -27px;
   }
 
@@ -2895,22 +2903,21 @@ button.chip {
     min-height: 44px;
   }
 
-  /* Les puces s'espacent un peu : deux cibles de 44 px côte à côte ne
-     doivent pas se chevaucher. */
+  /* The dots space out a little: two 44 px targets side by side must not
+     overlap. */
   .exp-dots {
     --lien: 46px;
   }
 }
 
-/* ---------- bandeau : empilé sur téléphone ----------
-   Sur grand écran, la pastille de chiffres est posée PAR-DESSUS le bandeau
-   défilant (position: absolute, inset: 0) : elle est étroite, le bandeau
-   respire de part et d'autre. Sous 720 px elle occupe toute la largeur et
-   le masque entièrement — mesuré, les deux faisaient exactement la même
-   hauteur et la même emprise.
-   On les empile donc : les chiffres d'abord, le bandeau dessous, chacun
-   entier. Placé en fin de fichier à dessein — à spécificité égale, c'est
-   l'ordre qui tranche, et les règles d'origine sont plus haut. */
+/* ---------- banner: stacked on phone ----------
+   On a large screen the figures pill is laid OVER the scrolling banner
+   (position: absolute, inset: 0): it is narrow, the banner breathes on
+   both sides. Under 720 px it takes the whole width and masks it
+   entirely — measured, the two had exactly the same height and footprint.
+   So they stack: the figures first, the banner below, each one whole.
+   Placed at the end of the file on purpose — at equal specificity, order
+   decides, and the original rules sit higher up. */
 @media (max-width: 720px) {
   .bandeau-block {
     height: auto;
@@ -2927,9 +2934,8 @@ button.chip {
   }
 
   .bandeau-stat-inner {
-    /* La pastille se cale sur son contenu : étirée sur toute la largeur,
-       elle redeviendrait un bloc plein qui ne se lit plus comme une
-       étiquette. */
+    /* The pill hugs its content: stretched over the full width, it would
+       become a solid block that no longer reads as a label. */
     width: fit-content;
     max-width: 100%;
     margin-inline: auto;
@@ -2937,16 +2943,16 @@ button.chip {
   }
 }
 
-/* ---------- lisibilité sur téléphone ----------
-   Sous 720 px, la composante vw des clamp() ne pèse plus rien (1,111vw
-   ≈ 4 px à 390 px de large) : c'est le PLANCHER de chaque échelle qui
-   gouverne, et il avait été choisi pour qu'une fenêtre de bureau étroite
-   ne devienne pas ridicule — pas pour la lecture au téléphone. Le texte de
-   fond y tombait donc à 14,5 px, sous le seuil de confort de 16 px.
-   On ne peut pas relever les planchers eux-mêmes : à 16 px, --fs-body
-   resterait figé jusqu'à 1440 px et écraserait toute l'échelle fluide du
-   bureau. D'où cette surcharge, limitée au téléphone.
-   En fin de fichier à dessein : à spécificité égale, l'ordre tranche. */
+/* ---------- readability on phone ----------
+   Under 720 px, the vw component of the clamp() no longer weighs anything
+   (1.111vw ≈ 4 px at 390 px wide): it is the FLOOR of each scale that
+   governs, and it had been chosen so a narrow desktop window would not
+   become ridiculous — not for reading on a phone. The body text therefore
+   dropped to 14.5 px there, under the 16 px comfort threshold.
+   The floors themselves cannot be raised: at 16 px, --fs-body would stay
+   frozen up to 1440 px and crush the whole fluid desktop scale. Hence this
+   override, limited to the phone.
+   At the end of the file on purpose: at equal specificity, order decides. */
 @media (max-width: 720px) {
   :root {
     --fs-small: 13px;
@@ -3168,7 +3174,7 @@ button.chip {
     color: rgba(243, 241, 236, 0.62);
   }
 
-  /* Rien ne doit défiler derrière le voile. */
+  /* Nothing must scroll behind the veil. */
   body {
     overflow: hidden;
   }
@@ -3197,22 +3203,52 @@ button.chip {
   }
 }
 
-/* ---------- ink edge, at the scale of a phone ----------
-   The filter's parameters are absolute pixels: the displacement and the
-   noise pattern do not shrink with the window. On a 393 px screen the
-   220 px of displacement cover 56 % of the width instead of 15 %, so the
-   edge comes down to two or three lobes — one of them reaches the top right
-   first and the orange shows up there, alone, before the rest arrives.
-   #ink-edge-fin keeps the same proportions at this width. The slack follows
-   the displacement it has to absorb: 60 px of travel needs far less than the
-   160 px the wide screen asks for, and the filtered surface — which Safari
-   rasterises again on every frame — shrinks with it. */
+/* ---------- phone: a torn edge that costs nothing ----------
+   Third attempt on the same subject, and the right one: the problem was not
+   the filter's tuning, it was the filter. feTurbulence, a feDisplacementMap
+   and a blur recomputed over several megapixels ON EVERY FRAME, while the
+   finger scrolls the page — Safari iOS cannot keep up, and it shows as a
+   browser that crawls.
+   Here there is no filter at all anymore. The torn edge is a silhouette
+   drawn once and for all, laid as a background image above the sheet, and
+   the sheet only MOVES — no more scaleY, which would squash the fringe. A
+   translate is pure compositing: no per-frame computation, so nothing left
+   to crawl.
+   The geometry does not change: ui.ts measures the layer instead of
+   assuming it, so the edge rises exactly as before. */
 @media (max-width: 720px) {
   .tear-filter {
-    --tear-slack: 60px;
-    filter: url(#ink-edge-fin);
+    filter: none;
+    inset: 0;
+  }
+
+  .tear-sheet {
+    /* The sheet's edge moves by translation: at 0 it is entirely under the
+       window, at 1 it covers it. The same travel as the scaleY it
+       replaces. */
+    transform: translate3d(0, calc((1 - var(--tear, 0)) * 100%), 0);
+  }
+
+  /* The fringe, laid just above the sheet's edge: irregular lobes and a few
+     detached drops. Stretched to the width of the screen, it does not
+     repeat, so no pattern shows. */
+  .tear-sheet::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    height: 48px;
+    background-image: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20400%2048%22%20preserveAspectRatio=%22none%22%3E%3Cpath%20fill=%22%23ff4d00%22%20d=%22M0%2048V27c7-1%2011-7%2018-8s10%205%2017%204%2011-9%2019-9%2012%207%2019%208%2012-6%2020-5%2012%209%2020%209%2012-8%2020-8%2012%206%2019%207%2012-9%2020-9%2012%208%2020%208%2011-7%2019-7%2012%206%2020%206%2012-8%2020-8%2011%207%2019%207%2012-5%2020-5%2012%207%2020%206%2011-8%2019-8%2012%205%2020%205%2012-6%2019-5%2012%208%2020%208%2012-7%2020-7%2011%206%2019%206%2012-8%2020-8v34z%22/%3E%3Cg%20fill=%22%23ff4d00%22%3E%3Cellipse%20cx=%2246%22%20cy=%2212%22%20rx=%227%22%20ry=%225%22/%3E%3Ccircle%20cx=%2263%22%20cy=%226%22%20r=%223%22/%3E%3Cellipse%20cx=%22148%22%20cy=%229%22%20rx=%229%22%20ry=%226%22/%3E%3Ccircle%20cx=%22168%22%20cy=%2215%22%20r=%222.5%22/%3E%3Cellipse%20cx=%22243%22%20cy=%2213%22%20rx=%226%22%20ry=%224%22/%3E%3Ccircle%20cx=%22262%22%20cy=%225%22%20r=%223.5%22/%3E%3Cellipse%20cx=%22331%22%20cy=%2210%22%20rx=%228%22%20ry=%225%22/%3E%3Ccircle%20cx=%22352%22%20cy=%2217%22%20r=%222.5%22/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
   }
 }
+
+/* The phone no longer filters the tear at all: the fringe block above
+   replaces the ink edge. This old tuning block was removed — it sat later
+   in the file and its `filter: url(#ink-edge-fin)` overrode the
+   `filter: none` of the fringe, silently bringing the heavy filter back. */
 
 /* ---------- reading indicator on a phone ----------
    The indicator is fixed at the middle of the right edge: a 64 px rail and
@@ -3225,16 +3261,16 @@ button.chip {
    top of the screen, filled from the left. The ink keeps switching with the
    background (--encre), and the counter in figures goes — at 10 px, over
    text, it was noise more than information.
-   PLACÉ EN FIN DE FICHIER À DESSEIN : à spécificité égale, l'ordre tranche,
-   et les règles d'origine sont plus haut. */
+   PLACED AT THE END OF THE FILE ON PURPOSE: at equal specificity, order
+   decides, and the original rules sit higher up. */
 @media (max-width: 720px) {
   #scroll-progress {
     left: 0;
     top: 0;
     translate: none;
     display: block;
-    /* 100dvw, comme la barre de navigation : `width: 100%` se cale sur le
-       bloc conteneur initial, plus large que l'écran réel sur mobile. */
+    /* 100dvw, like the navigation bar: `width: 100%` aligns on the initial
+       containing block, wider than the real screen on mobile. */
     width: 100dvw;
     gap: 0;
   }
@@ -3248,8 +3284,8 @@ button.chip {
   #scroll-progress .tick {
     width: 100%;
     height: 2px;
-    /* La barre se remplit depuis la gauche au lieu de faire descendre un
-       repère : même variable, même source, autre géométrie. */
+    /* The bar fills from the left instead of lowering a marker: same
+       variable, same source, different geometry. */
     translate: none;
     transform-origin: left center;
     scale: var(--scroll-pct, 0) 1;
