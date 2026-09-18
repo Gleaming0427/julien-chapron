@@ -210,6 +210,35 @@ if (header) {
   new ResizeObserver(measureHeader).observe(header);
 }
 
+/* The projects arrive from the side, one card out of two from the left, the
+   other from the right, staggered. Everything else is in the CSS: this only
+   says when. An observer rather than the scroll loop, because the whole
+   thing is a transition the compositor plays on its own — nothing to drive
+   frame by frame, which is what keeps it smooth on a phone.
+   The class is taken away when the frame leaves, so the arrival plays again
+   coming back up, like the skills block. A third of the frame in sight is
+   enough: waiting for half of it, the first cards were already well into
+   the screen when they set off. */
+{
+  const grille = document.querySelector<HTMLElement>(".projet-grille");
+  if (grille) {
+    new IntersectionObserver(
+      (entrees) => {
+        const part = entrees[0]?.intersectionRatio ?? 0;
+        // Two thresholds rather than one. With a single one, the cards left
+        // again as soon as the frame dropped below it — that is, while 150 px
+        // of it were still on screen on the way down, so they slid away under
+        // the reader's eyes. It arms at a third in sight and only disarms
+        // once the frame is completely gone, ready to play again on the way
+        // back up.
+        if (part >= 0.3) grille.classList.add("entree");
+        else if (part <= 0.01) grille.classList.remove("entree");
+      },
+      { threshold: [0, 0.3] },
+    ).observe(grille);
+  }
+}
+
 // The white sheet rises over the last screen of the dark part.
 const darkZone = document.querySelector<HTMLElement>(".dark-zone");
 const tearSheet = document.querySelector<HTMLElement>(".tear-sheet");

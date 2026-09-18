@@ -1742,6 +1742,10 @@ button.chip {
   grid-template-columns: repeat(4, 1fr);
   border: 1px solid rgba(243, 241, 236, 0.12);
   border-radius: var(--radius);
+  /* The cards slide in from beside themselves: the travel is clipped by the
+     frame instead of poking out past it. Nothing here is sticky, so the
+     scroll container this creates costs nothing. */
+  overflow: hidden;
 }
 
 .projet-etape {
@@ -1751,6 +1755,57 @@ button.chip {
   gap: clamp(18px, 2.5vh, 28px);
   padding: clamp(20px, 2.5vw, 32px);
   border-right: 1px solid rgba(243, 241, 236, 0.12);
+  /* Entrance: one card out of two comes from the left, the other from the
+     right, and they arrive one after another. The travel is short on
+     purpose — at a full cell width the cards would cross over their
+     neighbours before settling, which reads as a glitch and not as an
+     arrival. Only the transform and the opacity move, so the browser can
+     leave the whole thing to the compositor: no layout, no repaint, which
+     is what keeps it smooth on a phone.
+     --entree is the direction; :nth-child(even) flips it. */
+  opacity: 0;
+  transform: translate3d(var(--entree, -40px), 0, 0);
+  transition:
+    opacity 0.62s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.62s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.projet-etape:nth-child(even) {
+  --entree: 40px;
+}
+
+/* ui.ts sets the class when the frame enters the screen and takes it away
+   when it leaves: the arrival plays again on the way back up, like the rest
+   of the site. */
+.projet-grille.entree .projet-etape {
+  opacity: 1;
+  transform: none;
+}
+
+.projet-grille.entree .projet-etape:nth-child(2) {
+  transition-delay: 0.09s;
+}
+
+.projet-grille.entree .projet-etape:nth-child(3) {
+  transition-delay: 0.18s;
+}
+
+.projet-grille.entree .projet-etape:nth-child(4) {
+  transition-delay: 0.27s;
+}
+
+/* Without JS the class never comes, so the cards must not stay invisible.
+   Same with "reduce motion", where only the fade is kept. */
+html:not(.js) .projet-etape {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .projet-etape {
+    transform: none;
+    transition-duration: 0.01ms;
+  }
 }
 
 .projet-etape:nth-child(4n) {
