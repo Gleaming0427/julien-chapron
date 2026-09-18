@@ -1997,7 +1997,10 @@ button.chip {
      une petite avance, celle qui convient à une carte de ce genre, mais on
      est descendu deux fois : le vide occupe désormais 27 % de la carte au
      lieu de 45, pour le même contenu. */
-  padding-block: clamp(20px, 2.8vh, 34px) clamp(14px, 1.8vh, 22px);
+  /* Le bas reprend de l'air : la ligne légale se retrouvait collée au bord
+     de la carte. Le haut, lui, reste resserré — c'est l'écart entre les
+     deux qui posait problème au départ, pas le bas. */
+  padding-block: clamp(20px, 2.8vh, 34px) clamp(48px, 6vh, 76px);
   /* Narrower than the page gutter: inside a card of its own, the text does
      not need the margin the full-width blocks take. */
   padding-inline: clamp(18px, 2.2vw, 40px);
@@ -2150,6 +2153,11 @@ button.chip {
 @media (max-width: 860px) {
   .footer-haut {
     flex-direction: column;
+    /* align-items: flex-end is the desktop setting — it puts the foot of the
+       right-hand block level with the foot of the text. Turned into a
+       column it aligns to the RIGHT instead, and the statement, 311 px wide
+       in a 341 px card, sat 30 px in from everything below it. */
+    align-items: stretch;
   }
 
   .footer-droite {
@@ -2699,6 +2707,17 @@ button.chip {
      partagent (voir --pied-bas). */
   :root {
     --pied-bas: 8px;
+  }
+
+  /* Sur téléphone la carte débordait de 26 px de chaque côté : les 20 px de
+     gouttière du conteneur plus ses 6 px de marge. À cette largeur c'est
+     beaucoup de noir perdu de part et d'autre. Une marge négative la fait
+     passer sous la gouttière — elle reste dans la zone, qui est pleine
+     largeur, donc rien ne dépasse de l'écran — et son padding intérieur
+     suit. Bord de carte à 10 px du bord de l'écran, texte à 26. */
+  .footer-contenu {
+    margin-inline: calc(-1 * var(--gutter) + 10px);
+    padding-inline: 16px;
   }
 }
 
