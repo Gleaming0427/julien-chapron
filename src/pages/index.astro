@@ -106,8 +106,8 @@ const iconesProjet: Record<IconeProjet, string> = {
            every frame, what is no longer visible at this size is not worth
            paying for. -->
       <filter id="ink-edge-fin" x="-10%" y="-10%" width="120%" height="120%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.055 0.073" numOctaves="2" seed="7" result="noise"></feTurbulence>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="60" xChannelSelector="R" yChannelSelector="G" result="displaced"></feDisplacementMap>
+        <feTurbulence type="fractalNoise" baseFrequency="0.045 0.06" numOctaves="2" seed="7" result="noise"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="74" xChannelSelector="R" yChannelSelector="G" result="displaced"></feDisplacementMap>
         <feGaussianBlur in="displaced" stdDeviation="1.2" result="presmooth"></feGaussianBlur>
         <feComponentTransfer in="presmooth" result="cut">
           <feFuncA type="discrete" tableValues="0 0 0 0 0 1 1 1 1 1"></feFuncA>

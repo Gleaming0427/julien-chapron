@@ -377,11 +377,42 @@ export function initParcours3D(): void {
   const couleurs = geometrie.getAttribute("color") as THREE.BufferAttribute;
   const couleursArr = couleurs.array as Float32Array;
 
+  /* Is the layer on screen? hero3d has had this gate for a long time; this
+     module never did, so it was rendering a full WebGL pass EVERY FRAME from
+     load to unload — through the hero, the terminal, the torn edge, the
+     skills, the footer — for a donut that is only ever visible along the
+     rail. That is the cost that made the phone crawl, and three rounds of
+     shrinking the ink filter never touched it.
+     Not document.hidden, which reads true in contexts where the page is
+     perfectly visible (embedded panels, previews) and froze the donut for
+     good. Being off screen is the honest signal, and the state is derived
+     from the scroll position alone, so skipped frames leave nothing behind:
+     the first frame back recomputes everything. */
+  let enVue = true;
+  new IntersectionObserver((entrees) => {
+    enVue = entrees[0]?.isIntersecting ?? false;
+  }).observe(layer);
+
   let tPrec = performance.now();
   /** Last value of `avance` written into the position buffer. */
   let avancePrec = -1;
 
   const tick = (): void => {
+    /* Nothing to draw yet? Then draw nothing. Two cases: the layer is off
+       screen, or the sequence has not started — before it, the 2200 points
+       all sit in their waiting place off the top right corner, so a frame
+       costs a full WebGL pass to show an empty canvas.
+       The second case covers the torn edge exactly: the rail begins right
+       under the dark zone, so its layer is already intersecting while the
+       ink is still rising, and that is where the phone was being asked to
+       filter and render at the same time. */
+    if (!enVue || -rail.getBoundingClientRect().top <= window.innerHeight * SPEC_DEPART) {
+      // Reset the clock: on the way back, dt must not carry the whole time
+      // spent off screen.
+      tPrec = performance.now();
+      requestAnimationFrame(tick);
+      return;
+    }
     {
       const t = performance.now();
       const dt = Math.min(0.05, (t - tPrec) / 1000);

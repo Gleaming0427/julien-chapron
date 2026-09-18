@@ -3225,6 +3225,14 @@ button.chip {
        window, at 1 it covers it. The same travel as the scaleY it
        replaces. */
     transform: translate3d(0, calc((1 - var(--tear, 0)) * 100%), 0);
+    /* Announcing the movement is what turns the last per-frame cost into a
+       one-off. On its own layer, with contents that never change, the sheet
+       and the filtered strip it carries are rasterised ONCE: every frame
+       after that only moves the layer. Without it the browser is entitled to
+       repaint the area on each new position — and repainting the area means
+       running the filter again, which is precisely what we came here to
+       stop doing. */
+    will-change: transform;
   }
 
   /* The torn edge rides the sheet's top as its own thin strip: the filter
@@ -3240,7 +3248,7 @@ button.chip {
     left: 0;
     right: 0;
     bottom: calc(100% - 40px);
-    height: 128px;
+    height: 136px;
     background: linear-gradient(
       to top,
       var(--orange) 0px,
