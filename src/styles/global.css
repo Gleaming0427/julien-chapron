@@ -3203,17 +3203,15 @@ button.chip {
   }
 }
 
-/* ---------- phone: a torn edge that costs nothing ----------
-   Third attempt on the same subject, and the right one: the problem was not
-   the filter's tuning, it was the filter. feTurbulence, a feDisplacementMap
-   and a blur recomputed over several megapixels ON EVERY FRAME, while the
-   finger scrolls the page — Safari iOS cannot keep up, and it shows as a
-   browser that crawls.
-   Here there is no filter at all anymore. The torn edge is a silhouette
-   drawn once and for all, laid as a background image above the sheet, and
-   the sheet only MOVES — no more scaleY, which would squash the fringe. A
-   translate is pure compositing: no per-frame computation, so nothing left
-   to crawl.
+/* ---------- phone: the real torn edge, at a phone-sized cost ----------
+   Filtering the WHOLE sheet on every frame is what Safari iOS could not
+   afford: feTurbulence, a feDisplacementMap and a blur recomputed over
+   several megapixels while the finger scrolls, and the browser crawls.
+   The sheet itself therefore rises by pure translation — compositing only,
+   zero per-frame computation. The torn edge is the ONLY part that still
+   filters: a thin strip riding the seam, run through #ink-edge-fin (the
+   phone-tuned filter, 60 px of displacement). Same lobed edge as before,
+   on a surface ~20 times smaller.
    The geometry does not change: ui.ts measures the layer instead of
    assuming it, so the edge rises exactly as before. */
 @media (max-width: 720px) {
@@ -3229,19 +3227,28 @@ button.chip {
     transform: translate3d(0, calc((1 - var(--tear, 0)) * 100%), 0);
   }
 
-  /* The fringe, laid just above the sheet's edge: irregular lobes and a few
-     detached drops. Stretched to the width of the screen, it does not
-     repeat, so no pattern shows. */
-  .tear-sheet::before {
-    content: "";
+  /* The torn edge rides the sheet's top as its own thin strip: the filter
+     then only rasterises a band of a few hundred k pixels instead of the
+     whole sheet, so the phone keeps the REAL lobed edge — the same look as
+     before — at a fraction of the per-frame cost.
+     The strip overlaps the sheet by 40 px (the displacement of its bottom
+     edge stays over the sheet's orange, invisible), and its orange stops
+     48 px above the seam. The lobes reach at most 30 px above that, so
+     they stay inside the strip and the filter's region. */
+  .tear-frange {
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 100%;
-    height: 48px;
-    background-image: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20400%2048%22%20preserveAspectRatio=%22none%22%3E%3Cpath%20fill=%22%23ff4d00%22%20d=%22M0%2048V27c7-1%2011-7%2018-8s10%205%2017%204%2011-9%2019-9%2012%207%2019%208%2012-6%2020-5%2012%209%2020%209%2012-8%2020-8%2012%206%2019%207%2012-9%2020-9%2012%208%2020%208%2011-7%2019-7%2012%206%2020%206%2012-8%2020-8%2011%207%2019%207%2012-5%2020-5%2012%207%2020%206%2011-8%2019-8%2012%205%2020%205%2012-6%2019-5%2012%208%2020%208%2012-7%2020-7%2011%206%2019%206%2012-8%2020-8v34z%22/%3E%3Cg%20fill=%22%23ff4d00%22%3E%3Cellipse%20cx=%2246%22%20cy=%2212%22%20rx=%227%22%20ry=%225%22/%3E%3Ccircle%20cx=%2263%22%20cy=%226%22%20r=%223%22/%3E%3Cellipse%20cx=%22148%22%20cy=%229%22%20rx=%229%22%20ry=%226%22/%3E%3Ccircle%20cx=%22168%22%20cy=%2215%22%20r=%222.5%22/%3E%3Cellipse%20cx=%22243%22%20cy=%2213%22%20rx=%226%22%20ry=%224%22/%3E%3Ccircle%20cx=%22262%22%20cy=%225%22%20r=%223.5%22/%3E%3Cellipse%20cx=%22331%22%20cy=%2210%22%20rx=%228%22%20ry=%225%22/%3E%3Ccircle%20cx=%22352%22%20cy=%2217%22%20r=%222.5%22/%3E%3C/g%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
+    bottom: calc(100% - 40px);
+    height: 128px;
+    background: linear-gradient(
+      to top,
+      var(--orange) 0px,
+      var(--orange) 88px,
+      transparent 88px
+    );
+    filter: url(#ink-edge-fin);
+    pointer-events: none;
   }
 }
 

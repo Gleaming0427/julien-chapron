@@ -63,7 +63,13 @@ const iconesProjet: Record<IconeProjet, string> = {
          (scale 220, so 110 px of travel) without cropping it. -->
     <div class="tear" aria-hidden="true">
       <div class="tear-filter">
-        <div class="tear-sheet"></div>
+        <div class="tear-sheet">
+          <!-- Phone only: the thin filtered strip that carries the torn
+               edge (see the phone block in global.css). A real element, not
+               a pseudo-element — SVG url() filters do not apply on
+               ::before/::after. -->
+          <div class="tear-frange"></div>
+        </div>
       </div>
     </div>
   </div>
