@@ -1983,7 +1983,13 @@ button.chip {
 .footer-contenu {
   --bg: #ff4d00;
   --text: #0b0c0d;
-  --text-dim: rgba(11, 12, 13, 0.62);
+  /* 0,80 et non 0,62. Mesuré sur l'orange #ff4d00, l'encre à 62 % donne
+     3,41:1 — sous les 4,5:1 que demande le texte courant, et ça touchait
+     quatre éléments : la phrase d'accroche, les libellés des statistiques,
+     les titres de colonnes et la ligne légale. 0,77 suffit tout juste
+     (4,51), 0,80 donne 4,73 avec un peu de marge, et la nuance reste
+     franchement plus douce que l'encre pleine, qui est à 5,89. */
+  --text-dim: rgba(11, 12, 13, 0.8);
   --border: rgba(11, 12, 13, 0.22);
   --border-strong: rgba(11, 12, 13, 0.5);
   --green: #ff4d00;
@@ -2122,6 +2128,25 @@ button.chip {
 .footer-liste a {
   color: var(--text);
   text-decoration: none;
+}
+
+/* Cibles tactiles. Mesurés sur téléphone, ces quatre liens faisaient 17 px
+   de haut pour un minimum de 44 : visables au pouce à peu près une fois sur
+   deux. La hauteur est portée à 44 et l'écart entre les éléments tombe à
+   zéro — le pas passe ainsi de 37 à 44 px, donc aucune zone n'en recouvre
+   une autre, et la colonne ne grandit que de 14 px.
+   Au pointeur fin, rien ne change : la souris n'a pas besoin de ça et la
+   mise en page du bureau reste au pixel près. */
+@media (pointer: coarse) {
+  .footer-liste {
+    gap: 0;
+  }
+
+  .footer-liste a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+  }
 }
 
 /* A single name per link, slightly bold. */
