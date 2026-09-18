@@ -41,6 +41,13 @@
 
   --radius: 8px;
   --gutter: clamp(20px, 3vw, 56px);
+  /* Respiration sous le pied de page. Le conteneur la réserve, la zone du
+     pied la rattrape d'autant pour que le noir descende jusqu'au bas de la
+     page : les deux doivent rester égales, d'où cette valeur unique — elles
+     étaient écrites en double, et en double aussi dans la version
+     téléphone. 64 px laissaient une bande noire vide de 79 px sous la
+     carte orange, marge de la carte comprise. */
+  --pied-bas: 16px;
   /* Real header height, measured on load: a content
      "screen" is the window height minus this sticky bar. */
   --header-h: 57px;
@@ -309,7 +316,7 @@ code {
   max-width: none;
   margin: 0;
   /* Compense la hauteur de la barre, désormais hors du flux. */
-  padding: var(--header-h) var(--gutter) 64px;
+  padding: var(--header-h) var(--gutter) var(--pied-bas);
 }
 
 /* ---------- header ---------- */
@@ -1888,10 +1895,10 @@ button.chip {
   margin-inline: calc(50% - 50vw);
   /* Catches up the breathing room of the container: the black goes to the bottom of
      the page, without letting the gray of the body show through. */
-  margin-bottom: -64px;
+  margin-bottom: calc(-1 * var(--pied-bas));
   padding-inline: calc(50vw - 50%);
   /* Dark breathing room under the sheet. */
-  padding-bottom: 64px;
+  padding-bottom: var(--pied-bas);
   background-color: #0b0c0d;
   background-image: radial-gradient(
     rgba(139, 148, 158, calc(0.16 * var(--trame-footer, 1))) 1px,
@@ -1908,15 +1915,21 @@ button.chip {
   --border: rgba(11, 12, 13, 0.22);
   --border-strong: rgba(11, 12, 13, 0.5);
   --green: #ff4d00;
-  margin: clamp(10px, 1.5vw, 18px);
+  margin: clamp(8px, 1vw, 14px);
   border-radius: clamp(18px, 2vw, 28px);
   background: var(--bg);
   color: var(--text);
-  padding-block: clamp(56px, 9vh, 110px) clamp(28px, 4vh, 48px);
+  /* Mesuré sur 1009 x 768 : 69 px de padding haut pour 31 en bas, et un
+     écart de 38 px répété trois fois, dont deux de part et d'autre d'un
+     filet d'un pixel — 214 px de vide pour 259 px de contenu. Le haut garde
+     une petite avance, celle qui convient à une carte de ce genre, mais on
+     est descendu deux fois : le vide occupe désormais 27 % de la carte au
+     lieu de 45, pour le même contenu. */
+  padding-block: clamp(24px, 3.6vh, 44px) clamp(18px, 2.2vh, 28px);
   padding-inline: var(--gutter);
   display: flex;
   flex-direction: column;
-  gap: clamp(32px, 5vh, 64px);
+  gap: clamp(16px, 2.1vh, 26px);
 }
 
 /* The statement on the left, the statistics and the button on the right — the bottom of the
@@ -2482,7 +2495,7 @@ button.chip {
        rendre la page déplaçable latéralement sur un navigateur sans
        overflow: clip. Et le padding haut compense la barre, sortie du flux
        depuis son passage en position fixe. */
-    padding: var(--header-h) var(--gutter) 48px;
+    padding: var(--header-h) var(--gutter) var(--pied-bas);
   }
 
   /* The name is too long to fit in the pill with the navigation and
@@ -2600,11 +2613,10 @@ button.chip {
     font-size: clamp(22px, 6.5vw, 30px);
   }
 
-  /* The breathing room of the container goes to 48px on mobile: the zone of the
-     footer catches it by the same amount, the black stays to the bottom of the page. */
-  .site-footer {
-    margin-bottom: -48px;
-    padding-bottom: 48px;
+  /* Une seule valeur à reprendre : le conteneur et la zone du pied la
+     partagent (voir --pied-bas). */
+  :root {
+    --pied-bas: 12px;
   }
 }
 
