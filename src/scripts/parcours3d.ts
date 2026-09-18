@@ -53,6 +53,10 @@ const RETRAIT = 0.22;
 const TILT = 0.95;
 
 const COUNT = 2200;
+/** Outer radius of the torus (R + r), plus the jitter given to the points. */
+const RAYON_EXT = 0.91;
+/** Phone: what is left between the ring and the edge of the screen. */
+const MARGE_TEL = 16;
 const FOV = 42;
 const HALF_FOV_TAN = Math.tan((FOV * Math.PI) / 180 / 2);
 
@@ -282,12 +286,28 @@ export function initParcours3D(): void {
     renderer.setSize(vue.width, vue.height);
     camera.aspect = vue.width / vue.height;
 
-    // The form (diameter 2) occupies ~70% of the screen's smaller side:
-    // on a phone it shrinks with the window, on desktop it keeps
-    // its current scale (the smaller side there is the height).
-    // 0,62 et non 0,7 : le donut frôlait le bas du cadre, sans marge pour
-    // respirer.
-    const voulu = Math.min(vue.height, vue.width) * 0.62;
+    /* Size of the form, which is 2 units across.
+       On a wide screen it takes ~62 % of the smaller side — there the smaller
+       side is the height, and the donut lives behind the left-hand column
+       with the cards beside it.
+       On a phone it is measured off the WIDTH instead, so the ring runs from
+       one edge to the other with a margin of 16 px. Sized off the smaller
+       side, it was 244 px across for a 393 px screen: the ring covered 212 px,
+       a little over half the width, lost in the middle of the panel. Going
+       through the outer radius rather than the diameter is what puts the
+       edge of the ring where it is wanted, and not the edge of the box
+       around it. */
+    const voulu = etroit.matches
+      ? (vue.width - 2 * MARGE_TEL) / RAYON_EXT
+      : Math.min(vue.height, vue.width) * 0.62;
+    /* The grain of the cloud. Measured on the canvas itself rather than
+       guessed: at 0.015 a point came out 1.5 px across on a phone, which is
+       what made them hard to make out, and over a ring half as wide again
+       the same 2200 points are spread thinner still — what one sees of a
+       cloud is as much its density as the size of its grain. 0.023 puts a
+       point at about 2.3 px, clearly there without turning into a disc.
+       The wide screen keeps its fine grain. */
+    matiere.size = etroit.matches ? 0.023 : 0.015;
     camera.position.z = vue.height / (voulu * HALF_FOV_TAN);
     camera.updateProjectionMatrix();
 
@@ -305,18 +325,17 @@ export function initParcours3D(): void {
     // ne change rien, l'intro y étant déjà centrée (l'écart vaut zéro).
     const ecart = (vue.top + vue.height / 2 - (place.top + place.height / 2)) * mondeParPixel;
     finaleY = -ecart;
-    /* Phone: the block stacks, the title at the top and the card below it,
-       and the donut has the screen to itself as long as the card has not
-       arrived (it fades out as soon as it does, see the loop). Kept low, it
-       left about 400 px of void between the title and itself — measured on
-       a 390 x 715 window, the title ends at 109 and the ring only starts at
-       475. It is therefore centred in the band the title leaves free, which
-       reads as a composition instead of a shape pushed against the bottom
-       edge. Nothing changes on a wide screen, where the donut sits behind
-       the left-hand column and the cards beside it. */
+    /* Phone: dead centre of the panel, both ways. The block stacks there —
+       title at the top, card below — and the donut has the screen to itself
+       for as long as the card has not arrived; it fades out as soon as it
+       does (see the loop). Hung off the title, it sat low and off to one
+       side of a screen it was alone on. Centred and nearly edge to edge, it
+       reads as the composition of that moment. The title, at the very top,
+       is well clear of it: the ring is tilted, so it only covers about
+       210 px of height around the middle. */
     if (etroit.matches) {
-      const milieuLibre = (place.bottom + vue.bottom) / 2;
-      finaleY = (vue.top + vue.height / 2 - milieuLibre) * mondeParPixel;
+      finaleX = 0;
+      finaleY = 0;
     }
     // …but only as far as the frame allows. On a phone the intro sits at the
     // very top of the block, so this offset sends the donut 300 px below the
@@ -327,9 +346,7 @@ export function initParcours3D(): void {
     // On a wide screen the intro is already centred, this offset is zero and
     // the clamp never bites.
     const demiHauteur = camera.position.z * HALF_FOV_TAN;
-    // Outer radius of the torus (R + r) plus the jitter given to the points.
-    const rayon = 0.87 + 0.04;
-    const limite = Math.max(0, demiHauteur - rayon - demiHauteur * 0.06);
+    const limite = Math.max(0, demiHauteur - RAYON_EXT - demiHauteur * 0.06);
     finaleY = Math.max(-limite, Math.min(limite, finaleY));
     texteL = (place.left - vue.left) / vue.width;
     texteR = (place.right - vue.left) / vue.width;
