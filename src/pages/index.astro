@@ -265,16 +265,22 @@ const iconesProjet: Record<IconeProjet, string> = {
               <dd>+15</dd>
             </div>
           </dl>
-          <a class="axiom-btn axiom-btn-dark" href={`mailto:${identity.email}`}>
-            <span class="axiom-btn-text-col">
-              <span class="axiom-btn-text-row">Contactez-moi</span>
-              <span class="axiom-btn-text-row" aria-hidden="true">Contactez-moi</span>
-            </span>
-            <span class="axiom-btn-arrow-box">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h17.4" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
-            </span>
-          </a>
         </div>
+      </div>
+
+      <!-- The call to action on its own line, centred. Tucked under the two
+           statistics it read as their appendix, off in a corner, when it is
+           the one thing the page is asking for. -->
+      <div class="footer-appel">
+        <a class="axiom-btn axiom-btn-dark" href={`mailto:${identity.email}`}>
+          <span class="axiom-btn-text-col">
+            <span class="axiom-btn-text-row">Contactez-moi</span>
+            <span class="axiom-btn-text-row" aria-hidden="true">Contactez-moi</span>
+          </span>
+          <span class="axiom-btn-arrow-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h17.4" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
+          </span>
+        </a>
       </div>
 
       <div class="footer-separateur" aria-hidden="true"></div>

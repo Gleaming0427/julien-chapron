@@ -47,7 +47,7 @@
      étaient écrites en double, et en double aussi dans la version
      téléphone. 64 px laissaient une bande noire vide de 79 px sous la
      carte orange, marge de la carte comprise. */
-  --pied-bas: 16px;
+  --pied-bas: 10px;
   /* Real header height, measured on load: a content
      "screen" is the window height minus this sticky bar. */
   --header-h: 57px;
@@ -1703,6 +1703,10 @@ button.chip {
   min-height: 100vh;
   min-height: 100svh;
   align-content: center;
+  /* Le pied vient juste après : les 84 px que la section garde en bas
+     s'ajoutaient à la marge de la carte orange, soit 91 px de noir vide
+     entre les deux. */
+  padding-bottom: clamp(28px, 4.5vh, 56px);
   --bg: #0b0c0d;
   --text: #f3f1ec;
   --text-dim: rgba(243, 241, 236, 0.58);
@@ -1763,47 +1767,60 @@ button.chip {
      leave the whole thing to the compositor: no layout, no repaint, which
      is what keeps it smooth on a phone.
      --entree is the direction; :nth-child(even) flips it. */
-  opacity: 0;
-  transform: translate3d(var(--entree, -40px), 0, 0);
-  transition:
-    opacity 0.62s cubic-bezier(0.22, 0.61, 0.36, 1),
-    transform 0.62s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 .projet-etape:nth-child(even) {
   --entree: 40px;
 }
 
+/* The hidden state is armed BY THE SCRIPT, never by the stylesheet alone.
+   Written straight onto .projet-etape, the four cards stayed invisible for
+   good wherever the observer did not report — no JS, a module that threw
+   before this one, a browser holding its rendering steps. The page would
+   then simply be missing its projects. Here the worst case is an arrival
+   that does not play. */
+.projet-grille.anime .projet-etape {
+  opacity: 0;
+  transform: translate3d(var(--entree, -40px), 0, 0);
+}
+
+/* The transition is armed a frame AFTER the hidden state, by a second class,
+   so that going into hiding is not itself animated: declared from the
+   start, it faded the four cards out on load, in full view, before the
+   arrival could play them back in. */
+.projet-grille.pret .projet-etape {
+  transition:
+    opacity 0.62s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.62s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
 /* ui.ts sets the class when the frame enters the screen and takes it away
    when it leaves: the arrival plays again on the way back up, like the rest
    of the site. */
-.projet-grille.entree .projet-etape {
+.projet-grille.anime.entree .projet-etape {
   opacity: 1;
   transform: none;
 }
 
-.projet-grille.entree .projet-etape:nth-child(2) {
+.projet-grille.anime.entree .projet-etape:nth-child(2) {
   transition-delay: 0.09s;
 }
 
-.projet-grille.entree .projet-etape:nth-child(3) {
+.projet-grille.anime.entree .projet-etape:nth-child(3) {
   transition-delay: 0.18s;
 }
 
-.projet-grille.entree .projet-etape:nth-child(4) {
+.projet-grille.anime.entree .projet-etape:nth-child(4) {
   transition-delay: 0.27s;
 }
 
-/* Without JS the class never comes, so the cards must not stay invisible.
-   Same with "reduce motion", where only the fade is kept. */
-html:not(.js) .projet-etape {
-  opacity: 1;
-  transform: none;
-}
-
+/* With "reduce motion" only the fade is kept. */
 @media (prefers-reduced-motion: reduce) {
-  .projet-etape {
+  .projet-grille.anime .projet-etape {
     transform: none;
+  }
+
+  .projet-grille.pret .projet-etape {
     transition-duration: 0.01ms;
   }
 }
@@ -1970,7 +1987,7 @@ html:not(.js) .projet-etape {
   --border: rgba(11, 12, 13, 0.22);
   --border-strong: rgba(11, 12, 13, 0.5);
   --green: #ff4d00;
-  margin: clamp(8px, 1vw, 14px);
+  margin: clamp(6px, 0.7vw, 10px);
   border-radius: clamp(18px, 2vw, 28px);
   background: var(--bg);
   color: var(--text);
@@ -1980,15 +1997,25 @@ html:not(.js) .projet-etape {
      une petite avance, celle qui convient à une carte de ce genre, mais on
      est descendu deux fois : le vide occupe désormais 27 % de la carte au
      lieu de 45, pour le même contenu. */
-  padding-block: clamp(24px, 3.6vh, 44px) clamp(18px, 2.2vh, 28px);
-  padding-inline: var(--gutter);
+  padding-block: clamp(20px, 2.8vh, 34px) clamp(14px, 1.8vh, 22px);
+  /* Narrower than the page gutter: inside a card of its own, the text does
+     not need the margin the full-width blocks take. */
+  padding-inline: clamp(18px, 2.2vw, 40px);
   display: flex;
   flex-direction: column;
-  gap: clamp(16px, 2.1vh, 26px);
+  gap: clamp(13px, 1.7vh, 20px);
 }
 
-/* The statement on the left, the statistics and the button on the right — the bottom of the
-   right block (so the button) aligns with the bottom of the text. */
+/* The call to action, on its own line and centred. Under the statistics it
+   read as their appendix, pushed into a corner, when it is the one thing the
+   page is asking for. */
+.footer-appel {
+  display: flex;
+  justify-content: center;
+}
+
+/* The statement on the left, the statistics on the right — the foot of the
+   right-hand block lines up with the foot of the text. */
 .footer-haut {
   display: flex;
   justify-content: space-between;
@@ -2671,7 +2698,7 @@ html:not(.js) .projet-etape {
   /* Une seule valeur à reprendre : le conteneur et la zone du pied la
      partagent (voir --pied-bas). */
   :root {
-    --pied-bas: 12px;
+    --pied-bas: 8px;
   }
 }
 

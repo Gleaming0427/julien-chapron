@@ -222,6 +222,15 @@ if (header) {
 {
   const grille = document.querySelector<HTMLElement>(".projet-grille");
   if (grille) {
+    // The hidden state is armed here, not in the stylesheet: if this module
+    // never gets this far, the cards stay visible instead of disappearing
+    // from the page.
+    grille.classList.add("anime");
+    // Commit that hidden state before arming the transition, otherwise the
+    // four cards fade OUT on load, in full view, before anything can bring
+    // them back. Reading a layout property is what forces the flush.
+    void grille.offsetWidth;
+    grille.classList.add("pret");
     new IntersectionObserver(
       (entrees) => {
         const part = entrees[0]?.intersectionRatio ?? 0;
