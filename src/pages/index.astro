@@ -88,6 +88,25 @@ const iconesProjet: Record<IconeProjet, string> = {
         </feComponentTransfer>
         <feGaussianBlur in="cut" stdDeviation="0.4"></feGaussianBlur>
       </filter>
+      <!-- The same edge, scaled for a phone. The parameters above are
+           absolute pixels tuned on a wide screen: 220 px of displacement is
+           15 % of 1440 px, and the noise pattern 4.6 %. Carried over to a
+           393 px window they become 56 % and 17 % — the edge is then two or
+           three lobes the size of a hand, so one corner of the sheet wins the
+           race and the orange shows up in the top right before the rest.
+           Brought back to the same proportions: 60 px of displacement,
+           pattern of 18 px. Two octaves rather than three, and one blur pass
+           dropped — over a surface that Safari has to rasterise again on
+           every frame, what is no longer visible at this size is not worth
+           paying for. -->
+      <filter id="ink-edge-fin" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.055 0.073" numOctaves="2" seed="7" result="noise"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="60" xChannelSelector="R" yChannelSelector="G" result="displaced"></feDisplacementMap>
+        <feGaussianBlur in="displaced" stdDeviation="1.2" result="presmooth"></feGaussianBlur>
+        <feComponentTransfer in="presmooth" result="cut">
+          <feFuncA type="discrete" tableValues="0 0 0 0 0 1 1 1 1 1"></feFuncA>
+        </feComponentTransfer>
+      </filter>
     </defs>
   </svg>
 

@@ -3056,6 +3056,23 @@ button.chip {
   }
 }
 
+/* ---------- ink edge, at the scale of a phone ----------
+   The filter's parameters are absolute pixels: the displacement and the
+   noise pattern do not shrink with the window. On a 393 px screen the
+   220 px of displacement cover 56 % of the width instead of 15 %, so the
+   edge comes down to two or three lobes — one of them reaches the top right
+   first and the orange shows up there, alone, before the rest arrives.
+   #ink-edge-fin keeps the same proportions at this width. The slack follows
+   the displacement it has to absorb: 60 px of travel needs far less than the
+   160 px the wide screen asks for, and the filtered surface — which Safari
+   rasterises again on every frame — shrinks with it. */
+@media (max-width: 720px) {
+  .tear-filter {
+    --tear-slack: 60px;
+    filter: url(#ink-edge-fin);
+  }
+}
+
 /* ---------- reading indicator on a phone ----------
    The indicator is fixed at the middle of the right edge: a 64 px rail and
    its counter, anchored 14 px from the edge. On a desktop the gutters keep

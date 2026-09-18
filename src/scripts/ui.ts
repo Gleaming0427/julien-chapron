@@ -273,8 +273,13 @@ function interlude(railTop: number, vh: number): void {
   // Au tactile, la séquence est écourtée : neuf secondes pendant lesquelles
   // le doigt ne répond pas ne se lisent pas comme une mise en scène, mais
   // comme une page figée.
+  // Au tactile la séquence était plafonnée à 4,5 s, pour une course qui en
+  // demande une douzaine : les points du donut arrivaient deux fois et demie
+  // trop vite, en un jet qu'on ne lit pas. Le plafond visait une page qui ne
+  // répond plus, mais le verrou est déjà levé au doigt (lock ci-dessous) —
+  // on peut donc laisser la scène prendre son temps sans rien bloquer.
   const duree = TACTILE
-    ? Math.min(4.5, Math.max(2.4, distanceEcrans / VITESSE))
+    ? Math.min(8, Math.max(2.4, distanceEcrans / VITESSE))
     : Math.max(2.4, distanceEcrans / VITESSE);
 
   interludeJoue = true;
@@ -388,18 +393,13 @@ function onScroll(): void {
     const hauteur = calque.height || 1;
     // The "hang" offset lowers the start so that the edge sets off from the
     // very bottom of the screen.
-    // CROISSANCE: how fast the sheet grows, per pixel of scroll. The torn
-    // edge climbs the screen at (1 + croissance) times the scroll, since the
-    // tear window is itself scrolling up. At 1 the sweep is over in half a
-    // screen of scroll — four notches of a wheel, which reads on a desktop,
-    // but a fraction of a flick on a phone, where the whole effect went by
-    // unseen. Lowering it stretches the sweep: the floor is 0, where the ink
-    // would no longer lead the light zone at all and the edge would stop
-    // reshaping, so the sweep can never last more than one screen of scroll.
-    // 0.35 takes it from half a screen to three quarters, and the ink still
-    // runs up to 190 px ahead of the light zone below it.
-    const croissance = TACTILE ? 0.35 : 1;
-    const scale = (risen * croissance - hang + debord) / hauteur;
+    // The sheet grows one pixel per pixel of scroll, on every screen. It was
+    // slowed to 0.35 on touch so the sweep would last longer, and that made
+    // it worse, not better: what the phone lacked was not time but frames.
+    // Stretched over more of them, the same stutter simply had longer to be
+    // seen, and a slow effect that jumps reads as a page that is struggling.
+    // The cost is cut in the filter instead — see #ink-edge-fin.
+    const scale = (risen - hang + debord) / hauteur;
     tearSheet.style.setProperty("--tear", Math.min(1, Math.max(0, scale)).toFixed(4));
   }
 }

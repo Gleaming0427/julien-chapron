@@ -354,6 +354,8 @@ export function initParcours3D(): void {
   const couleursArr = couleurs.array as Float32Array;
 
   let tPrec = performance.now();
+  /** Last value of `avance` written into the position buffer. */
+  let avancePrec = -1;
 
   const tick = (): void => {
     {
@@ -383,12 +385,20 @@ export function initParcours3D(): void {
       // frame instead of off-screen: on the way back, the points settled
       // right in the middle of the page. This catch-up makes the computation
       // self-correcting — it no longer depends on having measured at the right time.
+      // Step 1 — the points enter from the top right and line up on the torus.
+      const avance = Math.min(1, spec / FORME_FIN);
       if (
-        departsPour.z !== camera.position.z ||
-        departsPour.aspect !== camera.aspect ||
-        departsPour.x !== finaleX ||
-        departsPour.y !== finaleY ||
-        departsPour.a !== angle
+        // Only while a point is still in flight. Past that the starts are
+        // never read again, and `angle` — which advances on every frame once
+        // the donut spins — kept re-triggering this loop of 2200 sines and
+        // cosines for the whole time the block was on screen, for a result
+        // nothing used.
+        avance < 1 &&
+        (departsPour.z !== camera.position.z ||
+          departsPour.aspect !== camera.aspect ||
+          departsPour.x !== finaleX ||
+          departsPour.y !== finaleY ||
+          departsPour.a !== angle)
       ) {
         poserLesDeparts();
       }
@@ -413,29 +423,34 @@ export function initParcours3D(): void {
         ? (1 - arrivee * arrivee * (3 - 2 * arrivee)).toFixed(3)
         : "1";
 
-      // Step 1 — the points enter from the left and line up on the torus.
-      const avance = Math.min(1, spec / FORME_FIN);
-      for (let i = 0; i < COUNT; i++) {
-        // The coefficients follow the spread: with a delay of up to
-        // 0.8, it takes 2.0 and 1.2 for even the last point to
-        // reach its place exactly at the end of the step.
-        const b = Math.min(1, Math.max(0, (avance * 2 - rangement[i]!) / 1.2));
-        const forme = b * b * (3 - 2 * b);
-        // Curved and serpentine trajectory rather than straight. The bell
-        // cancels out at both ends: the point leaves exactly from its waiting
-        // spot and settles exactly on its own, the deviation only lives in
-        // flight. The undulation is indexed on the PROGRESS and not on time,
-        // so the flight is identical on the way out and on the way back, and nothing depends
-        // on the speed at which one scrolls.
-        const cloche = Math.sin(Math.PI * forme);
-        const derive = cloche * (0.6 + 0.4 * Math.sin(forme * onde[i]! + phase[i]!));
-        for (let axe = 0; axe < 3; axe++) {
-          const k = i * 3 + axe;
-          tableau[k] =
-            relais[k]! + (cible[k]! - relais[k]!) * forme + ecart[k]! * derive;
+      // The flight depends on `avance` alone: once it stops moving, the 2200
+      // points are on their target, and rewriting them then handing the
+      // buffer back to the GPU changes nothing on screen. The rotation is
+      // carried by the group, not by the positions.
+      if (avance !== avancePrec) {
+        for (let i = 0; i < COUNT; i++) {
+          // The coefficients follow the spread: with a delay of up to
+          // 0.8, it takes 2.0 and 1.2 for even the last point to
+          // reach its place exactly at the end of the step.
+          const b = Math.min(1, Math.max(0, (avance * 2 - rangement[i]!) / 1.2));
+          const forme = b * b * (3 - 2 * b);
+          // Curved and serpentine trajectory rather than straight. The bell
+          // cancels out at both ends: the point leaves exactly from its waiting
+          // spot and settles exactly on its own, the deviation only lives in
+          // flight. The undulation is indexed on the PROGRESS and not on time,
+          // so the flight is identical on the way out and on the way back, and nothing depends
+          // on the speed at which one scrolls.
+          const cloche = Math.sin(Math.PI * forme);
+          const derive = cloche * (0.6 + 0.4 * Math.sin(forme * onde[i]! + phase[i]!));
+          for (let axe = 0; axe < 3; axe++) {
+            const k = i * 3 + axe;
+            tableau[k] =
+              relais[k]! + (cible[k]! - relais[k]!) * forme + ecart[k]! * derive;
+          }
         }
+        position.needsUpdate = true;
+        avancePrec = avance;
       }
-      position.needsUpdate = true;
 
       // Step 2 — the background switches to black, the points whiten.
       const brut = Math.min(
