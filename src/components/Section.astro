@@ -10,8 +10,13 @@ const { command, class: extraClass } = Astro.props;
 ---
 
 <section class:list={["section", extraClass]}>
-  <h2 class="section-title">
+  <!-- La commande est un ornement, pas un intitulé. En <h2> elle occupait le
+       plan du document à la place des vrais titres : Google lisait « $ cat
+       profil.md », « $ experience --all », « $ ls ~/projets-personnels » là
+       où se trouvent les mots du métier. Les intitulés qui les portent sont
+       remontés en <h2> dans la page. -->
+  <p class="section-title" aria-hidden="true">
     <span class="prompt">$</span> <span class="cmd">{command}</span>
-  </h2>
+  </p>
   <slot />
 </section>

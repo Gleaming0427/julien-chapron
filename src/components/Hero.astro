@@ -7,9 +7,12 @@ const pdfUrl = base === "/" ? "/CV_Julien_Chapron.pdf" : `${base}/CV_Julien_Chap
 ---
 
 <section class="hero">
-  <!-- Plain header kept for printing the CV. -->
+  <!-- Plain header kept for printing the CV. Le nom y est un paragraphe et
+       non un <h1> : masqué à l'écran, il restait dans le DOM, et la page
+       avait donc DEUX <h1> portant le même texte. La feuille d'impression
+       lui garde son allure de titre. -->
   <div class="print-only">
-    <h1>{identity.name}</h1>
+    <p class="print-nom">{identity.name}</p>
     <p class="print-role">{identity.role}</p>
     <p class="print-contact">
       {identity.location} · {identity.phone} · {identity.email} · {identity.githubLabel}

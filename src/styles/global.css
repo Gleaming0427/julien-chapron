@@ -2774,8 +2774,11 @@ button.chip {
     display: block;
   }
 
-  .print-only h1 {
+  /* Le nom n'est plus un <h1> — la page n'en garde qu'un, celui du hero —
+     mais il garde son allure de titre sur la feuille imprimée. */
+  .print-nom {
     font-size: 20px;
+    font-weight: 700;
     margin: 0;
   }
 

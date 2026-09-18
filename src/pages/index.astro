@@ -33,8 +33,8 @@ const iconesProjet: Record<IconeProjet, string> = {
 ---
 
 <Layout
-  title="Julien Chapron, Développeur Full-Stack"
-  description="CV de Julien Chapron, développeur full-stack TypeScript / React / Node.js. Projets personnels et applications."
+  title="Julien Chapron · Développeur Full-Stack à Toulouse"
+  description="Développeur full-stack TypeScript, React et Node.js — sept ans en production, remote ou hybride depuis Toulouse. Parcours, projets et contact."
 >
   <!-- Dark part: the hero fills the first screen, the terminal the
        second. The tear window is anchored on its last screen: the dark
@@ -126,7 +126,7 @@ const iconesProjet: Record<IconeProjet, string> = {
     <div class="spec-layout">
     <div class="spec-intro">
       <p class="spec-eyebrow">parcours</p>
-      <h3 class="spec-headline">Sept ans en production. <span>Toujours en équipe.</span></h3>
+      <h2 class="spec-headline">Sept ans en production. <span>Toujours en équipe.</span></h2>
       <p class="spec-lead">Trois missions, de la recherche publique à la voiture électrique connectée.</p>
     </div>
     <div class="exp-carousel">
@@ -193,7 +193,7 @@ const iconesProjet: Record<IconeProjet, string> = {
          sections, reached by simply scrolling the page. -->
   <Section command="cat competences.md" class="section-skills section-apres">
     <p class="spec-eyebrow">compétences</p>
-    <h3 class="spec-headline">Spécifications techniques. <span>Ce que j'utilise vraiment.</span></h3>
+    <h2 class="spec-headline">Spécifications techniques. <span>Ce que j'utilise vraiment.</span></h2>
     <p class="spec-lead">
       Sur chaque ligne, les deux premières sont celles où j'ai le plus
       d'heures de vol.
@@ -202,7 +202,7 @@ const iconesProjet: Record<IconeProjet, string> = {
       {
         skills.map((group, i) => (
           <div class="skill-row" style={`--d:${i}`}>
-            <h4 class="skill-cat">{group.category}</h4>
+            <h3 class="skill-cat">{group.category}</h3>
             <ul class="skill-items">
               {group.skills.map((skill) => <li>{skill}</li>)}
             </ul>
@@ -214,7 +214,7 @@ const iconesProjet: Record<IconeProjet, string> = {
 
   <Section command="ls ~/projets-personnels" class="section-apres section-projets">
     <p class="spec-eyebrow">projets</p>
-    <h3 class="spec-headline">Projets personnels. <span>Trois publiés, un prototype.</span></h3>
+    <h2 class="spec-headline">Projets personnels. <span>Trois publiés, un prototype.</span></h2>
     <p class="spec-lead">
       Une librairie sur npm, un outil d'analyse de vulnérabilités en open
       source, une application sur le Play Store.
@@ -232,7 +232,7 @@ const iconesProjet: Record<IconeProjet, string> = {
             <span class="projet-mesure">projet-0{i + 1}</span>
           </div>
           <div class="projet-corps">
-            <h4 class="projet-titre">{project.name}</h4>
+            <h3 class="projet-titre">{project.name}</h3>
             <p class="projet-texte">{project.description}</p>
           </div>
           <footer class="projet-pied">
