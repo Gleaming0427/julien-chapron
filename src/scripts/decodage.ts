@@ -149,9 +149,20 @@ export function initDecodage(): void {
     image();
   };
 
-  // Relaunches in a loop as long as the block is on screen: a small random
-  // batch scrambles, returns to French, and the next one is
-  // scheduled. The block's entry plays the whole table, as before.
+  /* Relance périodique : COUPÉE.
+
+     Le décodage d'entrée reste, et rejoue à chaque retour du bloc à l'écran :
+     l'effet garde son moment. Ce qui est coupé, c'est la boucle qui
+     rebrouillait un lot d'étiquettes toutes les 2,5 à 4 s pendant qu'on lit.
+
+     Mesuré sur le site en ligne : 37 % des relevés avaient au moins une
+     étiquette en katakana. C'est le tableau que le visiteur scanne pour
+     savoir si tu fais du Kubernetes — l'endroit le plus cher de la page pour
+     rendre du texte illisible, et il l'était plus d'un tiers du temps.
+
+     Repasser cette constante à true restaure le comportement d'origine. */
+  const RELANCE_PERIODIQUE: boolean = false;
+
   let dedans = false;
   let minuterie = 0;
 
@@ -182,7 +193,7 @@ export function initDecodage(): void {
       if (visible && !dedans) {
         window.clearTimeout(minuterie);
         jouer(libelles);
-        programmer();
+        if (RELANCE_PERIODIQUE) programmer();
       }
       dedans = visible;
     },
