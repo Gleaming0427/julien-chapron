@@ -1768,6 +1768,10 @@ button.chip {
   gap: clamp(18px, 2.5vh, 28px);
   padding: clamp(20px, 2.5vw, 32px);
   border-right: 1px solid rgba(243, 241, 236, 0.12);
+  /* Repère pour la zone cliquable des cartes qui ont une page : le lien du
+     pied s'étend sur toute la carte (voir .projet-lien::after). */
+  position: relative;
+  transition: background 0.3s ease;
   /* Entrance: one card out of two comes from the left, the other from the
      right, and they arrive one after another. The travel is short on
      purpose — at a full cell width the cards would cross over their
@@ -1949,6 +1953,32 @@ button.chip {
 
 .projet-lien:hover span,
 .projet-lien:focus-visible span {
+  border-bottom-color: var(--green);
+}
+
+/* Toute la carte est cliquable, pas seulement les deux mots du pied : le lien
+   s'étire sur la carte entière. Un seul lien dans le balisage, donc un seul
+   point d'entrée au clavier et un intitulé qui reste « Voir le projet » —
+   ce qu'un <a> enveloppant la carte ne permet pas sans noyer le lecteur
+   d'écran sous tout le texte de la carte. */
+.projet-lien::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Le survol répond sur toute la carte, sinon rien ne dit qu'elle est
+   cliquable tant que la souris n'a pas atteint le pied. */
+.projet-etape:has(.projet-lien):hover {
+  background: rgba(243, 241, 236, 0.03);
+}
+
+.projet-etape:has(.projet-lien):hover .projet-lien svg {
+  transform: translateX(4px);
+}
+
+.projet-etape:has(.projet-lien):hover .projet-lien span {
   border-bottom-color: var(--green);
 }
 
