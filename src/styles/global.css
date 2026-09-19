@@ -1916,6 +1916,42 @@ button.chip {
   text-overflow: ellipsis;
 }
 
+/* La carte était un cul-de-sac : le pied annonçait des liens depuis
+   l'origine sans jamais en porter. Seuls les projets qui ont une page de
+   détail en affichent un, les autres gardent leur pied d'une seule ligne. */
+.projet-lien {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  letter-spacing: 0.06em;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.projet-lien svg {
+  width: 15px;
+  height: 15px;
+  color: var(--green);
+  transition: transform 0.25s ease;
+}
+
+.projet-lien:hover svg,
+.projet-lien:focus-visible svg {
+  transform: translateX(4px);
+}
+
+.projet-lien span {
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.25s ease;
+}
+
+.projet-lien:hover span,
+.projet-lien:focus-visible span {
+  border-bottom-color: var(--green);
+}
+
 @media (max-width: 1080px) {
   .projet-grille {
     grid-template-columns: 1fr 1fr;

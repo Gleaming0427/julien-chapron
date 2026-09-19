@@ -19,6 +19,9 @@ const marqueeSkills = [
   "PostgreSQL", "Firebase", "GitLab CI", "GitHub Actions",
 ];
 
+const base = import.meta.env.BASE_URL;
+const url = (path: string) => (base === "/" ? path : base + path);
+
 // Project step icons, drawn as strokes, placed in the head box.
 const iconesProjet: Record<IconeProjet, string> = {
   serveur:
@@ -243,6 +246,12 @@ const iconesProjet: Record<IconeProjet, string> = {
           </div>
           <footer class="projet-pied">
             <p class="projet-note">{project.tagline}</p>
+            {project.page && (
+              <a class="projet-lien" href={url(project.page)}>
+                <span>Voir le projet</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h17.4" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
+              </a>
+            )}
           </footer>
         </article>
       ))}

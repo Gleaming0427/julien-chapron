@@ -38,6 +38,9 @@ export interface PersonalProject {
   stack: string;
   links: Link[];
   icon: IconeProjet;
+  /** Page de détail interne, quand le projet en a une. Les cartes de
+      l'accueil sont sinon des culs-de-sac : rien n'y est cliquable. */
+  page?: string;
 }
 
 export interface SkillGroup {
@@ -181,6 +184,7 @@ export const personalProjects: PersonalProject[] = [
       "Trouve les CVE qui comptent vraiment dans votre code : recoupées contre OSV/GHSA, analysées par reachability, avec correctifs exacts.",
     stack: "Python, Mistral AI",
     links: [{ label: "github.com/Gleaming0427/cve-triage", href: "https://github.com/Gleaming0427/cve-triage" }],
+    page: "/cve-triage/",
   },
   {
     name: "Pims Pocket",
