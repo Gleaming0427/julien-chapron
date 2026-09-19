@@ -334,13 +334,20 @@ function onScroll(): void {
        l'écran, séparés par une arête franche, et la barre du carrousel
        échouée seule en haut au-dessus d'une bande vide.
 
-       On mesure ce qui reste avant le décollage (le bas du rail rejoignant le
-       bas de l'écran) et on éteint le panneau sur le dernier demi-écran : le
-       bloc s'efface au lieu de sortir par le haut. */
-    const restantAvantDecollage = (railTop + carouselRail.offsetHeight - vh) / vh;
+       Le fondu suit la SORTIE du panneau, pas son décollage. Calé sur le
+       décollage, il était terminé avant que le bloc ne commence à quitter
+       l'écran : à 60 px après le décollage, le panneau était éteint alors
+       qu'il occupait encore 840 px des 900 de haut, avec seulement 60 px de
+       la section suivante en dessous — un écran plat.
+
+       Le bas du rail, ramené à la hauteur d'écran, donne exactement la bonne
+       courbe : 1 au décollage (le bas du rail touche le bas de l'écran), 0
+       quand le rail se termine, donc quand la section suivante l'a
+       entièrement remplacé. */
+    const basDuRail = railTop + carouselRail.offsetHeight;
     carouselRail.style.setProperty(
       "--sortie-rail",
-      Math.min(1, Math.max(0, restantAvantDecollage / 0.5)).toFixed(3),
+      Math.min(1, Math.max(0, basDuRail / vh)).toFixed(3),
     );
 
     if (reducedMotion) {
