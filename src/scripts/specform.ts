@@ -17,17 +17,29 @@
 const MOUVEMENT_REDUIT = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /** Durée de la chorégraphie complète, en secondes. */
-export const SPEC_DUREE = 3.4;
+export const SPEC_DUREE = 2.6;
 
 /** Part de --spec-form à partir de laquelle le carrousel est en place. */
-export const SPEC_CARROUSEL = 0.84;
+export const SPEC_CARROUSEL = 0.4;
+
+/* Les trois étapes se CHEVAUCHENT désormais, au lieu de se succéder.
+
+   En 0,62 / 0,72 / 0,84, elles étaient calibrées pour une séquence d'une
+   dizaine de secondes traversée par l'autoscroll : le titre n'arrivait qu'aux
+   deux tiers, le carrousel plus tard encore. Rejouées en 2,6 s sans autoscroll,
+   ces mêmes parts laissaient environ 2,4 s pendant lesquelles le profil était
+   déjà parti et rien n'était encore là — un écran orange et vide, c'est le
+   défaut qui a été signalé.
+
+   Le nuage de points est un décor ; le titre et les fiches sont le propos. Ils
+   arrivent donc PENDANT que les points se forment, et non après. */
 
 /** Fenêtre d'apparition du titre de gauche (.spec-intro). */
-export const TITRE_DEBUT = 0.62;
-export const TITRE_FIN = 0.72;
+export const TITRE_DEBUT = 0.1;
+export const TITRE_FIN = 0.26;
 /** Fenêtre d'apparition du carrousel (.exp-carousel). */
-export const CARROUSEL_DEBUT = 0.72;
-export const CARROUSEL_FIN = 0.84;
+export const CARROUSEL_DEBUT = 0.22;
+export const CARROUSEL_FIN = 0.4;
 
 let valeur = 0;
 

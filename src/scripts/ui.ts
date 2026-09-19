@@ -80,9 +80,13 @@ function trames(): void {
 // the whole staging (the globe, the cloud, the blocks).
 const loop = (time: number) => {
   window.lenis?.raf(time);
-  // The carousel slides toward its target on every frame: whatever the
-  // wheel does, the movement stays slow and gentle, impossible to speed up.
-  carouselCurrent += (carouselTarget - carouselCurrent) * 0.03;
+  /* Le fondu d'un bloc à l'autre rejoint sa cible à chaque image. 0,03 était
+     calibré pour un rail de 5,8 écrans traversé par un autoscroll lent : il
+     met ~1,7 s à converger, ce qui ajoutait son propre retard au trou décrit
+     plus haut. Sur un rail deux fois plus court, parcouru à la molette, ce
+     retard se voit. 0,10 converge en ~0,5 s : toujours un fondu, plus une
+     traîne. */
+  carouselCurrent += (carouselTarget - carouselCurrent) * 0.1;
   applyCarousel();
   trames();
   requestAnimationFrame(loop);
@@ -125,15 +129,23 @@ const zoneClaire = document.querySelector<HTMLElement>(".light-zone");
 // position catches up to it slowly (the wheel can never scroll fast).
 const carouselRail = document.querySelector<HTMLElement>(".carousel-rail");
 const carouselTrack = document.querySelector<HTMLElement>(".carousel-track");
-// Share of the rail's course allotted to each transition from one block to
-// the next, in screens of scroll. Splitting equally meant making block 1,
-// which only has a fade to play, pay the same price as block 2, which has to
-// fit the parade of the three experience cards.
-// The rail now holds only two blocks: the profile and the journey. The
-// following ones are normal sections again, reached by scrolling
-// the page. These two weights place the journey's arrival at 2.0 rail
-// screens — just before the cards start scrolling, at 2.295.
-const POIDS = [0.75, 1.25];
+/* Part de la course du rail allouée au passage d'un bloc au suivant.
+
+   CES POIDS SONT SOLIDAIRES DE LA SORTIE DU PROFIL (profilout.ts) : le texte
+   du profil s'efface à 0,92 écran de rail (palier 0,6 + sortie 0,32), et le
+   bloc parcours doit être arrivé AU PLUS TARD à ce moment-là. Sinon on ouvre
+   un trou où plus rien n'est affiché.
+
+   C'est exactement ce qui s'est produit : à 0,75 le parcours arrivait à 1,44
+   écran pour un profil parti à 0,92, soit 0,52 écran — près d'un plein écran
+   orange et vide. Le trou existait déjà avant, mais l'autoscroll le traversait
+   en montrant l'animation 3D ; en supprimant l'autoscroll, on a découvert le
+   vide sans le combler.
+
+   0,25 place l'arrivée à 0,92 écran (0,5 + 0,25/1,5 × 2,5 de course) et amorce
+   le fondu d'entrée dès 0,85, pendant que le profil finit de s'effacer : les
+   deux blocs se croisent au lieu de se succéder. */
+const POIDS = [0.25, 1.25];
 const POIDS_TOTAL = POIDS.reduce((a, b) => a + b, 0);
 
 /** Rail progress (0 → 1) converted into block position (0 → 4). */

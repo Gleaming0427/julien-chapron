@@ -1345,20 +1345,19 @@ button.chip {
    above the ring. */
 
 
-/* The sequence: step 1 the shape (parcours3d), step 2 the title appears,
-   step 3 the carousel arrives. */
-/* Landmarks taken from specform.ts (TITRE_DEBUT / TITRE_FIN): the CSS cannot
-   import them, so they have to be copied by hand if they are changed. */
-.spec-intro {
-  opacity: calc(min(1, max(0, (var(--spec-form, 0) - 0.62) / 0.1)));
-}
+/* Le titre et les fiches ne sont PLUS conditionnés à la chorégraphie.
 
-.exp-carousel {
-  /* The carousel becomes fully opaque right after its appearance:
-     the first card reads sharp, not half transparent. */
-  /* CARROUSEL_DEBUT / CARROUSEL_FIN landmarks from specform.ts. */
-  opacity: calc(min(1, max(0, (var(--spec-form, 0) - 0.72) / 0.12)));
-}
+   Ils l'étaient : le titre n'apparaissait qu'à --spec-form 0,62 et le
+   carrousel à 0,72. Tant que le contenu dépend d'une animation, il existe une
+   vitesse de défilement qui le double — le visiteur arrive sur le bloc, le
+   texte du profil est déjà parti, et le contenu n'a pas encore le droit de
+   s'afficher : écran vide. C'est ce qui a été signalé, et resserrer les seuils
+   ne faisait que réduire la fenêtre sans la fermer.
+
+   Le bloc porte déjà son propre fondu d'entrée (--item-op, écrit par ui.ts) :
+   le contenu arrive donc avec lui, franc, tout de suite. Le nuage de points
+   garde sa mise en scène — c'est un décor, il peut se permettre d'être en
+   retard sur la lecture. L'inverse n'est pas vrai. */
 
 
 
