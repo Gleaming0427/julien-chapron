@@ -1,63 +1,82 @@
-import { PROFIL_PALIER, PROFIL_SORTIE } from "./profilout";
+/* Progression de la mise en scène du bloc parcours (--spec-form).
 
-// Driver of the parcours block's progression: --spec-form follows the rail
-// position (three steps of two wheel gestures each). The 3D
-// modules and the CSS read this variable to orchestrate the sequence.
-/* ---------------------------------------------------------------------
-   Choreography of the parcours block, expressed in shares of --spec-form.
-   WARNING: global.css repeats TITRE_* and CARROUSEL_* as hard values (the CSS
-   cannot import). If you touch these values, carry them over there —
-   they are flagged by a comment that points back here.
+   AVANT : la variable suivait la position du scroll, et ui.ts verrouillait la
+   molette pendant 9,7 s pour que la séquence se joue à la bonne vitesse. Le
+   visiteur payait 2,3 écrans de molette pour une mise en scène, et reprenait
+   la main en cours de route sans comprendre pourquoi. Mesuré : une impulsion
+   de 120 px déclenchait un trajet automatique de 2 111 px.
 
-   The intended rhythm, at the scroll speed imposed by ui.ts:
-     points arrival  4.2 s
-     then, 2 s later, the left-hand title
-     then, 1 s later, the carousel.
-   --------------------------------------------------------------------- */
+   MAINTENANT : la séquence a son propre temps. Elle démarre quand le bloc
+   arrive réellement à l'écran, se joue seule, et ne bloque rien — on peut
+   continuer à scroller pendant. Le scroll ne sert plus qu'à scroller.
 
-/** Rail position (in screens, i.e. -railTop/vh) where --spec-form starts.
-    Derived from the profile text's exit rather than copied: the two
-    must stay glued together, otherwise we lock the wheel to show nothing
-    (too late) or the two texts overlap (too early). */
-export const SPEC_DEPART = PROFIL_PALIER + PROFIL_SORTIE + 0.06;
-/** Travel of --spec-form, in rail screens. */
-export const SPEC_COURSE = 2.28;
-/** Value of --spec-form from which the card carousel takes
-    over. Before this point, everything is automatic; after it, the wheel rules. */
+   AVERTISSEMENT : global.css recopie TITRE_* et CARROUSEL_* en dur (le CSS ne
+   peut pas importer). Si ces valeurs changent, les reporter là-bas — elles y
+   sont signalées par un commentaire qui renvoie ici. */
+
+const MOUVEMENT_REDUIT = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/** Durée de la chorégraphie complète, en secondes. */
+export const SPEC_DUREE = 3.4;
+
+/** Part de --spec-form à partir de laquelle le carrousel est en place. */
 export const SPEC_CARROUSEL = 0.84;
 
-/** Appearance window of the left-hand title (.spec-intro). */
+/** Fenêtre d'apparition du titre de gauche (.spec-intro). */
 export const TITRE_DEBUT = 0.62;
 export const TITRE_FIN = 0.72;
-/** Appearance window of the card carousel (.exp-carousel). */
+/** Fenêtre d'apparition du carrousel (.exp-carousel). */
 export const CARROUSEL_DEBUT = 0.72;
 export const CARROUSEL_FIN = 0.84;
-/** Scroll speed, in screens per second, that ui.ts must hold for
-    the intervals above to really be 2 s and 1 s. */
-export const VITESSE = 0.228;
 
-/** Rail position, in screens, matching a value of --spec-form.
-    Exported because ui.ts targets these same markers: copied over there, they
-    would have drifted at the first adjustment. */
-export function railPourSpec(valeur: number): number {
-  return SPEC_DEPART + valeur * SPEC_COURSE;
+let valeur = 0;
+
+/** Valeur courante, lue par parcours3d : une seule horloge pour toute la
+    séquence. Recalculée là-bas, elle divergeait au premier réglage. */
+export function specCourant(): number {
+  return valeur;
 }
 
 export function initSpecForm(): void {
   const section = document.querySelector<HTMLElement>(".section-exp");
-  const rail = section?.closest<HTMLElement>(".carousel-rail");
-  if (!section || !rail) return;
+  if (!section) return;
+  const bloc = section.closest<HTMLElement>(".carousel-item");
 
-  const tick = (): void => {
-    const vh = window.innerHeight;
-    const railTop = rail.getBoundingClientRect().top;
-    // Step 1 (particle explosion) holds 3 wheel gestures, steps
-    // 2 and 3 hold 2 each: ~2.3 screens in total.
-    const progress = Math.min(
-      1,
-      Math.max(0, (-railTop - vh * SPEC_DEPART) / (vh * SPEC_COURSE)),
-    );
-    section.style.setProperty("--spec-form", progress.toFixed(3));
+  const ecrire = (v: number): void => {
+    valeur = v;
+    section.style.setProperty("--spec-form", v.toFixed(3));
+  };
+  ecrire(0);
+
+  // Mouvement réduit : la scène est posée d'emblée, pas jouée.
+  if (MOUVEMENT_REDUIT) {
+    ecrire(1);
+    return;
+  }
+
+  let debut: number | null = null;
+
+  const tick = (t: number): void => {
+    /* Le déclencheur est l'arrivée VISUELLE du bloc, pas sa position dans le
+       document : le panneau est épinglé et techniquement « à l'écran » dès le
+       début du rail, alors que le texte du profil y est encore lisible. On lit
+       donc l'opacité que ui.ts écrit sur le bloc — la même vérité que les
+       fondus, donc rien à resynchroniser. */
+    const presence = Number(bloc?.style.getPropertyValue("--item-op") || "0");
+
+    if (presence > 0.6) {
+      if (debut === null) debut = t;
+      const p = Math.min(1, (t - debut) / (SPEC_DUREE * 1000));
+      // Adouci aux deux bouts : la scène démarre et se pose au lieu de filer
+      // à vitesse constante.
+      ecrire(p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+    } else if (presence < 0.05 && debut !== null) {
+      // Bloc entièrement reparti : la séquence se réarme et rejouera au retour,
+      // comme les autres blocs de la page.
+      debut = null;
+      ecrire(0);
+    }
+
     requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);

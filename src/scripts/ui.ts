@@ -2,8 +2,6 @@
 // section reveal, 3D card tilt, back to top, email copy.
 
 import Lenis from "lenis";
-import { SPEC_CARROUSEL, VITESSE, railPourSpec } from "./specform";
-import { PROFIL_PALIER } from "./profilout";
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -148,15 +146,9 @@ function positionBloc(p: number): number {
   return POIDS.length;
 }
 
-/** The inverse: a block position rendered as rail progress. */
-function railPour(bloc: number): number {
-  let acc = 0;
-  for (let i = 0; i < POIDS.length; i++) {
-    if (bloc <= i + 1) return (acc + Math.max(0, bloc - i) * POIDS[i]) / POIDS_TOTAL;
-    acc += POIDS[i];
-  }
-  return 1;
-}
+/* La fonction inverse (position de bloc → avancement du rail) servait à
+   envoyer le scroll sur une fiche quand on cliquait un point. Les fiches ne
+   vivant plus sur l'axe du scroll, elle n'a plus d'emploi. */
 
 /** Position in the carousel, expressed in blocks: 0 = profile, 1 = journey… */
 let carouselTarget = 0;
@@ -191,7 +183,7 @@ function applyCarousel(): void {
     }
   }
 
-  applyExperiences();
+  // Les fiches ne sont plus rejouées ici : elles ne dépendent plus du scroll.
 }
 
 // Section numbers (1-5): entrance from right to left on scroll,
@@ -255,94 +247,17 @@ const tearSheet = document.querySelector<HTMLElement>(".tear-sheet");
 const tearWindow = document.querySelector<HTMLElement>(".tear");
 const tearFilter = document.querySelector<HTMLElement>(".tear-filter");
 
-/* ---------- the profile → journey interlude plays itself ----------
-   Past the threshold, the page unwinds on its own until the journey block
-   has fully arrived: the text settles without any need to scroll. At the exact
-   end of that run, the card carousel takes over and the
-   wheel has the hand again.
+/* L'interlude a été supprimé.
 
-   We animate the SCROLL position, not the internal state. The scroll is
-   already the single source on which the 3D background, the block fades and the
-   carousel depend: by driving it, the three stay in agreement with each other,
-   whereas forcing the state would have made them diverge from the real position. */
-/* A single wheel impulse is enough to launch everything: we read the profile,
-   we push once, and both the donut and the journey title arrive on their own.
-   The parcours3d threshold (0.65 screen) is crossed DURING this automatic
-   travel, so the donut triggers itself along the way —
-   the two thresholds no longer have to be lined up with each other. */
-/** Touch screen: no mouse, so no wheel to lock. */
-const TACTILE = window.matchMedia("(pointer: coarse)").matches;
+   Il partait au seuil du bloc profil : une impulsion de molette, et la page
+   défilait seule sur 2,35 écrans pendant 9,7 s, molette verrouillée. Mesuré
+   sur le site en ligne, et le verrou n'était même pas étanche — une tentative
+   de reprise regagnait 980 px, si bien que la page et le visiteur tiraient le
+   scroll chacun de leur côté.
 
-/* The interlude takes over exactly where the text starts to leave, never
-   before. At 0.12 screen it fired while the sentence was still whole on
-   screen and 38 % faded, and from there the page carried you off for two and
-   a half screens with the wheel locked: there was no reading the profile
-   block unless you happened to stop on the right pixel. Tied to the plateau
-   rather than set on its own, so the two cannot drift apart. */
-const SEUIL_INTERLUDE = PROFIL_PALIER;
-// Rearm at 0.10: as soon as one is back above the trigger point, the
-// interlude can replay. At 0.02 one had to fall back to 2 % of a screen
-// from the very start of the rail — a partial return, the normal gesture,
-// left it disarmed and scrolling back down no longer triggered anything.
-// The band between 0.10 and 0.12 is enough to avoid any back-and-forth:
-// once launched, the scroll jumps to 2.6 screens, far from the threshold.
-const REARMEMENT = PROFIL_PALIER * 0.55; // one must really be back at the top of the rail
-let interludeJoue = false;
-let interludeEnCours = false;
-
-function interlude(railTop: number, vh: number): void {
-  const lenis = window.lenis;
-  if (!lenis || interludeEnCours) return;
-
-  const sortie = -railTop / vh;
-  if (sortie < REARMEMENT) interludeJoue = false;
-  if (interludeJoue || sortie < SEUIL_INTERLUDE) return;
-
-  // End of the run: the point where the card carousel takes over.
-  // It is --spec-form that orchestrates the inside of the block (the left title
-  // only appears at 0.715, the carousel at 0.84) — aiming for carouselTarget = 1,
-  // as I used to, stopped at 2.01 screens while the title is only
-  // readable at 2.63: there was inevitably wheel left to give.
-  const cible = railTop + window.scrollY + railPourSpec(SPEC_CARROUSEL) * vh;
-  // If the wheel has already passed this point, do not pull the page back.
-  if (window.scrollY >= cible - 2) return;
-
-  // Duration indexed on the real distance: the sequence keeps the same apparent
-  // speed whatever the height of the rail. Hard-coded, it started
-  // racing as soon as the rail was made longer.
-  const distanceEcrans = (cible - window.scrollY) / vh;
-  // The duration is no longer a free setting: the choreography imposes
-  // the speed. The intended intervals between the arrival of the donut, the title and
-  // the carousel are set in shares of --spec-form; for them to really last
-  // 2 s and 1 s, the scroll must hold VITESSE screens per second.
-  // On touch the sequence is cut short: nine seconds during which the
-  // finger does not answer do not read as staging, but as a frozen page.
-  // On touch the sequence used to be capped at 4.5 s, for a travel that
-  // needs a dozen: the donut's points arrived two and a half times too
-  // fast, in a jet one cannot read. The cap targeted a page that no longer
-  // responds, but the lock is already released to the finger (lock below) —
-  // so the scene can take its time without blocking anything.
-  const duree = TACTILE
-    ? Math.min(8, Math.max(2.4, distanceEcrans / VITESSE))
-    : Math.max(2.4, distanceEcrans / VITESSE);
-
-  interludeJoue = true;
-  interludeEnCours = true;
-  lenis.scrollTo(cible, {
-    duration: duree,
-    // The lock only makes sense on the wheel. To the finger, it turns every
-    // ignored gesture into a suspicion of bug: the hand therefore takes
-    // back control as soon as it touches the screen, and the sequence
-    // plays by itself if nothing is touched.
-    lock: !TACTILE,
-    // Smoothed start and arrival: the page sets off and settles instead of
-    // racing at constant speed.
-    easing: (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2),
-    onComplete: () => {
-      interludeEnCours = false;
-    },
-  });
-}
+   La mise en scène n'a pas disparu pour autant : elle se joue désormais à son
+   propre rythme, déclenchée par l'arrivée du bloc (voir specform.ts). On garde
+   le spectacle, sans le facturer en molette ni confisquer le contrôle. */
 
 let ticking = false;
 
@@ -394,9 +309,6 @@ function onScroll(): void {
     const course = Math.max(1, carouselRail.offsetHeight - vh * 0.5);
     const p = Math.min(1, Math.max(0, (-railTop - vh * 0.5) / course));
     carouselTarget = positionBloc(p);
-    // Without Lenis (reduced motion), window.lenis does not exist and the interlude
-    // does not play: the wheel keeps the hand from start to finish.
-    interlude(railTop, vh);
     // Approach fade, a fair balance: invisible in the bottom third of
     // the page, the text reveals itself during the middle third and is
     // fully readable on reaching the center.
@@ -464,106 +376,103 @@ window.addEventListener(
 /* The first pass is at the VERY END of the module, not here: see the comment
    that goes with it. */
 
-// Experience carousel, driven by the scroll. The position of the cards
-// is smoothed: it slowly catches up to the target — when the carousel
-// appears we are on card 1, and the wheel never jumps a card.
-let fichePosition = 0;
+/* ---------- carrousel d'expériences ----------
+   Il était piloté au scroll : chaque fiche coûtait 0,65 écran, dont les deux
+   tiers ne bougeaient pas. Mesuré sur le site en ligne : 11 pas de scroll sur
+   17 sans le moindre changement à l'écran, puis une bascule brutale. Et les
+   fiches se substituaient SUR PLACE, sans aucun déplacement — donc sans le
+   moindre indice de direction.
 
-// Experience carousel, driven by the scroll. Block 2 occupies a
-// quarter of the rail's course; we fit the passing of the three cards there.
-// The cards go down: the outgoing one leaves through the bottom, the next
-// arrives from the top.
+   Un carrousel est une navigation LATÉRALE. La brancher sur l'axe vertical du
+   scroll revient à demander au visiteur de déduire un sens de lecture d'un
+   geste qui n'a pas le même axe. C'était la cause, pas le réglage.
+
+   Il se pilote donc par un vrai geste : flèches, points, balayage au doigt,
+   flèches du clavier. Et les fiches se déplacent, car c'est le déplacement —
+   pas le fondu — qui dit où l'on va. */
+
 const expSlides = Array.from(document.querySelectorAll<HTMLElement>(".exp-slides .experience"));
 const expDots = Array.from(document.querySelectorAll<HTMLButtonElement>(".exp-dot"));
+const expFleches = Array.from(document.querySelectorAll<HTMLButtonElement>(".exp-fleche"));
+const expCompteur = document.querySelector<HTMLElement>(".exp-compteur-actuel");
 
-/** Continuous position in the experience carousel (0 → n-1). */
-function applyExperiences(): void {
+let ficheActive = 0;
+
+function montrerFiche(cible: number): void {
   if (expSlides.length < 2) return;
   const dernier = expSlides.length - 1;
-
-  // The cards stay on the FIRST one as long as the carousel is not
-  // fully visible (--spec-form < 0.84). Then each card advances
-  // by about two wheel gestures (0.5 screen). The position is smoothed:
-  // the carousel always starts at step 1, never at step 2.
-  const section = document.querySelector<HTMLElement>(".section-exp");
-  const spec = Number(section?.style.getPropertyValue("--spec-form") || "0");
-  const railTop = carouselRail.getBoundingClientRect().top;
-  const vh = window.innerHeight;
-  let cibleFiches = 0;
-  if (spec >= SPEC_CARROUSEL) {
-    // The cards start EXACTLY where the interlude hands back, no
-    // further. This point was hard-coded (2.78) and never followed the
-    // shifts of the interlude's end: 0.485 screen of dead course
-    // remained, where one scrolled with nothing moving — 1.5 gestures
-    // wasted before the first card. Tied to the shared value, it can no
-    // longer drift. Then, exactly two wheel gestures per card.
-    const depart = railPourSpec(SPEC_CARROUSEL);
-    cibleFiches = Math.min(dernier, Math.max(0, (-railTop / vh - depart) / 0.65));
-  }
-  fichePosition += (cibleFiches - fichePosition) * 0.12;
-  const prog = fichePosition;
-
-  // Stepped curve: the card stays still over the two thirds of its
-  // scroll portion, and flips over the middle third. Without this, it
-  // slides constantly and one never stops on the one that is sharp.
-  const indice = Math.floor(prog);
-  const reste = prog - indice;
-  const DEBUT = 0.34; // share of the course where the card does not move yet
-  const FIN = 0.66;   // share where the next one is already settled
-  const brut = Math.min(1, Math.max(0, (reste - DEBUT) / (FIN - DEBUT)));
-  const bascule = brut * brut * (3 - 2 * brut); // easing at both ends
-  const posee = Math.min(dernier, indice + bascule);
+  ficheActive = Math.min(dernier, Math.max(0, cible));
 
   expSlides.forEach((slide, i) => {
-    const loin = Math.abs(posee - i);
-    // The cards do not move: they substitute for one another
-    // in place, through focus alone. A slide, even a slight one,
-    // made the whole column move at each wheel notch.
-    slide.style.opacity = Math.max(0, 1 - loin * 1.9).toFixed(3);
-    // Only the current card stays clickable and readable.
-    slide.style.visibility = loin < 0.5 ? "visible" : "hidden";
+    const ecart = i - ficheActive;
+    slide.classList.toggle("is-active", ecart === 0);
+    // D'où arrive la fiche et par où elle repart : à gauche si on l'a passée,
+    // à droite si elle est encore devant. Ce décalage EST le sens de lecture.
+    slide.style.setProperty("--decalage", ecart === 0 ? "0px" : ecart < 0 ? "-38px" : "38px");
+    slide.setAttribute("aria-hidden", ecart === 0 ? "false" : "true");
   });
 
-  const actif = Math.round(posee);
   expDots.forEach((dot, i) => {
-    // Fill of the dot and its finish line, continuously. The first
-    // dot is full from the start: we are already on it. The following ones
-    // fill during the travel that leads there, hence the offset of 1.
-    const part = Math.min(1, Math.max(0, posee - i + 1));
-    dot.style.setProperty("--f", part.toFixed(4));
-    dot.classList.toggle("is-active", i === actif);
-    dot.setAttribute("aria-selected", i === actif ? "true" : "false");
+    dot.classList.toggle("is-active", i === ficheActive);
+    dot.setAttribute("aria-selected", i === ficheActive ? "true" : "false");
+    // Un seul point dans la tabulation : le groupe se parcourt aux flèches,
+    // comme l'attend un role="tablist".
+    dot.tabIndex = i === ficheActive ? 0 : -1;
+    dot.style.setProperty("--f", i <= ficheActive ? "1" : "0");
   });
+
+  expFleches.forEach((f) => {
+    const pas = Number(f.dataset.pas || "0");
+    // Désactivée plutôt que masquée : on voit qu'on est au bout de la série
+    // au lieu de voir un bouton disparaître.
+    f.disabled = ficheActive + pas < 0 || ficheActive + pas > dernier;
+  });
+
+  if (expCompteur) expCompteur.textContent = String(ficheActive + 1);
 }
 
-// Clicking a dot scrolls the page to the corresponding position:
-// without this, the scroll would overwrite the choice on the next frame.
-if (expSlides.length > 1 && carouselRail) {
-  const dernier = expSlides.length - 1;
-  expDots.forEach((dot, i) => {
-    dot.addEventListener("click", () => {
-      const vh = window.innerHeight;
-      const railDoc = carouselRail.getBoundingClientRect().top + window.scrollY;
-      // Same course as in onScroll: hard-coded, it stopped
-      // matching as soon as the rail's height was touched.
-      const course = Math.max(1, carouselRail.offsetHeight - vh * 0.5);
-      const cible = railDoc + vh * 0.5 + railPour(1 + (i / dernier) * 0.68) * course;
-      const lenis = window.lenis;
-      if (lenis) lenis.scrollTo(cible);
-      else window.scrollTo({ top: cible, behavior: "smooth" });
-    });
+if (expSlides.length > 1) {
+  expFleches.forEach((f) => {
+    f.addEventListener("click", () => montrerFiche(ficheActive + Number(f.dataset.pas || "0")));
   });
+  expDots.forEach((dot, i) => dot.addEventListener("click", () => montrerFiche(i)));
 
-  document.querySelector(".exp-dots")?.addEventListener("keydown", (event) => {
+  document.querySelector(".exp-carousel")?.addEventListener("keydown", (event) => {
     const key = (event as KeyboardEvent).key;
     const pas = key === "ArrowRight" ? 1 : key === "ArrowLeft" ? -1 : 0;
     if (!pas) return;
     event.preventDefault();
-    const actuel = expDots.findIndex((d) => d.classList.contains("is-active"));
-    const suivant = Math.min(dernier, Math.max(0, actuel + pas));
-    expDots[suivant]?.click();
-    expDots[suivant]?.focus();
+    montrerFiche(ficheActive + pas);
+    expDots[ficheActive]?.focus();
   });
+
+  /* Balayage au doigt. Seuil en pixels ET tolérance verticale : sans la
+     seconde, un défilement vertical un peu oblique changeait de fiche — soit
+     exactement le défaut que cette refonte corrige. */
+  const zone = document.querySelector<HTMLElement>(".exp-slides");
+  let departX = 0;
+  let departY = 0;
+  zone?.addEventListener(
+    "touchstart",
+    (e) => {
+      departX = e.changedTouches[0].clientX;
+      departY = e.changedTouches[0].clientY;
+    },
+    { passive: true },
+  );
+  zone?.addEventListener(
+    "touchend",
+    (e) => {
+      const dx = e.changedTouches[0].clientX - departX;
+      const dy = e.changedTouches[0].clientY - departY;
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.6) {
+        montrerFiche(ficheActive + (dx < 0 ? 1 : -1));
+      }
+    },
+    { passive: true },
+  );
+
+  montrerFiche(0);
 }
 
 // The burger: the menu lives on a class set on <html>, closed by a
@@ -588,15 +497,16 @@ if (burger && voile) {
   });
 }
 
-/* ---------- first pass ----------
-   Deliberately the LAST statement of the module. Called right after the
-   scroll listener was registered — its natural place — it took the whole
-   script down as soon as the system asks to reduce motion: on that branch
-   onScroll() settles the carousel itself, hence applyExperiences(), which
-   reads `expSlides` — a constant declared further down, so still undefined
-   at that moment. The script died there, and with it everything set up
-   after: the parcours block stayed on its orange background from end to
-   end, the experience dots did nothing and the burger no longer opened.
-   Nothing above needs this call to happen earlier: it only reads the scroll
-   position and writes the staging. */
+/* ---------- premier passage ----------
+   Volontairement la DERNIÈRE instruction du module. Appelé juste après
+   l'enregistrement de l'écouteur de scroll — sa place naturelle — il faisait
+   tomber tout le script dès que le système demandait à réduire le mouvement :
+   sur cette branche, onScroll() posait lui-même le carrousel, donc appelait
+   applyExperiences(), qui lisait `expSlides`, une constante déclarée plus bas
+   et donc encore indéfinie. Le script mourait là, emportant tout ce qui se
+   mettait en place ensuite.
+
+   Ce piège a disparu avec le pilotage au scroll des fiches, mais l'appel reste
+   en dernier : il ne lit que la position du scroll et écrit la mise en scène,
+   donc rien au-dessus n'a besoin qu'il arrive plus tôt. */
 onScroll();

@@ -464,6 +464,31 @@ html.menu-ouvert .site-header {
    inset:0 aligns on the usable area (screen − 15 px) and the content of the
    menu ends up shifted ~7 px to the left. 100vw centers on
    the real screen, in all browsers. */
+/* Lien d'évitement : hors écran jusqu'à ce qu'il prenne le focus, où il vient
+   se poser en haut à gauche. Il reste dans le flux du clavier tout du long —
+   display:none ou visibility:hidden l'en sortiraient, ce qui est exactement
+   ce qu'on ne veut pas ici. */
+.saut-contenu {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 100;
+  padding: 11px 16px;
+  border-radius: var(--radius);
+  background: var(--green);
+  color: #0b0c0d;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  text-decoration: none;
+  translate: 0 calc(-100% - 20px);
+  transition: translate 0.2s ease;
+}
+
+.saut-contenu:focus-visible {
+  translate: 0 0;
+}
+
 .menu-voile {
   position: fixed;
   top: 0;
@@ -479,12 +504,21 @@ html.menu-ouvert .site-header {
   background-size: var(--trame-pas);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
+  /* Le voile était seulement transparent : ses deux liens restaient dans la
+     tabulation alors qu'il porte aria-hidden="true". Au clavier, le focus
+     partait donc dans du contenu invisible et annoncé comme masqué — c'est
+     ce qu'on voyait en positions 3 et 4 de l'ordre de tabulation.
+     visibility le sort de l'arbre focusable ; le délai la laisse le temps de
+     s'effacer avant de disparaître. */
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
 }
 
 html.menu-ouvert .menu-voile {
   opacity: 1;
   pointer-events: auto;
+  visibility: visible;
+  transition: opacity 0.3s ease, visibility 0s;
 }
 
 .menu {
@@ -1112,15 +1146,20 @@ button.chip {
      absolute screens and do not move with this value.
      The negative margins cancel the gutters of the light zone:
      the 100vw items fit exactly in the screen. */
-  /* 580vh, mesuré et non choisi. Le panneau reste épinglé sur (hauteur - 1
-     écran), soit 4,8 écrans ici. Les fiches démarrent à 2,895 écrans de rail
-     et coûtent 0,65 écran chacune : la troisième est donc atteinte à 4,195,
-     et il reste 0,605 écran pour la tenir avant que le bloc se libère.
-     À 450vh l'épinglage ne durait que 3,5 écrans : il ne restait que 0,605
-     écran APRÈS le départ des fiches, de quoi en afficher 1,93 sur 3. La
-     troisième n'arrivait jamais — le bloc se décollait et descendait pendant
-     qu'on l'attendait. */
-  height: 580vh;
+  /* 300vh, contre 580vh auparavant.
+
+     Les 580vh payaient deux choses qui n'existent plus : la mise en scène du
+     parcours, qui coûtait 2,3 écrans de molette et se joue maintenant au temps
+     (specform.ts), et le défilé des trois fiches, qui en coûtait 1,95 et se
+     pilote maintenant à la main. Mesuré sur l'ancien rail : 9 paliers sans
+     aucun changement à l'écran, dont 5 crans de molette à vide après la
+     dernière fiche.
+
+     Ce qu'il reste à financer, et rien d'autre : le panneau est épinglé sur
+     (hauteur - 1 écran), soit 2 écrans ici. Le texte du profil en consomme
+     0,92 (palier 0,6 + sortie 0,32, voir profilout.ts), ce qui laisse ~1,1
+     écran pour tenir le bloc parcours à l'écran le temps qu'on le parcoure. */
+  height: 300vh;
   margin-top: 8px;
   margin-inline: calc(-1 * var(--gutter));
   /* The pinned panel is 100svh tall, the height of the window with the toolbar
@@ -1404,15 +1443,112 @@ button.chip {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
-  /* Opacity and blur are written frame by frame by the script, as the
-     scroll goes: no transition here, it would fight with it. The cards
-     do not move, they substitute in place.
-     Without JS, the first card stays readable and the others stacked below. */
+  /* Les fiches se DÉPLACENT désormais. Elles se substituaient sur place, par
+     simple fondu : rien n'indiquait d'où venait la suivante ni où partait la
+     précédente, donc rien ne donnait le sens de lecture. --decalage est écrit
+     par ui.ts — négatif pour ce qu'on a dépassé, positif pour ce qui reste
+     devant — et c'est ce signe qui porte l'information.
+     Sans JS, la première fiche reste lisible et les autres sont empilées. */
   opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  translate: var(--decalage, 38px) 0;
+  transition:
+    opacity 0.4s ease,
+    translate 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 0.4s;
 }
 
-.exp-slides .experience:first-child {
+.exp-slides .experience.is-active {
   opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  translate: 0 0;
+  transition:
+    opacity 0.4s ease,
+    translate 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s;
+}
+
+/* Sans JS, la première fiche doit rester visible : le script n'a alors pas
+   posé .is-active, et tout le bloc serait vide. */
+html:not(.js) .exp-slides .experience:first-child {
+  opacity: 1;
+  visibility: visible;
+  translate: 0 0;
+}
+
+/* Le déplacement est le seul porteur du sens de lecture ; s'il est refusé,
+   on garde le fondu, qui reste lisible. */
+@media (prefers-reduced-motion: reduce) {
+  .exp-slides .experience {
+    translate: 0 0 !important;
+    transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+  }
+}
+
+/* ---------- navigation des fiches ---------- */
+.exp-nav {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.exp-fleche {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.exp-fleche svg {
+  width: 17px;
+  height: 17px;
+}
+
+.exp-fleche:hover:not(:disabled) {
+  background: var(--bg-soft);
+  border-color: var(--green);
+}
+
+/* Désactivée mais toujours là : on voit qu'on est au bout de la série,
+   au lieu de voir un bouton disparaître et la rangée se réorganiser. */
+.exp-fleche:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* Les points et le compteur forment UN groupe, centré entre les deux flèches.
+   Avec une seule marge automatique sur le compteur, les points restaient collés
+   à la flèche de gauche et un grand vide s'ouvrait au milieu de la rangée. */
+.exp-dots {
+  margin-left: auto;
+}
+
+.exp-compteur {
+  margin: 0 auto 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.exp-compteur b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.exp-compteur span {
+  margin: 0 3px;
+  opacity: 0.5;
 }
 
 /* The watermark number, very faded, behind the content. */

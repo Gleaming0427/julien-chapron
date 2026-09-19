@@ -92,6 +92,11 @@ const ficheAuteur = {
     <script is:inline>document.documentElement.classList.add("js");</script>
   </head>
   <body>
+    <!-- Lien d'évitement. La page fait dix écrans : sans lui, atteindre le
+         contenu au clavier passait par toute l'en-tête à chaque visite.
+         Invisible tant qu'il n'a pas le focus. -->
+    <a class="saut-contenu" href={url("/") + "#main"}>Aller au contenu</a>
+
     <!-- Rappel d'orientation : affiché uniquement sur écran tactile tenu à
          l'horizontale. Le site est construit sur des blocs d'un écran de
          haut ; couché, un téléphone n'en montre plus qu'une bande. -->

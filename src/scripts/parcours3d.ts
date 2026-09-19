@@ -19,10 +19,9 @@ import * as THREE from "three";
 import {
   CARROUSEL_DEBUT,
   CARROUSEL_FIN,
-  SPEC_COURSE,
-  SPEC_DEPART,
   TITRE_DEBUT,
   TITRE_FIN,
+  specCourant,
 } from "./specform";
 
 /* The steps, expressed in shares of --spec-form. They chain together without
@@ -406,7 +405,7 @@ export function initParcours3D(): void {
        under the dark zone, so its layer is already intersecting while the
        ink is still rising, and that is where the phone was being asked to
        filter and render at the same time. */
-    if (!enVue || -rail.getBoundingClientRect().top <= window.innerHeight * SPEC_DEPART) {
+    if (!enVue || specCourant() <= 0) {
       // Reset the clock: on the way back, dt must not carry the whole time
       // spent off screen.
       tPrec = performance.now();
@@ -418,21 +417,11 @@ export function initParcours3D(): void {
       const dt = Math.min(0.05, (t - tPrec) / 1000);
       tPrec = t;
 
-      const vh = window.innerHeight;
-      const railTop = rail.getBoundingClientRect().top;
-
-      // A SINGLE clock for the whole sequence: the rail's position, read
-      // with the formula from specform.ts. The two real-time ramps that
-      // drove the arrival and the settling have been removed — they advanced
-      // at their own pace while the title and the block fades
-      // followed the scroll, and the max() of those curves broke its slope
-      // where they crossed: that was the jump. The smoothness no longer comes
-      // from a local easing but from the scroll itself, which ui.ts animates
-      // with a curve softened at both ends.
-      const spec = Math.min(
-        1,
-        Math.max(0, (-railTop - vh * SPEC_DEPART) / (vh * SPEC_COURSE)),
-      );
+      // UNE SEULE horloge pour toute la séquence. Elle vivait ici, recalculée
+      // depuis la position du rail ; elle vient maintenant de specform.ts, qui
+      // la mène au temps et non au scroll. Recopier la formule était déjà la
+      // source d'une divergence à chaque réglage — la lire supprime le risque.
+      const spec = specCourant();
 
       // Has the framing moved since the last computation of the starts? The
       // layout measurements settle after the first render, and a

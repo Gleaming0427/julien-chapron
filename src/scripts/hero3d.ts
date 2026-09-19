@@ -559,6 +559,15 @@ export function initHero3D(): void {
   // Europe faces the camera on load.
   let autoYaw = -1.6;
 
+  /* « Réduire le mouvement » ne réduisait rien ici : le globe continuait de
+     tourner et les paquets de circuler. Le réglage existe notamment pour les
+     troubles vestibulaires, et une sphère qui tourne sans fin est exactement
+     ce qu'il vise. On garde donc la scène — la supprimer laisserait un grand
+     vide — mais on la POSE : l'assemblage se joue (c'est une transition, pas
+     une boucle), puis plus rien ne bouge tout seul. Le glisser reste actif :
+     un mouvement que l'on provoque soi-même n'est pas concerné. */
+  const MOUVEMENT_REDUIT = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   renderer.setAnimationLoop(() => {
     // No guard on document.hidden: this flag is true in
     // contexts where the page is nevertheless displayed (embedded panels,
@@ -586,12 +595,14 @@ export function initHero3D(): void {
       // Inertia after release, then resumption of the slow rotation.
       dragYaw += yawVelocity;
       yawVelocity *= 0.94;
-      autoYaw += 0.0005;
+      if (!MOUVEMENT_REDUIT) autoYaw += 0.0005;
     }
     spin.rotation.y = autoYaw + dragYaw;
 
     // The traffic only starts once the globe is formed.
-    const netTime = t - (FLY_IN + STAGGER);
+    // Mouvement réduit : l'horloge du trafic est figée sur une image
+    // représentative — les liaisons restent dessinées, elles ne défilent plus.
+    const netTime = MOUVEMENT_REDUIT ? 1.5 : t - (FLY_IN + STAGGER);
     if (netTime > 0) {
       const headPos = heads.geometry.getAttribute("position") as THREE.BufferAttribute;
       (heads.material as THREE.PointsMaterial).opacity = Math.min(1, netTime);

@@ -145,6 +145,11 @@ const iconesProjet: Record<IconeProjet, string> = {
             <article class:list={["experience", i === 0 && "is-active"]} data-slide={i}>
               <span class="experience-watermark" aria-hidden="true">{`0${i + 1}`}</span>
               <div class="experience-body">
+                {/* Les trois postes n'apparaissaient nulle part dans le plan du
+                    document : trois expériences, invisibles à un lecteur d'écran
+                    qui parcourt les titres. Le titre est ici sans changer la mise
+                    en page, qui présente déjà ces informations plus bas. */}
+                <h3 class="visually-hidden">{exp.title} — {exp.company}, {exp.period}</h3>
                 <p class="exp-eyebrow"><span class="exp-mark" aria-hidden="true"></span>{exp.metric}</p>
 
                 <div class="exp-stat">
@@ -175,20 +180,38 @@ const iconesProjet: Record<IconeProjet, string> = {
           ))
         }
       </div>
-      <div class="exp-dots" role="tablist" aria-label="Choisir une expérience">
-        {
-          experiences.map((exp, i) => (
-            <button
-              type="button"
-              class:list={["exp-dot", i === 0 && "is-active"]}
-              data-go={i}
-              role="tab"
-              aria-selected={i === 0 ? "true" : "false"}
-            >
-              <span class="visually-hidden">{exp.company}</span>
-            </button>
-          ))
-        }
+      <!-- La barre de navigation des fiches. Les points seuls ne disaient ni
+           combien il y en a, ni dans quel sens on avance : le compteur donne
+           la première information, les flèches la seconde. -->
+      <div class="exp-nav">
+        <button type="button" class="exp-fleche" data-pas="-1" aria-label="Expérience précédente">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 12H3" /><path d="m8.8 6.8-5.2 5.2 5.2 5.2" /></svg>
+        </button>
+
+        <div class="exp-dots" role="tablist" aria-label="Choisir une expérience">
+          {
+            experiences.map((exp, i) => (
+              <button
+                type="button"
+                class:list={["exp-dot", i === 0 && "is-active"]}
+                data-go={i}
+                role="tab"
+                aria-selected={i === 0 ? "true" : "false"}
+                tabindex={i === 0 ? 0 : -1}
+              >
+                <span class="visually-hidden">{exp.company}</span>
+              </button>
+            ))
+          }
+        </div>
+
+        <p class="exp-compteur" aria-hidden="true">
+          <b class="exp-compteur-actuel">1</b><span>/</span>{experiences.length}
+        </p>
+
+        <button type="button" class="exp-fleche" data-pas="1" aria-label="Expérience suivante">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.6 12H21" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
+        </button>
       </div>
     </div>
     </div>
