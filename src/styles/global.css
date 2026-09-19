@@ -1182,6 +1182,11 @@ button.chip {
    behind the pill, which floats over it instead of resting on a strip. The
    content, for its part, is centered and never comes under the pill. */
 .carousel-sticky {
+  /* --sortie-rail est écrit par ui.ts : 1 tant que le panneau est épinglé,
+     puis il descend à 0 sur le dernier demi-écran du rail. Sans lui, le
+     panneau sortait par le haut sans s'effacer et laissait la barre du
+     carrousel seule en haut de l'écran, au-dessus de la section suivante. */
+  opacity: var(--sortie-rail, 1);
   position: sticky;
   top: 0;
   /* This is where the defect showed: at 100vh, the bottom of the block —
@@ -1514,7 +1519,12 @@ html:not(.js) .exp-slides .experience:first-child {
 }
 
 .exp-fleche:hover:not(:disabled) {
-  background: var(--bg-soft);
+  /* Surtout PAS var(--bg-soft) ici. Le carrousel vit dans .light-zone, où ce
+     jeton est redéfini en clair : il valait rgb(246,248,250), soit un disque
+     quasi blanc sous une icône blanche — la flèche disparaissait au survol.
+     Une teinte explicite, tirée de la couleur du texte, tient dans les deux
+     contextes. */
+  background: rgba(243, 241, 236, 0.1);
   border-color: var(--green);
 }
 
@@ -1728,9 +1738,15 @@ html:not(.js) .exp-slides .experience:first-child {
   cursor: pointer;
 }
 
-/* The line that links the dot to the previous one, as long as the gap between
-   the two. It fills from left to right, at the same pace as the dot
-   it joins. */
+/* La ligne qui relie un point au précédent. Elle a sa PROPRE variable (--l),
+   distincte du remplissage du point (--f).
+
+   Les deux partageaient --f, ce qui avait du sens quand le carrousel était
+   piloté au scroll : --f était un remplissage continu, et la file se
+   remplissait progressivement. Avec une navigation discrète, tout point déjà
+   passé se retrouvait plein orange — deux, puis trois points « actifs » à la
+   fois, et plus aucun moyen de lire où l'on est.
+   Désormais : la ligne trace le chemin parcouru, un seul point est allumé. */
 .exp-dot + .exp-dot::before {
   content: "";
   position: absolute;
@@ -1741,7 +1757,7 @@ html:not(.js) .exp-slides .experience:first-child {
   translate: 0 -50%;
   background: linear-gradient(
     to right,
-    var(--green) 0 calc(var(--f, 0) * 100%),
+    var(--green) 0 calc(var(--l, 0) * 100%),
     var(--border) 0
   );
   pointer-events: none;

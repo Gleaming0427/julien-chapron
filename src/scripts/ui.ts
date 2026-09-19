@@ -326,6 +326,23 @@ function onScroll(): void {
     // fully readable on reaching the center.
     const approach = Math.min(1, Math.max(0, railTop / vh));
     document.documentElement.style.setProperty("--profil-op", Math.max(0, 1 - approach * 1.5).toFixed(3));
+
+    /* Sortie du rail. Le bloc parcours n'avait AUCUNE sortie : son fondu vaut
+       1 - (t - 2) × 4, or la cible plafonne à 2, donc il ne descendait jamais
+       sous 1. Le panneau épinglé se décollait et remontait mécaniquement
+       pendant que la section suivante poussait par le bas — les deux à
+       l'écran, séparés par une arête franche, et la barre du carrousel
+       échouée seule en haut au-dessus d'une bande vide.
+
+       On mesure ce qui reste avant le décollage (le bas du rail rejoignant le
+       bas de l'écran) et on éteint le panneau sur le dernier demi-écran : le
+       bloc s'efface au lieu de sortir par le haut. */
+    const restantAvantDecollage = (railTop + carouselRail.offsetHeight - vh) / vh;
+    carouselRail.style.setProperty(
+      "--sortie-rail",
+      Math.min(1, Math.max(0, restantAvantDecollage / 0.5)).toFixed(3),
+    );
+
     if (reducedMotion) {
       carouselCurrent = carouselTarget;
       applyCarousel();
@@ -430,7 +447,10 @@ function montrerFiche(cible: number): void {
     // Un seul point dans la tabulation : le groupe se parcourt aux flèches,
     // comme l'attend un role="tablist".
     dot.tabIndex = i === ficheActive ? 0 : -1;
-    dot.style.setProperty("--f", i <= ficheActive ? "1" : "0");
+    // --f allume LE point courant, et lui seul. --l remplit la ligne qui mène
+    // jusqu'à lui : le chemin parcouru se lit, sans allumer plusieurs points.
+    dot.style.setProperty("--f", i === ficheActive ? "1" : "0");
+    dot.style.setProperty("--l", i <= ficheActive ? "1" : "0");
   });
 
   expFleches.forEach((f) => {
