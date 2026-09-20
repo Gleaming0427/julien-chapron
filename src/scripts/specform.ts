@@ -16,11 +16,14 @@
 
 const MOUVEMENT_REDUIT = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/** Durée de la chorégraphie complète, en secondes. */
-export const SPEC_DUREE = 2.6;
+/** Durée de la chorégraphie complète, en secondes.
 
-/** Part de --spec-form à partir de laquelle le carrousel est en place. */
-export const SPEC_CARROUSEL = 0.4;
+    4,0 et non 2,6. Le nuage de points se forme sur les 42 premiers pour cent
+    de --spec-form (FORME_FIN dans parcours3d). À 2,6 s, cette formation
+    tenait dans 640 ms — et comme le bloc atteint sa pleine opacité avant
+    qu'elle ne commence, le donut semblait arriver déjà construit. Ici elle
+    dure environ 1,4 s : on voit les points se poser. */
+export const SPEC_DUREE = 4.0;
 
 /* Les trois étapes se CHEVAUCHENT désormais, au lieu de se succéder.
 
@@ -80,9 +83,13 @@ export function initSpecForm(): void {
     if (presence > 0.6) {
       if (debut === null) debut = t;
       const p = Math.min(1, (t - debut) / (SPEC_DUREE * 1000));
-      // Adouci aux deux bouts : la scène démarre et se pose au lieu de filer
-      // à vitesse constante.
-      avance = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+      /* Adouci aux deux bouts, mais en QUADRATIQUE et non plus en cubique.
+         La cubique laissait --spec-form sous 0,05 pendant les 500 premières
+         millisecondes : les points ne bougeaient pas, puis rattrapaient d'un
+         coup. On ne voyait donc jamais la formation, seulement son résultat.
+         La quadratique décolle assez tôt pour que le premier point parte
+         tout de suite, tout en gardant une arrivée qui se pose. */
+      avance = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
     } else if (presence < 0.05) {
       // Bloc entièrement reparti : la séquence se réarme et rejouera au retour,
       // comme les autres blocs de la page.

@@ -27,9 +27,22 @@ import {
 /* The steps, expressed in shares of --spec-form. They chain together without
    overlapping those of the CSS (title 0.43 → 0.715; carousel 0.715 →
    0.835): the points are formed and whitened before the title arrives. */
-const FORME_FIN = 0.42;   // end of the points' arrival (4.2 s)
-const NOIR_DEBUT = 0.42;  // the background switches during the wait before the title
-const NOIR_FIN = 0.54;    // black background, white points
+const FORME_FIN = 0.42; // fin de l'arrivée des points
+
+/* Le blanchiment se joue PENDANT le vol, plus après lui.
+
+   Il commençait à 0,42, c'est-à-dire une fois les points posés : ils volaient
+   donc en sombre, ce qui les rendait parfaitement visibles tant que le fond
+   restait orange. Mais le volet ferme désormais dès l'arrivée du bloc (voir
+   --volet-entree dans ui.ts, qui règle la collision avec le texte du profil) :
+   des points sombres traversaient un fond déjà noir, donc invisibles. On ne
+   voyait le nuage qu'une fois construit ET blanchi — exactement ce qui a été
+   signalé.
+
+   Démarré à 0,04, le blanchiment couvre l'essentiel du vol : les points
+   s'éclaircissent en chemin et on les voit se poser. */
+const NOIR_DEBUT = 0.04;
+const NOIR_FIN = 0.26;
 
 /* Attenuation of the points that fall BEHIND the title. The points rise to
    ~0.95 white, exactly the luminance of the text (#f3f1ec): left untouched, they
@@ -393,6 +406,8 @@ export function initParcours3D(): void {
   }).observe(layer);
 
   let tPrec = performance.now();
+  /** Le canvas a-t-il déjà été vidé depuis que la scène s'est retirée ? */
+  let canvasEfface = false;
   /** Last value of `avance` written into the position buffer. */
   let avancePrec = -1;
 
@@ -406,12 +421,27 @@ export function initParcours3D(): void {
        ink is still rising, and that is where the phone was being asked to
        filter and render at the same time. */
     if (!enVue || specCourant() <= 0) {
+      /* La sortie de boucle laissait la DERNIÈRE image rendue collée sur le
+         canvas. Tant que --spec-form décroissait avec le scroll, les points
+         avaient le temps de repartir hors champ avant d'atteindre zéro, donc
+         l'image gelée était vide et personne ne le voyait. Depuis que la
+         scène se retire avec la présence du bloc, zéro arrive vite : le vol en
+         cours restait figé, et l'on remontait sur le profil avec un nuage de
+         points semé en travers du texte orange.
+
+         On efface donc une fois en entrant dans cet état — une seule, sinon
+         c'est un appel WebGL par image pour ne rien dessiner. */
+      if (!canvasEfface) {
+        renderer.clear();
+        canvasEfface = true;
+      }
       // Reset the clock: on the way back, dt must not carry the whole time
       // spent off screen.
       tPrec = performance.now();
       requestAnimationFrame(tick);
       return;
     }
+    canvasEfface = false;
     {
       const t = performance.now();
       const dt = Math.min(0.05, (t - tPrec) / 1000);
@@ -429,8 +459,21 @@ export function initParcours3D(): void {
       // frame instead of off-screen: on the way back, the points settled
       // right in the middle of the page. This catch-up makes the computation
       // self-correcting — it no longer depends on having measured at the right time.
-      // Step 1 — the points enter from the top right and line up on the torus.
-      const avance = Math.min(1, spec / FORME_FIN);
+      /* Étape 1 — les points entrent par le haut à droite et se rangent sur le
+         tore.
+
+         L'avancement n'est plus linéaire. Les points attendent HORS CADRE
+         (sx ≈ 1,10), si bien qu'à progression constante ils passaient environ
+         les deux tiers de leur vol en dehors de l'écran : mesuré, rien n'était
+         encore visible à 65 % du trajet, et la formation ne s'apercevait que
+         sur ses 220 dernières millisecondes. D'où l'impression d'un donut qui
+         arrive déjà construit — allonger la durée totale n'y changeait rien,
+         la part visible restant la même fraction.
+
+         Cette courbe avale vite la course hors champ, puis freine sur la fin,
+         la seule qu'on voit : les points se posent au lieu de surgir. */
+      const volBrut = Math.min(1, spec / FORME_FIN);
+      const avance = 1 - Math.pow(1 - volBrut, 3);
       if (
         // Only while a point is still in flight. Past that the starts are
         // never read again, and `angle` — which advances on every frame once
