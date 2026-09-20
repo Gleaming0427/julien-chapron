@@ -681,8 +681,9 @@ html.menu-ouvert .menu-voile {
   .hero-stage,
   .dark-zone .marquee,
   .hero-dot,
-  .hero-stage-label,
-  .hero-stage-label::before {
+  /* La balise de Toulouse bat comme le point de disponibilité : sous
+     « réduire le mouvement », elle se tait avec lui. */
+  .hero-balise {
     animation: none;
   }
 }
@@ -798,70 +799,130 @@ html.menu-ouvert .menu-voile {
   z-index: 1;
 }
 
-/* Status chip placed on the globe, badge-style. */
-.hero-stage-label {
+/* ---------- la scène ancrée sur Toulouse ----------
+
+   Remplace l'ancienne pastille « disponible · Toulouse » qui flottait à côté
+   du globe. Un libellé posé à côté d'une image ne raconte rien ; un trait
+   pointillé qui va le chercher non plus — un fil se lit comme un câble.
+
+   Ici tout est accroché à la ville et se lit dans l'ordre : le nom du lieu,
+   une balise qui bat dessus, puis la carte de celui qui y habite et qui est
+   disponible. Le lien est spatial, pas filaire.
+
+   L'ancre est un POINT de taille nulle : --ville-x / --ville-y, écrits image
+   par image par hero3d.ts, la posent sur la projection de Toulouse, et tout
+   se place autour d'elle. --lien-op, du même module, tombe à 0 quand la ville
+   passe derrière le globe ou pendant qu'on le fait tourner à la main. */
+.hero-ancre {
   position: absolute;
-  right: 4%;
-  top: calc(50% - 16px);
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
   z-index: 1;
-  display: inline-flex;
+  pointer-events: none;
+  translate: var(--ville-x, 50%) var(--ville-y, 50%);
+  opacity: var(--lien-op, 0);
+  transition: opacity 0.3s ease;
+}
+
+/* La balise. Le même battement que le point de disponibilité, en plus large :
+   c'est elle qui dit « maintenant ». */
+.hero-balise {
+  position: absolute;
+  left: -5px;
+  top: -5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 0 rgba(255, 77, 0, 0.5);
+  animation: hero-balise-onde 2.4s ease-out infinite;
+}
+
+@keyframes hero-balise-onde {
+  0% { box-shadow: 0 0 0 0 rgba(255, 77, 0, 0.5); }
+  70% { box-shadow: 0 0 0 14px rgba(255, 77, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 77, 0, 0); }
+}
+
+/* Le nom de la ville, à GAUCHE de la balise. Centré dessous, il courait sous
+   la carte — qui est à droite — et s'y faisait manger. */
+.hero-ville {
+  position: absolute;
+  right: 16px;
+  top: 0;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text);
+  white-space: nowrap;
+  text-shadow: 0 1px 6px rgba(13, 17, 23, 0.9);
+}
+
+/* La carte, à droite de la balise et centrée sur elle. Le décalage et la tige
+   qui le comble suffisent à rattacher les deux. */
+.hero-carte {
+  position: absolute;
+  left: 26px;
+  top: 0;
+  transform: translateY(-50%);
+  display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 5px 12px;
+  gap: 10px;
+  padding: 7px 15px 7px 7px;
   border: 1px solid var(--border);
   border-radius: 999px;
-  background: rgba(13, 17, 23, 0.7);
-  backdrop-filter: blur(4px);
-  font-family: var(--font-mono);
-  font-size: var(--fs-small);
-  letter-spacing: 0.02em;
-  color: var(--text-dim);
-  pointer-events: none;
-  animation: hero-soft-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: 1.85s;
+  background: rgba(13, 17, 23, 0.82);
+  backdrop-filter: blur(6px);
+  white-space: nowrap;
 }
 
-/* A bright point makes the tour of the outline: a conic gradient turns
-   behind the chip, and a mask reveals only the thickness of the
-   stroke. Without @property, the gradient stays fixed — the badge is simply
-   without animation, nothing breaks. */
-@property --badge-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
-.hero-stage-label::before {
+.hero-carte::before {
   content: "";
   position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background: conic-gradient(
-    from var(--badge-angle),
-    transparent 0%,
-    transparent 72%,
-    rgba(255, 77, 0, 0.35) 84%,
-    rgba(255, 107, 31, 0.95) 92%,
-    rgba(255, 77, 0, 0.35) 96%,
-    transparent 100%
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  animation: badge-sweep 3.2s linear infinite;
-  pointer-events: none;
+  right: 100%;
+  top: 50%;
+  width: 26px;
+  height: 1px;
+  /* Dégradé plutôt que trait plein : la tige naît de la balise au lieu de s'y
+     coller bout à bout. */
+  background: linear-gradient(to left, var(--border-strong), transparent);
 }
 
-@keyframes badge-sweep {
-  to {
-    --badge-angle: 360deg;
-  }
+.hero-portrait {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  /* Un liseré discret détache la photo du fond sombre sans la cerner. */
+  box-shadow: 0 0 0 1px rgba(243, 241, 236, 0.18);
+  flex: none;
+}
+
+.hero-carte-texte {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.25;
+}
+
+.hero-carte-nom {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.hero-carte-dispo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
 }
 
 .hero-dot {

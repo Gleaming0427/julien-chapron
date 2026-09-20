@@ -365,7 +365,16 @@ export function initHero3D(): void {
 
   // outer: tilt + mouse parallax · spin: continuous rotation.
   const outer = new THREE.Group();
-  outer.rotation.x = 0.3;
+  /* Inclinaison réglée sur la LATITUDE de Toulouse, et non plus sur 0,3 rad.
+
+     Le lacet initial amenait déjà la ville au bon méridien — mesuré, elle
+     tombait à 8 px du centre horizontal. Mais à 17° d'inclinaison pour une
+     ville à 43,6° N, elle se retrouvait 141 px trop haut sur le disque, et
+     c'est l'Afrique qui occupait le centre du regard.
+
+     En inclinant de la latitude elle-même, le point visé arrive au centre. */
+  const INCLINAISON = NODES[0]![0] * DEG;
+  outer.rotation.x = INCLINAISON;
   const spin = new THREE.Group();
   outer.add(spin);
   scene.add(outer);
@@ -386,8 +395,27 @@ export function initHero3D(): void {
   const landCloud = pointCloud(land, 0xffffff, 2.6, 1);
   spin.add(seaCloud.points, landCloud.points);
 
-  // Toulouse no longer has a point of its own: the links still start from it,
-  // but without an orange dot in the middle of the scatter.
+  /* Toulouse reprend un point à elle : c'est l'ancre du trait pointillé qui
+     part de la pastille « disponible · Toulouse ». Un halo plus large et très
+     transparent l'entoure — seul, un point de 0,02 se perd dans la semaille
+     des points de terre, qui font la même taille. */
+  const TOULOUSE = fromLatLon(NODES[0]![0], NODES[0]![1]);
+  const villeAncre = new THREE.Mesh(
+    new THREE.SphereGeometry(0.02, 14, 14),
+    new THREE.MeshBasicMaterial({ color: 0xff4d00 }),
+  );
+  // Juste au-dessus de la surface : posé dessus, il serait à demi mangé par
+  // la sphère opaque qui masque la face arrière.
+  villeAncre.position.copy(TOULOUSE).multiplyScalar(1.015);
+  spin.add(villeAncre);
+
+  const villeHalo = new THREE.Mesh(
+    new THREE.SphereGeometry(0.045, 14, 14),
+    new THREE.MeshBasicMaterial({ color: 0xff4d00, transparent: true, opacity: 0.2 }),
+  );
+  villeHalo.position.copy(villeAncre.position);
+  spin.add(villeHalo);
+
   const clouds = [seaCloud, landCloud];
   let assembling = true;
 
@@ -477,10 +505,27 @@ export function initHero3D(): void {
   const HALF_FOV_TAN = Math.tan((42 * DEG) / 2);
   let width = 0;
   let height = 0;
+  /* La scène ancrée sur Toulouse.
+
+     Ce qui relève de la mise en page est mesuré ICI, dans resize(), et jamais
+     dans la boucle de rendu : le canvas et la scène défilent ensemble, donc
+     leur écart RELATIF ne change qu'au redimensionnement. Lire des rectangles
+     à chaque image aurait forcé un calcul de mise en page soixante fois par
+     seconde, pour des valeurs constantes. */
+  const ancre = stage.querySelector<HTMLElement>(".hero-ancre");
+  let cadreVue = { dx: 0, dy: 0, w: 1, h: 1 };
+
   const resize = (): void => {
     const view = layer.getBoundingClientRect();
     const slot = stage.getBoundingClientRect();
     if (view.width < 1 || view.height < 1 || slot.height < 1) return;
+
+    cadreVue = {
+      dx: view.left - slot.left,
+      dy: view.top - slot.top,
+      w: view.width,
+      h: view.height,
+    };
     width = slot.width;
     height = slot.height;
 
@@ -558,6 +603,9 @@ export function initHero3D(): void {
   const clock = new THREE.Clock();
   // Europe faces the camera on load.
   let autoYaw = -1.6;
+  // Réutilisés à chaque image plutôt que réalloués : la boucle tourne à 60 Hz.
+  const positionVille = new THREE.Vector3();
+  const projection = new THREE.Vector3();
 
   /* « Réduire le mouvement » ne réduisait rien ici : le globe continuait de
      tourner et les paquets de circuler. Le réglage existe notamment pour les
@@ -660,7 +708,34 @@ export function initHero3D(): void {
       orbit.satPos.needsUpdate = true;
     }
 
-    outer.rotation.x += (0.3 + dragPitch - outer.rotation.x) * 0.08;
+    outer.rotation.x += (INCLINAISON + dragPitch - outer.rotation.x) * 0.08;
     renderer.render(scene, camera);
+
+    /* La scène ancrée sur Toulouse, APRÈS le rendu : les matrices monde sont
+       alors à jour pour l'image courante, sans avoir à les recalculer. */
+    if (ancre) {
+      villeAncre.getWorldPosition(positionVille);
+      // Le globe est centré sur l'origine et la caméra regarde vers -z : la
+      // composante z du point dit donc s'il est face à nous (positive) ou
+      // derrière (négative).
+      const face = positionVille.z;
+
+      projection.copy(positionVille).project(camera);
+      const x = cadreVue.dx + (projection.x * 0.5 + 0.5) * cadreVue.w;
+      const y = cadreVue.dy + (-projection.y * 0.5 + 0.5) * cadreVue.h;
+      ancre.style.setProperty("--ville-x", `${x.toFixed(1)}px`);
+      ancre.style.setProperty("--ville-y", `${y.toFixed(1)}px`);
+
+      /* Tout s'efface dès que la ville tourne vers l'arrière — annoncer
+         « Toulouse » en désignant un point caché derrière le globe n'aurait
+         aucun sens — et pendant qu'on fait tourner le globe à la main, où la
+         carte suivrait le geste en fouettant l'écran. La scène attend aussi
+         que le globe soit formé : pointer une ville sur une nuée de points en
+         vol ne dit rien. La marge de 0,18 coupe avant le bord exact de la
+         sphère, là où le point rase la surface et devient illisible. */
+      const net = Math.min(1, Math.max(0, (face - 0.18) / 0.32));
+      const op = dragging || assembling ? 0 : net;
+      ancre.style.setProperty("--lien-op", op.toFixed(3));
+    }
   });
 }

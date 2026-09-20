@@ -1,0 +1,13 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "portfolio",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--port", "4321"],
+      "port": 4321,
+      "_pourquoi_autoPort_false": "Astro n'honore PAS la variable d'environnement PORT — vérifié : avec PORT=4399 il écoute quand même sur 4321. Un port attribué automatiquement serait donc ignoré par le serveur, et l'outil surveillerait un port vide. Le port reste fixe et explicite ; s'il est occupé, c'est un serveur résiduel à arrêter.",
+      "autoPort": false
+    }
+  ]
+}

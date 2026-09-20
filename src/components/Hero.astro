@@ -3,6 +3,7 @@ import { identity } from "../data/cv";
 
 const base = import.meta.env.BASE_URL;
 const pdfUrl = base === "/" ? "/CV_Julien_Chapron.pdf" : `${base}/CV_Julien_Chapron.pdf`;
+const portraitUrl = base === "/" ? "/julien-chapron.webp" : `${base}/julien-chapron.webp`;
 
 ---
 
@@ -41,7 +42,34 @@ const pdfUrl = base === "/" ? "/CV_Julien_Chapron.pdf" : `${base}/CV_Julien_Chap
     </div>
 
     <div class="hero-stage" aria-hidden="true">
-      <div class="hero-stage-label"><span class="hero-dot"></span> disponible · Toulouse</div>
+      <!-- Une scène ancrée, et non plus une pastille flottante reliée par un
+           fil. Le tout est accroché à Toulouse : hero3d.ts écrit la position
+           projetée de la ville dans --ville-x / --ville-y, et l'ensemble suit
+           le globe puis s'efface quand la ville passe derrière.
+
+           L'ordre raconte : une balise vivante sur la ville, son nom, puis la
+           carte qui dit qui y habite et qu'il est disponible. -->
+      <div class="hero-ancre">
+        <span class="hero-balise"></span>
+        <span class="hero-ville">Toulouse</span>
+
+        <div class="hero-carte">
+          <img
+            class="hero-portrait"
+            src={portraitUrl}
+            width="56"
+            height="56"
+            alt=""
+            decoding="async"
+          />
+          <span class="hero-carte-texte">
+            <b class="hero-carte-nom">{identity.name}</b>
+            <span class="hero-carte-dispo">
+              <span class="hero-dot"></span> disponible maintenant
+            </span>
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 
