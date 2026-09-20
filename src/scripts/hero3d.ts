@@ -142,9 +142,77 @@ export function buildPoints(): { land: THREE.Vector3[]; sea: THREE.Vector3[] } {
 const FLY_IN = 1.5;
 const STAGGER = 0.8;
 
+/* ---------- la statue ----------
+
+   Silhouette de la Vénus de Milo, dessinée à la main en coordonnées
+   normalisées : hauteur 2 comme le diamètre du globe, largeur d'une statue.
+
+   Elle est DESSINÉE et non scannée. Un vrai relevé 3D aurait posé une
+   question de licence et pesé plusieurs méga-octets pour une scène qui dure
+   trois secondes. Ce qu'il faut ici, c'est que la forme se reconnaisse d'un
+   coup d'œil en points : la tête inclinée, les épaules larges, les DEUX bras
+   brisés à des hauteurs différentes — c'est ce détail-là qui la nomme — la
+   taille creusée, puis le drapé qui s'évase jusqu'au socle.
+
+   Parcourue dans le sens horaire depuis le sommet du crâne. */
+const VENUS: [number, number][] = [
+  [0.02, 1.0], [0.1, 0.96], [0.13, 0.88], [0.12, 0.8], [0.08, 0.75],
+  [0.05, 0.72], [0.07, 0.68],
+  // épaule droite, puis le bras brisé haut
+  [0.2, 0.64], [0.3, 0.58], [0.34, 0.5], [0.3, 0.44], [0.26, 0.4],
+  // flanc droit et taille
+  [0.24, 0.3], [0.22, 0.18], [0.24, 0.08],
+  // hanche et drapé
+  [0.3, 0.0], [0.34, -0.12], [0.32, -0.3], [0.34, -0.5], [0.36, -0.7],
+  [0.38, -0.88], [0.36, -1.0],
+  // socle
+  [-0.34, -1.0],
+  // remontée du drapé à gauche
+  [-0.32, -0.86], [-0.3, -0.66], [-0.28, -0.46], [-0.26, -0.26],
+  [-0.28, -0.08], [-0.26, 0.06], [-0.24, 0.18], [-0.26, 0.3],
+  // bras gauche brisé plus bas et plus large
+  [-0.3, 0.4], [-0.34, 0.46], [-0.36, 0.54], [-0.3, 0.6],
+  // épaule gauche, cou, tête
+  [-0.18, 0.66], [-0.08, 0.7], [-0.06, 0.74], [-0.09, 0.8],
+  [-0.1, 0.88], [-0.06, 0.96],
+];
+
+/** Le point est-il dans la silhouette ? Lancer de rayon horizontal. */
+function dansVenus(x: number, y: number): boolean {
+  let dedans = false;
+  for (let i = 0, j = VENUS.length - 1; i < VENUS.length; j = i++) {
+    const [xi, yi] = VENUS[i]!;
+    const [xj, yj] = VENUS[j]!;
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
+      dedans = !dedans;
+    }
+  }
+  return dedans;
+}
+
+/* ---------- puis la taille ----------
+
+   Onze ans de taille de pierre sur monuments historiques avant la
+   reconversion : c'est ce que raconte l'ouverture. Les points ne forment plus
+   directement le globe — ils dressent d'abord une STATUE, qui tient en place,
+   puis se défait en sphère.
+
+   Le globe est donc littéralement fait de la même matière que la statue : les
+   mêmes points, déplacés. Onze ans de pierre qui deviennent sept ans de
+   code. */
+
+/** Temps pendant lequel la statue tient, une fois dressée. */
+const TENUE_BLOC = 1.0;
+/** Durée de la taille : le bloc devient sphère. */
+const TAILLE = 1.9;
+/** Instant où le globe est entièrement dégagé. */
+const FORME_FAITE = FLY_IN + STAGGER + TENUE_BLOC + TAILLE;
+
 export interface Cloud {
   points: THREE.Points;
   start: Float32Array;
+  /** Position sur le bloc de départ. */
+  bloc: Float32Array;
   target: Float32Array;
   delay: Float32Array;
 }
@@ -156,9 +224,13 @@ export function pointCloud(
   color: number,
   size: number,
   opacity: number,
+  /** Décale les tirages de la statue : deux nuages de même graine
+      rempliraient exactement les mêmes places. */
+  graine: number,
 ): Cloud {
   const count = positions.length;
   const target = new Float32Array(count * 3);
+  const bloc = new Float32Array(count * 3);
   const start = new Float32Array(count * 3);
   const delay = new Float32Array(count);
 
@@ -173,6 +245,31 @@ export function pointCloud(
       const v = Math.sin(i * n) * 43758.5453;
       return v - Math.floor(v);
     };
+
+    /* La place du point dans la statue : tirage au sort dans le rectangle
+       englobant, rejeté tant qu'il tombe hors de la silhouette. Déterministe,
+       donc la statue est la même à chaque visite.
+
+       Le tirage est indexé sur `graine` pour que les deux nuages — terres et
+       mers — remplissent la statue SANS se superposer : à graine identique
+       ils auraient produit la même suite, et les points se seraient empilés
+       deux par deux au lieu de couvrir la surface. */
+    let vx = 0;
+    let vy = 0;
+    for (let essai = 0; essai < 24; essai++) {
+      vx = (noise(graine + essai * 3.71) - 0.5) * 0.8;
+      vy = (noise(graine + 11.3 + essai * 5.17) - 0.5) * 2.05;
+      if (dansVenus(vx, vy)) break;
+    }
+    /* La profondeur donne le volume : la statue est ronde, pas découpée dans
+       du carton. Une section elliptique — le point est d'autant plus avancé
+       qu'il est proche de l'axe — suffit à ce que la forme tienne quand la
+       scène s'incline. */
+    const creux = Math.max(0, 1 - (vx / 0.38) ** 2);
+    const profondeur = Math.sqrt(creux) * 0.3 * (noise(graine + 7.9) - 0.5) * 2;
+    bloc[i * 3] = vx;
+    bloc[i * 3 + 1] = vy;
+    bloc[i * 3 + 2] = profondeur;
     // Offset in the XY plane of the GLOBE — and not of the screen, contrary to
     // what this comment used to say: the group rotates, so this offset tips into
     // depth as the rotation goes. The points can therefore graze the
@@ -205,7 +302,17 @@ export function pointCloud(
     opacity,
     depthWrite: false,
   });
-  return { points: new THREE.Points(geometry, material), start, target, delay };
+  return { points: new THREE.Points(geometry, material), start, bloc, target, delay };
+}
+
+/** Avancement de la taille : 0 tant que le bloc tient, 1 une fois la sphère
+    dégagée. Exporté parce que la sphère opaque et le trafic du réseau s'y
+    accrochent — sans quoi ils apparaîtraient pendant que la pierre est encore
+    brute. */
+export function degagement(elapsed: number): number {
+  const t = Math.min(1, Math.max(0, (elapsed - (FLY_IN + STAGGER + TENUE_BLOC)) / TAILLE));
+  // Adouci aux deux bouts : le geste part et se pose, il ne file pas.
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
 /** Advances a cloud's assembly. Returns true while there is still movement. */
@@ -214,13 +321,24 @@ export function advance(cloud: Cloud, elapsed: number): boolean {
   const position = attribute.array as Float32Array;
   let moving = false;
 
+  /* La taille est COMMUNE à tous les points, sans décalage : le bloc se
+     dégage d'un seul geste. Le décalage ne concerne que l'arrivée initiale,
+     où les points tombent un à un. */
+  const taille = degagement(elapsed);
+  if (taille < 1) moving = true;
+
   for (let i = 0; i < cloud.delay.length; i++) {
     const t = Math.min(1, Math.max(0, (elapsed - cloud.delay[i]!) / FLY_IN));
     if (t < 1) moving = true;
     const eased = 1 - Math.pow(1 - t, 3);
     for (let axis = 0; axis < 3; axis++) {
       const k = i * 3 + axis;
-      position[k] = cloud.start[k]! + (cloud.target[k]! - cloud.start[k]!) * eased;
+      /* La cible de l'arrivée est la position COURANTE entre bloc et sphère.
+         Tant que la pierre est brute, les points tombent sur le bloc ; une
+         fois la taille lancée, ils suivent le dégagement. Une seule formule
+         pour les deux temps, donc aucune couture entre eux. */
+      const arrivee = cloud.bloc[k]! + (cloud.target[k]! - cloud.bloc[k]!) * taille;
+      position[k] = cloud.start[k]! + (arrivee - cloud.start[k]!) * eased;
     }
   }
   attribute.needsUpdate = true;
@@ -391,8 +509,8 @@ export function initHero3D(): void {
   core.scale.setScalar(0.001);
   spin.add(core);
 
-  const seaCloud = pointCloud(sea, 0x8b949e, 1.6, 0.6);
-  const landCloud = pointCloud(land, 0xffffff, 2.6, 1);
+  const seaCloud = pointCloud(sea, 0x8b949e, 1.6, 0.6, 12.9898);
+  const landCloud = pointCloud(land, 0xffffff, 2.6, 1, 63.7);
   spin.add(seaCloud.points, landCloud.points);
 
   /* Toulouse reprend un point à elle : c'est l'ancre du trait pointillé qui
@@ -602,7 +720,13 @@ export function initHero3D(): void {
 
   const clock = new THREE.Clock();
   // Europe faces the camera on load.
-  let autoYaw = -1.6;
+  /* Lacet qui amène Toulouse face à la caméra une fois le globe dégagé.
+     Pendant la statue, la scène reste à zéro : à -1,6 rad, la Vénus aurait été
+     vue de profil, c'est-à-dire réduite à une tranche. */
+  const YAW_TOULOUSE = -1.6;
+  /** Dérive lente du globe. Elle ne part qu'après la taille : la statue se
+      tient immobile, le temps qu'on la regarde. */
+  let derive = 0;
   // Réutilisés à chaque image plutôt que réalloués : la boucle tourne à 60 Hz.
   const positionVille = new THREE.Vector3();
   const projection = new THREE.Vector3();
@@ -633,24 +757,41 @@ export function initHero3D(): void {
         if (advance(cloud, t)) moving = true;
       }
       assembling = moving;
-      // The core grows with them: it only hides the back face once
-      // the sphere is in place.
-      const formed = Math.min(1, t / (FLY_IN + STAGGER));
-      core.scale.setScalar(Math.max(0.001, formed));
+      /* La sphère opaque grandit avec le DÉGAGEMENT, plus avec l'arrivée des
+         points. Accrochée à l'arrivée, elle se serait installée pendant que
+         la pierre est encore brute : une boule noire au milieu du bloc, qui
+         en aurait masqué la face arrière et tué la lecture du volume. Elle
+         n'a de sens qu'une fois la sphère dégagée — c'est elle qui donne au
+         globe son opacité. */
+      core.scale.setScalar(Math.max(0.001, degagement(t)));
     }
+
+    const degage = degagement(t);
+
+    /* Le marqueur de Toulouse reste à sa place SUR LA SPHÈRE : pendant la
+       statue, il flottait donc tout seul à côté d'elle, sans rien désigner.
+       Il n'a de sens qu'une fois le globe dégagé. */
+    villeAncre.visible = degage > 0.85;
+    villeHalo.visible = villeAncre.visible;
 
     if (!dragging) {
       // Inertia after release, then resumption of the slow rotation.
       dragYaw += yawVelocity;
       yawVelocity *= 0.94;
-      if (!MOUVEMENT_REDUIT) autoYaw += 0.0005;
+      // La dérive n'entre en jeu qu'une fois la taille finie.
+      if (!MOUVEMENT_REDUIT && degage >= 1) derive += 0.0005;
     }
-    spin.rotation.y = autoYaw + dragYaw;
+    /* De face pendant la statue, puis pivot vers Toulouse pendant la taille :
+       le mouvement de rotation fait partie du passage d'une forme à l'autre,
+       il n'est pas un réglage indépendant. */
+    spin.rotation.y = YAW_TOULOUSE * degage + derive + dragYaw;
 
     // The traffic only starts once the globe is formed.
     // Mouvement réduit : l'horloge du trafic est figée sur une image
     // représentative — les liaisons restent dessinées, elles ne défilent plus.
-    const netTime = MOUVEMENT_REDUIT ? 1.5 : t - (FLY_IN + STAGGER);
+    // Le réseau n'a rien à relier tant que le globe n'est pas dégagé : il
+    // part de la fin de la taille, pas de l'arrivée des points.
+    const netTime = MOUVEMENT_REDUIT ? 1.5 : t - FORME_FAITE;
     if (netTime > 0) {
       const headPos = heads.geometry.getAttribute("position") as THREE.BufferAttribute;
       (heads.material as THREE.PointsMaterial).opacity = Math.min(1, netTime);
@@ -708,7 +849,9 @@ export function initHero3D(): void {
       orbit.satPos.needsUpdate = true;
     }
 
-    outer.rotation.x += (INCLINAISON + dragPitch - outer.rotation.x) * 0.08;
+    /* L'inclinaison suit elle aussi la taille : une statue se tient droite,
+       c'est le globe qui penche. */
+    outer.rotation.x += (INCLINAISON * degage + dragPitch - outer.rotation.x) * 0.08;
     renderer.render(scene, camera);
 
     /* La scène ancrée sur Toulouse, APRÈS le rendu : les matrices monde sont
