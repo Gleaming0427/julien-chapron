@@ -443,10 +443,16 @@ export function initParcours3D(): void {
          cours restait figé, et l'on remontait sur le profil avec un nuage de
          points semé en travers du texte orange.
 
-         On efface donc une fois en entrant dans cet état — une seule, sinon
-         c'est un appel WebGL par image pour ne rien dessiner. */
+         On MASQUE le canvas, on ne l'efface pas. renderer.clear() le peignait
+         en NOIR OPAQUE : le canvas fait toute la fenêtre, si bien que le bloc
+         profil entier — fond orange et texte — disparaissait derrière un
+         rectangle noir, du début du rail jusqu'à +0,87 écran. Le DOM restait
+         pourtant parfaitement correct, ce qui rendait le défaut introuvable
+         en lisant les styles : seuls les pixels le montraient.
+
+         visibility ne peint rien du tout et se remet sans coût. */
       if (!canvasEfface) {
-        renderer.clear();
+        canvas.style.visibility = "hidden";
         canvasEfface = true;
       }
       // Reset the clock: on the way back, dt must not carry the whole time
@@ -455,7 +461,10 @@ export function initParcours3D(): void {
       requestAnimationFrame(tick);
       return;
     }
-    canvasEfface = false;
+    if (canvasEfface) {
+      canvas.style.visibility = "";
+      canvasEfface = false;
+    }
     {
       const t = performance.now();
       const dt = Math.min(0.05, (t - tPrec) / 1000);
