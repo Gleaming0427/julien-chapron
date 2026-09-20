@@ -195,10 +195,16 @@ function applyCarousel(): void {
      propre variable et ne se disputent jamais la même. */
   const blocParcours = items[1];
   if (blocParcours && carouselRail) {
-    carouselRail.style.setProperty(
-      "--volet-entree",
-      Number(blocParcours.style.getPropertyValue("--item-op") || "0").toFixed(4),
-    );
+    const presence = Number(blocParcours.style.getPropertyValue("--item-op") || "0");
+    carouselRail.style.setProperty("--volet-entree", presence.toFixed(4));
+
+    /* parcours3d cesse d'écrire --fond-bloc2 dès que --spec-form retombe à 0,
+       et la dernière valeur qu'il a posée reste collée sur le rail : au retour
+       vers le profil, le fond gardait 11,5 % de noir pour toujours. Le bloc
+       parti, plus personne n'a de raison d'assombrir le rail — on efface. */
+    if (presence < 0.02) {
+      carouselRail.style.removeProperty("--fond-bloc2");
+    }
   }
 
   // The dot ring of the journey block arrives from the left on each
@@ -442,12 +448,15 @@ window.addEventListener(
    scroll revient à demander au visiteur de déduire un sens de lecture d'un
    geste qui n'a pas le même axe. C'était la cause, pas le réglage.
 
-   Il se pilote donc par un vrai geste : flèches, points, balayage au doigt,
-   flèches du clavier. Et les fiches se déplacent, car c'est le déplacement —
-   pas le fondu — qui dit où l'on va. */
+   Il se pilote donc par un vrai geste : flèches, balayage au doigt, flèches
+   du clavier. Et les fiches se déplacent, car c'est le déplacement — pas le
+   fondu — qui dit où l'on va.
+
+   Les points de navigation ont été retirés : ils répétaient ce que le
+   compteur « 1 / 3 » dit déjà en toutes lettres. C'est lui qui porte la
+   position, et son aria-live l'annonce au lecteur d'écran. */
 
 const expSlides = Array.from(document.querySelectorAll<HTMLElement>(".exp-slides .experience"));
-const expDots = Array.from(document.querySelectorAll<HTMLButtonElement>(".exp-dot"));
 const expFleches = Array.from(document.querySelectorAll<HTMLButtonElement>(".exp-fleche"));
 const expCompteur = document.querySelector<HTMLElement>(".exp-compteur-actuel");
 
@@ -467,18 +476,6 @@ function montrerFiche(cible: number): void {
     slide.setAttribute("aria-hidden", ecart === 0 ? "false" : "true");
   });
 
-  expDots.forEach((dot, i) => {
-    dot.classList.toggle("is-active", i === ficheActive);
-    dot.setAttribute("aria-selected", i === ficheActive ? "true" : "false");
-    // Un seul point dans la tabulation : le groupe se parcourt aux flèches,
-    // comme l'attend un role="tablist".
-    dot.tabIndex = i === ficheActive ? 0 : -1;
-    // --f allume LE point courant, et lui seul. --l remplit la ligne qui mène
-    // jusqu'à lui : le chemin parcouru se lit, sans allumer plusieurs points.
-    dot.style.setProperty("--f", i === ficheActive ? "1" : "0");
-    dot.style.setProperty("--l", i <= ficheActive ? "1" : "0");
-  });
-
   expFleches.forEach((f) => {
     const pas = Number(f.dataset.pas || "0");
     // Désactivée plutôt que masquée : on voit qu'on est au bout de la série
@@ -493,15 +490,17 @@ if (expSlides.length > 1) {
   expFleches.forEach((f) => {
     f.addEventListener("click", () => montrerFiche(ficheActive + Number(f.dataset.pas || "0")));
   });
-  expDots.forEach((dot, i) => dot.addEventListener("click", () => montrerFiche(i)));
-
   document.querySelector(".exp-carousel")?.addEventListener("keydown", (event) => {
     const key = (event as KeyboardEvent).key;
     const pas = key === "ArrowRight" ? 1 : key === "ArrowLeft" ? -1 : 0;
     if (!pas) return;
     event.preventDefault();
     montrerFiche(ficheActive + pas);
-    expDots[ficheActive]?.focus();
+    /* Le focus suit la flèche correspondante. Il allait sur le point courant ;
+       les points ayant disparu, sans cela il resterait sur un bouton qui vient
+       peut-être d'être désactivé en bout de série — et le focus serait perdu. */
+    const arrivee = expFleches.find((f) => Number(f.dataset.pas || "0") === pas);
+    if (arrivee && !arrivee.disabled) arrivee.focus();
   });
 
   /* Balayage au doigt. Seuil en pixels ET tolérance verticale : sans la

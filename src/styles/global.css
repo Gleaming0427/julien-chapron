@@ -1568,15 +1568,11 @@ html:not(.js) .exp-slides .experience:first-child {
   cursor: default;
 }
 
-/* Les points et le compteur forment UN groupe, centré entre les deux flèches.
-   Avec une seule marge automatique sur le compteur, les points restaient collés
-   à la flèche de gauche et un grand vide s'ouvrait au milieu de la rangée. */
-.exp-dots {
-  margin-left: auto;
-}
-
+/* Les points ont été retirés : le compteur porte seul la position, centré
+   entre les deux flèches. Deux marges automatiques le placent au milieu quelle
+   que soit la largeur des boutons. */
 .exp-compteur {
-  margin: 0 auto 0 0;
+  margin: 0 auto;
   font-family: var(--font-mono);
   font-size: var(--fs-small);
   color: var(--text-dim);
@@ -1738,84 +1734,9 @@ html:not(.js) .exp-slides .experience:first-child {
   color: var(--text);
 }
 
-/* Navigation: dots linked by a thin line. Each fills as
-   a pie slice during the journey that leads to it, and the line that brings it
-   fills with it: you always see where you are between two cards.
-   --f, set by the script, goes from 0 (empty dot) to 1 (full dot). */
-.exp-dots {
-  --dot: 12px;
-  --lien: 54px;
-  position: relative;
-  /* Width to content: without it the container stretches over the whole column
-     and the lines would overflow very far beyond the dots. */
-  width: fit-content;
-  margin-inline: auto;
-  display: flex;
-  align-items: center;
-  gap: var(--lien);
-}
-
-.exp-dot {
-  position: relative;
-  width: var(--dot);
-  height: var(--dot);
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  /* The traveled part full, the rest in gray: a pie that
-     fills clockwise from noon. */
-  background: conic-gradient(
-    var(--green) calc(var(--f, 0) * 1turn),
-    var(--border) 0
-  );
-  cursor: pointer;
-}
-
-/* La ligne qui relie un point au précédent. Elle a sa PROPRE variable (--l),
-   distincte du remplissage du point (--f).
-
-   Les deux partageaient --f, ce qui avait du sens quand le carrousel était
-   piloté au scroll : --f était un remplissage continu, et la file se
-   remplissait progressivement. Avec une navigation discrète, tout point déjà
-   passé se retrouvait plein orange — deux, puis trois points « actifs » à la
-   fois, et plus aucun moyen de lire où l'on est.
-   Désormais : la ligne trace le chemin parcouru, un seul point est allumé. */
-.exp-dot + .exp-dot::before {
-  content: "";
-  position: absolute;
-  right: 100%;
-  top: 50%;
-  width: var(--lien);
-  height: 1px;
-  translate: 0 -50%;
-  background: linear-gradient(
-    to right,
-    var(--green) 0 calc(var(--l, 0) * 100%),
-    var(--border) 0
-  );
-  pointer-events: none;
-}
-
-/* Without JS — and on the very first frame, before the script has set
-   --f — the first dot is already full: we are on it. The inline style
-   written by the script wins afterwards. */
-.exp-dot:first-child {
-  --f: 1;
-}
-
-.exp-dot:hover {
-  /* A discreet ring: the target stays small, there has to be feedback. */
-  box-shadow: 0 0 0 3px var(--border);
-}
-
-.exp-dot:focus-visible {
-  outline: 2px solid var(--green);
-  outline-offset: 3px;
-}
-
-.exp-dot.is-active {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 30%, transparent);
-}
+/* Les points de navigation ont été retirés : ils doublaient l'information du
+   compteur « 1 / 3 », qui la donne en toutes lettres. Les flèches et le
+   compteur suffisent, et la rangée respire. */
 
 .visually-hidden {
   position: absolute;
@@ -3136,13 +3057,6 @@ html:not(.js) .exp-slides .experience:first-child {
    this block silently lost — the menu button stayed at 40 px and the dots'
    spacing at 54. At equal specificity, order decides. */
 @media (pointer: coarse) {
-  /* The touch zone extends without moving the visible dot: it keeps its
-     12 px, but becomes reachable over 44. */
-  .exp-dot::after {
-    content: "";
-    position: absolute;
-    inset: -16px;
-  }
 
   .burger {
     width: 44px;
@@ -3161,11 +3075,6 @@ html:not(.js) .exp-slides .experience:first-child {
     min-height: 44px;
   }
 
-  /* The dots space out a little: two 44 px targets side by side must not
-     overlap. */
-  .exp-dots {
-    --lien: 46px;
-  }
 }
 
 /* ---------- banner: stacked on phone ----------
@@ -3328,9 +3237,6 @@ html:not(.js) .exp-slides .experience:first-child {
     color: var(--text-dim);
   }
 
-  .exp-dots {
-    margin-top: 10px;
-  }
 }
 
 /* ---------- really short screens (SE, mini, phone with a large text size) ----------

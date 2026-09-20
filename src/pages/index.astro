@@ -188,25 +188,13 @@ const iconesProjet: Record<IconeProjet, string> = {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 12H3" /><path d="m8.8 6.8-5.2 5.2 5.2 5.2" /></svg>
         </button>
 
-        <div class="exp-dots" role="tablist" aria-label="Choisir une expérience">
-          {
-            experiences.map((exp, i) => (
-              <button
-                type="button"
-                class:list={["exp-dot", i === 0 && "is-active"]}
-                data-go={i}
-                role="tab"
-                aria-selected={i === 0 ? "true" : "false"}
-                tabindex={i === 0 ? 0 : -1}
-              >
-                <span class="visually-hidden">{exp.company}</span>
-              </button>
-            ))
-          }
-        </div>
-
-        <p class="exp-compteur" aria-hidden="true">
-          <b class="exp-compteur-actuel">1</b><span>/</span>{experiences.length}
+        <!-- Le compteur porte seul la position, au centre entre les deux
+             flèches. aria-live l'annonce au changement : sans les points, il
+             est le seul à dire où l'on en est, y compris au lecteur d'écran. -->
+        <p class="exp-compteur" role="status" aria-live="polite">
+          <span class="visually-hidden">Expérience </span>
+          <b class="exp-compteur-actuel">1</b><span aria-hidden="true">/</span
+          ><span class="visually-hidden"> sur </span>{experiences.length}
         </p>
 
         <button type="button" class="exp-fleche" data-pas="1" aria-label="Expérience suivante">

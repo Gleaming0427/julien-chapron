@@ -67,6 +67,7 @@ export function initSpecForm(): void {
   }
 
   let debut: number | null = null;
+  let avance = 0;
 
   const tick = (t: number): void => {
     /* Le déclencheur est l'arrivée VISUELLE du bloc, pas sa position dans le
@@ -81,13 +82,26 @@ export function initSpecForm(): void {
       const p = Math.min(1, (t - debut) / (SPEC_DUREE * 1000));
       // Adouci aux deux bouts : la scène démarre et se pose au lieu de filer
       // à vitesse constante.
-      ecrire(p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
-    } else if (presence < 0.05 && debut !== null) {
+      avance = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+    } else if (presence < 0.05) {
       // Bloc entièrement reparti : la séquence se réarme et rejouera au retour,
       // comme les autres blocs de la page.
       debut = null;
-      ecrire(0);
+      avance = 0;
     }
+
+    /* Une horloge ne sait pas reculer — et c'est ce qui cassait le RETOUR vers
+       le bloc profil. L'avance restait à 1 tant que la présence n'était pas
+       retombée sous 0,05, si bien que le nuage de points et son volet noir
+       tenaient à pleine puissance PAR-DESSUS le texte du profil qui revenait,
+       avant de disparaître d'un coup.
+
+       Le retrait rattache la scène à la présence du bloc : elle se rabat en
+       même temps qu'il s'efface, dans les deux sens. À l'aller, l'horloge ne
+       démarre qu'au-delà de 0,6, donc le retrait vaut déjà 1 et ne change
+       rien. */
+    const retrait = Math.min(1, presence / 0.6);
+    ecrire(avance * retrait);
 
     requestAnimationFrame(tick);
   };
