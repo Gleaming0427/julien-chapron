@@ -10,11 +10,19 @@
     or a tenth of a flick, and the sentence was going away while you were
     still on the first line. */
 export const PROFIL_PALIER = 0.6;
-/** Travel of the profile text's exit, in rail screens, counted AFTER the
-    plateau. Short: it is a simple fade, and everything it consumes delays
-    the parcours entrance. specform.ts sets the start of its staging just
-    after. */
-export const PROFIL_SORTIE = 0.32;
+/** Course de la sortie du texte du profil, en écrans de rail, comptée APRÈS
+    le palier.
+
+    0,24 et non 0,32. Le bloc parcours commence son fondu d'entrée à 0,847
+    écran de rail ; à 0,32 le texte du profil n'était éteint qu'à 0,92, donc
+    il restait lisible — à ~10 % sur l'orange, ce qui se voit — pendant que le
+    titre et la fiche du parcours étaient déjà là. Trois couches de texte se
+    percutaient.
+
+    0,24 l'éteint à 0,84, juste avant que le parcours ne commence à paraître :
+    les deux se succèdent au lieu de se superposer, et le volet sombre se
+    ferme dans cette même fenêtre (voir --volet-entree dans ui.ts). */
+export const PROFIL_SORTIE = 0.24;
 
 export function initProfilOut(): void {
   const rail = document.querySelector<HTMLElement>(".carousel-rail");

@@ -64,6 +64,18 @@
 
 html {
   scroll-behavior: smooth;
+  /* La page défilait de 173 px vers la DROITE. `overflow-x: clip` était déjà
+     posé sur body, mais il ne se propageait pas jusqu'à la zone d'affichage :
+     le canvas du hero (1786 px) et le bandeau défilant (2428 px) laissaient
+     donc une barre horizontale et 173 px de vide à droite.
+
+     Mesuré identique en production avant toute modification de ma part : ce
+     n'était pas une régression du carrousel, c'était là depuis le début.
+
+     Posé ici, cela clippe réellement. Vérifié : le panneau du rail reste
+     épinglé et l'en-tête `fixed` garde exactement le même comportement —
+     c'est le risque que signale le commentaire de .site-header. */
+  overflow-x: clip;
 }
 
 body {
@@ -1171,9 +1183,14 @@ button.chip {
      rail takes the panel's colour — orange until the shutter is drawn, dark
      afterwards — and the uncovered band melts into it. */
   background-color: var(--orange);
+  /* Deux pilotes, jamais en conflit : --fond-bloc2 vient de parcours3d (qui ne
+     démarre qu'une fois le bloc arrivé) et --volet-entree de ui.ts (qui suit
+     l'arrivée elle-même). Le maximum des deux ferme donc le volet PENDANT
+     l'arrivée, au lieu d'attendre qu'elle soit finie — sans quoi le texte du
+     profil reste lisible sous celui du parcours. */
   background-color: color-mix(
     in srgb,
-    #0b0c0d calc(var(--fond-bloc2, 0) * 100%),
+    #0b0c0d calc(max(var(--fond-bloc2, 0), var(--volet-entree, 0)) * 100%),
     var(--orange)
   );
 }
@@ -1435,6 +1452,15 @@ button.chip {
 
 .exp-slides {
   display: grid;
+  /* La fiche entrante démarre à 90 px hors cadre. La découpe lui donne le bon
+     comportement de carrousel : elle entre depuis DERRIÈRE le bord au lieu de
+     flotter à côté du cadre.
+     (J'avais d'abord cru que c'était la cause de la barre de défilement
+     horizontale de la page — c'était faux, elle venait du canvas du hero et
+     du bandeau, et elle préexistait. Voir html { overflow-x: clip }.)
+     `clip` plutôt que `hidden` : on découpe sans créer de conteneur de
+     défilement. */
+  overflow: clip;
 }
 
 .exp-slides .experience {
@@ -1456,11 +1482,17 @@ button.chip {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  translate: var(--decalage, 38px) 0;
+  translate: var(--decalage, 90px) 0;
+  /* Le délai sur l'opacité n'est pas un ornement. Sans lui, la fiche sortante
+     était à 20 % d'opacité alors qu'elle n'avait parcouru que 36 de ses 38 px :
+     le mouvement portait bien la direction, mais il se jouait derrière un
+     fondu déjà terminé — donc personne ne le voyait. On la laisse partir
+     visible pendant 0,1 s avant de l'éteindre, et la course passe de 38 à
+     90 px (5,7 % de la largeur de la fiche, c'était invisible ; 14 % se lit). */
   transition:
-    opacity 0.4s ease,
-    translate 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    visibility 0s linear 0.4s;
+    opacity 0.34s ease 0.1s,
+    translate 0.52s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 0.44s;
 }
 
 .exp-slides .experience.is-active {
@@ -1468,9 +1500,10 @@ button.chip {
   visibility: visible;
   pointer-events: auto;
   translate: 0 0;
+  /* L'entrante, elle, n'attend pas : elle paraît pendant qu'elle avance. */
   transition:
     opacity 0.4s ease,
-    translate 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    translate 0.52s cubic-bezier(0.22, 1, 0.36, 1),
     visibility 0s;
 }
 

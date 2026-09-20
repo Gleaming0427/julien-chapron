@@ -182,6 +182,25 @@ function applyCarousel(): void {
     item.style.setProperty("--item-op", Math.min(fadeOut, fadeIn).toFixed(3));
   });
 
+  /* Le volet sombre se ferme AVEC l'arrivée du bloc parcours.
+
+     Il ne pouvait pas : --fond-bloc2 est écrit par parcours3d, qui ne tourne
+     que si --spec-form > 0, qui ne démarre que quand le bloc est déjà là.
+     Dépendance circulaire — le volet arrivait donc toujours APRÈS, et le texte
+     du profil, encore à ~10 % sur l'orange, restait parfaitement lisible sous
+     le titre et la fiche du parcours. Trois couches de texte superposées.
+
+     Ce second pilote ferme le volet au rythme du bloc. Le fond prend le
+     maximum des deux (voir .carousel-rail) : les deux modules écrivent leur
+     propre variable et ne se disputent jamais la même. */
+  const blocParcours = items[1];
+  if (blocParcours && carouselRail) {
+    carouselRail.style.setProperty(
+      "--volet-entree",
+      Number(blocParcours.style.getPropertyValue("--item-op") || "0").toFixed(4),
+    );
+  }
+
   // The dot ring of the journey block arrives from the left on each
   // appearance of the block (class removed when the block hides).
   const specForm = document.querySelector<HTMLElement>(".spec-form");
@@ -444,7 +463,7 @@ function montrerFiche(cible: number): void {
     slide.classList.toggle("is-active", ecart === 0);
     // D'où arrive la fiche et par où elle repart : à gauche si on l'a passée,
     // à droite si elle est encore devant. Ce décalage EST le sens de lecture.
-    slide.style.setProperty("--decalage", ecart === 0 ? "0px" : ecart < 0 ? "-38px" : "38px");
+    slide.style.setProperty("--decalage", ecart === 0 ? "0px" : ecart < 0 ? "-90px" : "90px");
     slide.setAttribute("aria-hidden", ecart === 0 ? "false" : "true");
   });
 
