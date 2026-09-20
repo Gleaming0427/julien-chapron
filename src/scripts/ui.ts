@@ -322,10 +322,18 @@ function onScroll(): void {
     const dansLaZoneClaire = cadre.top <= milieu && cadre.bottom >= milieu;
     // The panel's coverage is written on the rail (see parcours3d): that is
     // where it is read from, the panel itself only inherits it.
-    const volet = Number(
-      carouselRail?.style.getPropertyValue("--fond-bloc2") ||
-        document.querySelector<HTMLElement>(".parcours-fond")?.style.getPropertyValue("--fond-bloc2") ||
-        "0",
+    /* Même maximum que le fond du rail. --fond-bloc2 vient de parcours3d, qui
+       ne se monte plus sous 720 px : là, seul --volet-entree dit que le
+       panneau est passé au noir. Sans lui, l'indicateur se croyait sur fond
+       clair pendant tout le bloc parcours et écrivait en encre sombre sur du
+       sombre — invisible sur téléphone. */
+    const volet = Math.max(
+      Number(
+        carouselRail?.style.getPropertyValue("--fond-bloc2") ||
+          document.querySelector<HTMLElement>(".parcours-fond")?.style.getPropertyValue("--fond-bloc2") ||
+          "0",
+      ),
+      Number(carouselRail?.style.getPropertyValue("--volet-entree") || "0"),
     );
     progress.classList.toggle("sur-clair", dansLaZoneClaire && volet < 0.5);
   }

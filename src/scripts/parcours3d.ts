@@ -93,6 +93,20 @@ function surLeTore(i: number): [number, number, number] {
 }
 
 export function initParcours3D(): void {
+  /* Sous 720 px, la scène ne se monte pas du tout.
+
+     La mise en page y est empilée : la fiche fait 350 × 530 et se pose à
+     188 px du haut, si bien qu'elle recouvre 58 % du canvas — et le nuage
+     étant centré, il tombe exactement dessous. Mesuré : on ne voit pas un
+     point, à aucun moment de la séquence. On payait donc un contexte WebGL et
+     un rendu à chaque image, sur l'appareil qui le supporte le moins bien,
+     pour quelque chose d'invisible.
+
+     Le volet sombre ne dépend plus de ce module (ui.ts écrit --volet-entree,
+     et le fond prend le maximum des deux) : le bloc garde donc son fond, sa
+     transition et son carrousel. Seul le décor disparaît. */
+  if (window.matchMedia("(max-width: 720px)").matches) return;
+
   const section = document.querySelector<HTMLElement>(".section-exp");
   const intro = document.querySelector<HTMLElement>(".spec-intro");
   const sticky = section?.closest<HTMLElement>(".carousel-sticky");
