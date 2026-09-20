@@ -177,6 +177,75 @@ const VENUS: [number, number][] = [
   [-0.1, 0.88], [-0.06, 0.96],
 ];
 
+/* ---------- le portrait ----------
+
+   Plutôt qu'une silhouette dessinée, on échantillonne la PHOTO : les points
+   se sèment là où l'image est claire, avec une densité proportionnelle à la
+   luminance. Le résultat est donc le vrai visage, pas une approximation — et
+   il se lit comme une taille-douce, ce qui va bien avec le propos.
+
+   Si le chargement échoue, la silhouette de la Vénus ci-dessus reste en
+   secours : l'ouverture ne doit jamais rester sans forme. */
+async function echantillonnerPortrait(
+  url: string,
+  combien: number,
+): Promise<Float32Array | null> {
+  try {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = url;
+    await image.decode();
+
+    const n = 200;
+    const toile = document.createElement("canvas");
+    toile.width = n;
+    toile.height = n;
+    const ctx = toile.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return null;
+    ctx.drawImage(image, 0, 0, n, n);
+    const pixels = ctx.getImageData(0, 0, n, n).data;
+
+    const sorties = new Float32Array(combien * 2);
+    let ecrits = 0;
+    // Générateur déterministe : le portrait est le même à chaque visite.
+    let graine = 1;
+    const tirage = (): number => {
+      graine = (graine * 16807) % 2147483647;
+      return graine / 2147483647;
+    };
+
+    let gardeFou = 0;
+    while (ecrits < combien && gardeFou < combien * 120) {
+      gardeFou++;
+      const px = Math.floor(tirage() * n);
+      const py = Math.floor(tirage() * n);
+      const k = (py * n + px) * 4;
+      const r = pixels[k]!;
+      const v = pixels[k + 1]!;
+      const bl = pixels[k + 2]!;
+
+      // Le fond est un vert très saturé : il domine nettement les deux autres
+      // canaux, ce qui suffit à l'écarter sans toucher au sujet.
+      if (v > r * 1.25 && v > bl * 1.25) continue;
+
+      const luminance = (0.2126 * r + 0.7152 * v + 0.0722 * bl) / 255;
+      /* Plancher de densité. Sans lui, la veste sombre et les cheveux
+         disparaissent complètement et il ne reste qu'un visage qui flotte
+         sans épaules — on perd la silhouette qui le rend lisible. */
+      if (tirage() > 0.2 + 0.8 * luminance) continue;
+
+      sorties[ecrits * 2] = (px / n - 0.5) * 1.7;
+      sorties[ecrits * 2 + 1] = (0.5 - py / n) * 1.7;
+      ecrits++;
+    }
+
+    // Trop peu de points retenus : l'image n'est pas celle qu'on croit.
+    return ecrits > combien * 0.6 ? sorties.subarray(0, ecrits * 2) : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Le point est-il dans la silhouette ? Lancer de rayon horizontal. */
 function dansVenus(x: number, y: number): boolean {
   let dedans = false;
@@ -227,6 +296,11 @@ export function pointCloud(
   /** Décale les tirages de la statue : deux nuages de même graine
       rempliraient exactement les mêmes places. */
   graine: number,
+  /** Positions tirées de la photo, ou null si elle n'a pas pu être lue. */
+  portrait: Float32Array | null,
+  /** Rang du premier point de ce nuage dans le vivier du portrait : les deux
+      nuages y puisent des places distinctes au lieu de se superposer. */
+  debut: number,
 ): Cloud {
   const count = positions.length;
   const target = new Float32Array(count * 3);
@@ -256,17 +330,29 @@ export function pointCloud(
        deux par deux au lieu de couvrir la surface. */
     let vx = 0;
     let vy = 0;
-    for (let essai = 0; essai < 24; essai++) {
-      vx = (noise(graine + essai * 3.71) - 0.5) * 0.8;
-      vy = (noise(graine + 11.3 + essai * 5.17) - 0.5) * 2.05;
-      if (dansVenus(vx, vy)) break;
+    let profondeur = 0;
+
+    if (portrait) {
+      // Une place du vivier par point, sans réemploi entre les deux nuages.
+      const j = ((debut + i) * 2) % portrait.length;
+      vx = portrait[j]!;
+      vy = portrait[j + 1]!;
+      /* Épaisseur faible et purement aléatoire : c'est une image, pas un
+         buste. Une vraie profondeur demanderait la carte de relief du visage,
+         qu'une photo ne donne pas — et un faux volume déformerait les
+         traits, donc la ressemblance. */
+      profondeur = (noise(graine + 7.9) - 0.5) * 0.14;
+    } else {
+      // Secours : la silhouette dessinée, si la photo n'a pas pu être lue.
+      for (let essai = 0; essai < 24; essai++) {
+        vx = (noise(graine + essai * 3.71) - 0.5) * 0.8;
+        vy = (noise(graine + 11.3 + essai * 5.17) - 0.5) * 2.05;
+        if (dansVenus(vx, vy)) break;
+      }
+      const creux = Math.max(0, 1 - (vx / 0.38) ** 2);
+      profondeur = Math.sqrt(creux) * 0.3 * (noise(graine + 7.9) - 0.5) * 2;
     }
-    /* La profondeur donne le volume : la statue est ronde, pas découpée dans
-       du carton. Une section elliptique — le point est d'autant plus avancé
-       qu'il est proche de l'axe — suffit à ce que la forme tienne quand la
-       scène s'incline. */
-    const creux = Math.max(0, 1 - (vx / 0.38) ** 2);
-    const profondeur = Math.sqrt(creux) * 0.3 * (noise(graine + 7.9) - 0.5) * 2;
+
     bloc[i * 3] = vx;
     bloc[i * 3 + 1] = vy;
     bloc[i * 3 + 2] = profondeur;
@@ -452,7 +538,7 @@ function satelliteOrbit(
   };
 }
 
-export function initHero3D(): void {
+export async function initHero3D(): Promise<void> {
   const stage = document.querySelector<HTMLElement>(".hero-stage");
   if (!stage) return;
 
@@ -509,8 +595,19 @@ export function initHero3D(): void {
   core.scale.setScalar(0.001);
   spin.add(core);
 
-  const seaCloud = pointCloud(sea, 0x8b949e, 1.6, 0.6, 12.9898);
-  const landCloud = pointCloud(land, 0xffffff, 2.6, 1, 63.7);
+  /* La photo est lue AVANT de construire les nuages. Remplir les positions
+     après coup aurait fait sauter les points d'une forme à l'autre en pleine
+     arrivée ; et c'est une image locale de 3 Ko, donc l'attente ne se voit
+     pas. Si elle échoue, `portrait` vaut null et la silhouette dessinée prend
+     le relais sans que rien ne se remarque. */
+  const base = document.querySelector<HTMLElement>(".hero-stage");
+  const chemin =
+    base?.closest("body")?.querySelector<HTMLImageElement>(".hero-portrait")?.src ??
+    "/julien-chapron.webp";
+  const portrait = await echantillonnerPortrait(chemin, land.length + sea.length);
+
+  const seaCloud = pointCloud(sea, 0x8b949e, 1.6, 0.6, 12.9898, portrait, 0);
+  const landCloud = pointCloud(land, 0xffffff, 2.6, 1, 63.7, portrait, sea.length);
   spin.add(seaCloud.points, landCloud.points);
 
   /* Toulouse reprend un point à elle : c'est l'ancre du trait pointillé qui
