@@ -64,9 +64,10 @@ const portraitUrl = base === "/" ? "/julien-chapron.webp" : `${base}/julien-chap
           />
           <span class="hero-carte-texte">
             <b class="hero-carte-nom">{identity.name}</b>
-            <span class="hero-carte-dispo">
-              <span class="hero-dot"></span> disponible maintenant
-            </span>
+            <!-- Plus de pastille pulsante ici : la balise sur Toulouse est le
+                 seul point de la scène, et un second à dix pixels de la photo
+                 lui disputait le regard. Le mot « maintenant » suffit. -->
+            <span class="hero-carte-dispo">disponible maintenant</span>
           </span>
         </div>
       </div>

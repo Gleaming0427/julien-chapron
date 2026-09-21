@@ -525,7 +525,8 @@ function satelliteOrbit(
     }),
   );
   sat.material.userData.eclat = eclat;
-  line.add(sat);
+  /* Satellite non ajouté à son orbite : il posait un carré clair de plus sur
+     chacune des quatre orbites. La ligne de l'orbite suffit à la dire. */
   return {
     line,
     colors: geometry.getAttribute("color") as THREE.BufferAttribute,
@@ -615,21 +616,26 @@ export async function initHero3D(): Promise<void> {
      transparent l'entoure — seul, un point de 0,02 se perd dans la semaille
      des points de terre, qui font la même taille. */
   const TOULOUSE = fromLatLon(NODES[0]![0], NODES[0]![1]);
-  const villeAncre = new THREE.Mesh(
-    new THREE.SphereGeometry(0.02, 14, 14),
-    new THREE.MeshBasicMaterial({ color: 0xff4d00 }),
-  );
-  // Juste au-dessus de la surface : posé dessus, il serait à demi mangé par
-  // la sphère opaque qui masque la face arrière.
-  villeAncre.position.copy(TOULOUSE).multiplyScalar(1.015);
+  /* Une ancre qui ne dessine RIEN.
+
+     Toulouse avait déjà son point orange : les arcs du réseau qui en partent
+     s'y rejoignent et le forment. J'y ai ajouté une sphère, puis un halo
+     autour — on en comptait trois pour une seule ville, à quelques pixels les
+     uns des autres. Un repère qui se dédouble ne repère plus rien.
+
+     Il ne reste donc que le point d'origine. Cet objet sert uniquement à
+     projeter la position de la ville à l'écran pour y accrocher le libellé
+     et la carte. Il DOIT rester enfant de `spin` : sorti du graphe, sa
+     position monde ne subit plus la rotation et l'ancre part se poser hors
+     du globe — c'est ce qui est arrivé au premier essai. */
+  const villeAncre = new THREE.Object3D();
+  villeAncre.position.copy(TOULOUSE);
   spin.add(villeAncre);
 
-  const villeHalo = new THREE.Mesh(
-    new THREE.SphereGeometry(0.045, 14, 14),
-    new THREE.MeshBasicMaterial({ color: 0xff4d00, transparent: true, opacity: 0.2 }),
-  );
-  villeHalo.position.copy(villeAncre.position);
-  spin.add(villeHalo);
+  /* Pas de halo autour. Un second disque orange, même très transparent, se
+     lisait comme un DEUXIÈME point à côté du premier — avec les têtes de
+     paquets qui passent par là, on en comptait trois pour une seule ville.
+     Un repère qui se dédouble ne repère plus rien : il n'en reste qu'un. */
 
   const clouds = [seaCloud, landCloud];
   let assembling = true;
@@ -695,10 +701,10 @@ export async function initHero3D(): Promise<void> {
     });
   });
 
-  // The network nodes, in a discreet green dotted style.
-  const cities = pointCloud(nodePoints.slice(1), 0xff4d00, 3, 0.7);
-  spin.add(cities.points);
-  clouds.push(cities);
+  /* Plus AUCUN point pour les autres villes du réseau. Leurs arcs restent
+     tracés — c'est eux qui disent le maillage — mais leurs points
+     encombraient le globe et disputaient la lecture à Toulouse, qui doit
+     rester le seul repère. */
 
   // The head of each packet.
   const heads = new THREE.Points(
@@ -715,7 +721,9 @@ export async function initHero3D(): Promise<void> {
       depthWrite: false,
     }),
   );
-  spin.add(heads);
+  /* Les têtes de paquets ne sont plus ajoutées à la scène : ce sont elles
+     qui semaient les petits carrés clairs un peu partout sur le globe. Les
+     segments lumineux qui parcourent les arcs, eux, restent. */
 
   const HALF_FOV_TAN = Math.tan((42 * DEG) / 2);
   let width = 0;
@@ -864,12 +872,6 @@ export async function initHero3D(): Promise<void> {
     }
 
     const degage = degagement(t);
-
-    /* Le marqueur de Toulouse reste à sa place SUR LA SPHÈRE : pendant la
-       statue, il flottait donc tout seul à côté d'elle, sans rien désigner.
-       Il n'a de sens qu'une fois le globe dégagé. */
-    villeAncre.visible = degage > 0.85;
-    villeHalo.visible = villeAncre.visible;
 
     if (!dragging) {
       // Inertia after release, then resumption of the slow rotation.
