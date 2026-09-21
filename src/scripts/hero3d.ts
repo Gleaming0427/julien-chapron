@@ -799,7 +799,14 @@ export async function initHero3D(): Promise<void> {
   );
   // The core hides nothing until the globe is formed.
   core.scale.setScalar(0.001);
-  spin.add(core);
+  /* RIEN DU GLOBE N'ENTRE DANS LA SCÈNE quand elle s'arrête au portrait.
+
+     Les mettre à l'opacité zéro ne suffisait pas : un objet transparent reste
+     dessiné, et il suffit d'un arrondi, d'un mélange de couches ou d'une
+     surface vue par la tranche pour qu'il laisse une trace — ces traits du
+     globe qu'on voyait encore passer sur le visage. Ne pas les ajouter du
+     tout, c'est la seule garantie qu'ils ne peuvent rien laisser. */
+  if (!SANS_GLOBE) spin.add(core);
 
   /* La photo est lue AVANT de construire les nuages. Remplir les positions
      après coup aurait fait sauter les points d'une forme à l'autre en pleine
@@ -999,7 +1006,7 @@ export async function initHero3D(): Promise<void> {
     satelliteOrbit(1.17, 0.6, -1.1, 0.19, 0.5),
     satelliteOrbit(1.195, -0.25, 1.35, -0.07, 0.38),
   ];
-  orbits.forEach((orbit) => spin.add(orbit.line));
+  if (!SANS_GLOBE) orbits.forEach((orbit) => spin.add(orbit.line));
 
   // Each link is doubled: a very discreet permanent trace, which draws
   // the topology, and a short luminous segment that travels it, the packet.
@@ -1022,14 +1029,14 @@ export async function initHero3D(): Promise<void> {
       opacity: 0, // revealed at the end, once the globe is formed
     });
     arcs.push(arc);
-    spin.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), arc));
+    if (!SANS_GLOBE) spin.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), arc));
 
     const packet = new THREE.Line(
       new THREE.BufferGeometry().setFromPoints(points),
       new THREE.LineBasicMaterial({ color: 0xff6b1f, transparent: true, opacity: 0 }),
     );
     packet.geometry.setDrawRange(0, 0);
-    spin.add(packet);
+    if (!SANS_GLOBE) spin.add(packet);
 
     links.push({
       packet,
