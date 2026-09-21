@@ -451,11 +451,20 @@ export function pointCloud(
       // Une place de la tranche par point, dans l'ordre, sans réemploi.
       vx = portrait[i * 2]!;
       vy = portrait[i * 2 + 1]!;
-      /* Épaisseur faible et purement aléatoire : c'est une image, pas un
-         buste. Une vraie profondeur demanderait la carte de relief du visage,
-         qu'une photo ne donne pas — et un faux volume déformerait les
-         traits, donc la ressemblance. */
-      profondeur = (noise(graine + 7.9) - 0.5) * 0.14;
+      /* ÉPAISSEUR NULLE : le portrait est rigoureusement plat.
+
+         Il en portait une, faible et purement aléatoire, pour ne pas paraître
+         découpé dans du papier. Elle avait un coût invisible mais décisif : en
+         projection perspective, la profondeur d'un point déplace sa position À
+         L'ÉCRAN. Chiffré sur le bureau, où la caméra est à trois unités, un
+         écart de ±0,07 décale un point du bord de ±3,9 px pour une trame qui
+         en compte 4,7 — presque une case entière. La grille était régulière
+         dans la scène et brouillée à l'affichage.
+
+         Et cette épaisseur ne montre plus rien : la forme est figée et ne
+         tourne pas, or un volume ne se lit que s'il tourne. On la retire, et la
+         trame devient exacte là où on la regarde. */
+      profondeur = SANS_GLOBE ? 0 : (noise(graine + 7.9) - 0.5) * 0.14;
     } else if (portrait) {
       /* Pas de place dans le portrait : le point attend en haut, hors champ,
          au-dessus de la place qu'il occupera sur le globe. Son bloc sera son
@@ -573,11 +582,25 @@ export function pointCloud(
   return { points: new THREE.Points(geometry, material), start, bloc, target, delay };
 }
 
+/** LA SCÈNE S'ARRÊTE SUR LE PORTRAIT.
+
+    Le globe, ses continents, ses arcs de réseau, ses orbites et la sphère
+    opaque qui lui donnait son volume : plus rien de tout cela n'apparaît. Les
+    points volent jusqu'au visage et s'y arrêtent, définitivement, sans
+    rotation ni possibilité d'en imprimer une.
+
+    Le code du globe n'est PAS supprimé pour autant : il est court-circuité par
+    cette seule constante. Il a coûté assez de mises au point — la trame du
+    visage, la couleur de Toulouse, le cadrage — pour qu'on ne le jette pas ;
+    remettre `false` ici le rallume entièrement. */
+const SANS_GLOBE = true;
+
 /** Avancement de la taille : 0 tant que le bloc tient, 1 une fois la sphère
     dégagée. Exporté parce que la sphère opaque et le trafic du réseau s'y
     accrochent — sans quoi ils apparaîtraient pendant que la pierre est encore
-    brute. */
+    brute. Bloqué à 0 sans globe : le portrait est l'état final, pas une étape. */
 export function degagement(elapsed: number): number {
+  if (SANS_GLOBE) return 0;
   const t = Math.min(1, Math.max(0, (elapsed - (FLY_IN + STAGGER + TENUE_BLOC)) / TAILLE));
   // Adouci aux deux bouts : le geste part et se pose, il ne file pas.
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -1130,6 +1153,11 @@ export async function initHero3D(): Promise<void> {
   // does a half-turn; the tilt is bounded so as not to turn the
   // globe over. touch-action: pan-y (CSS) leaves vertical scrolling to the finger.
   stage.addEventListener("pointerdown", (event) => {
+    /* Sans globe, aucune prise : il n'y a plus de sphère à tourner, et un
+       portrait qu'on fait pivoter à la main ne montrerait que la tranche de
+       son nuage. Le curseur `grab` est retiré côté CSS pour que rien ne le
+       laisse croire. */
+    if (SANS_GLOBE) return;
     dragging = true;
     pointerId = event.pointerId;
     lastX = event.clientX;
@@ -1234,7 +1262,12 @@ export async function initHero3D(): Promise<void> {
        Lancé dès que la taille s'amorce, le fondu s'achève vers 4 s, au milieu
        de la transformation. Le nom de l'attribut dit toujours « globe » : c'est
        bien le passage au globe qu'il annonce, simplement à son début. */
-    if (degage > 0) {
+    /* SANS GLOBE, LE SIGNAL S'ACCROCHE À L'ARRIVÉE DU VISAGE. Il ne peut plus
+       attendre le début d'une taille qui n'a pas lieu — il ne partirait jamais,
+       et la ligne du hero resterait sur la disponibilité pour toujours. Le
+       portrait est complet une fois le dernier point posé, soit FLY_IN plus
+       l'étalement des départs. */
+    if (SANS_GLOBE ? t >= FLY_IN + STAGGER : degage > 0) {
       document.documentElement.dataset.globe = "1";
     }
 
@@ -1255,7 +1288,11 @@ export async function initHero3D(): Promise<void> {
     // représentative — les liaisons restent dessinées, elles ne défilent plus.
     // Le réseau n'a rien à relier tant que le globe n'est pas dégagé : il
     // part de la fin de la taille, pas de l'arrivée des points.
-    const netTime = MOUVEMENT_REDUIT ? 1.5 : t - FORME_FAITE;
+    /* Sans globe, l'horloge du réseau ne démarre jamais : arcs, orbites,
+       satellites et paquets restent à l'opacité zéro, qui est leur valeur de
+       naissance. Rien à masquer, rien à détruire — ils ne sont simplement
+       jamais réveillés. */
+    const netTime = SANS_GLOBE ? -1 : MOUVEMENT_REDUIT ? 1.5 : t - FORME_FAITE;
     if (netTime > 0) {
       const headPos = heads.geometry.getAttribute("position") as THREE.BufferAttribute;
       (heads.material as THREE.PointsMaterial).opacity = Math.min(1, netTime);

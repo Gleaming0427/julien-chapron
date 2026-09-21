@@ -953,9 +953,10 @@ html.menu-ouvert .menu-voile {
   min-height: 180px;
   max-height: 560px;
   margin-bottom: -12px;
-  /* The globe is turned by hand; with a finger, the vertical gesture stays with
-     the page scroll. */
-  cursor: grab;
+  /* Plus de `grab` : il n'y a plus de globe à tourner, et un curseur qui promet
+     une prise inexistante est un mensonge de plus à corriger. Le portrait est
+     figé (voir SANS_GLOBE dans hero3d.ts). `touch-action` reste : le geste
+     vertical doit continuer d'appartenir au défilement de la page. */
   touch-action: pan-y;
 }
 
