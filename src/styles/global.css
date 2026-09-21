@@ -1230,9 +1230,13 @@ html.menu-ouvert .menu-voile {
 
 /* Ghost variant: one orange line, no fill — the quiet neighbour of the
    solid button. */
+/* Le bouton secondaire du hero, et lui seul : c'est le seul endroit où ce
+   variant est employé. Texte ORANGE, comme sa bordure — il devient une seule
+   pièce au lieu d'un texte clair posé dans un cadre coloré, et il se distingue
+   franchement du bouton plein à côté de lui. */
 .axiom-btn-ghost {
   background: transparent;
-  color: var(--text);
+  color: var(--orange);
   border: 1px solid var(--orange);
 }
 
@@ -3148,6 +3152,20 @@ html:not(.js) .exp-slides .experience:first-child {
     justify-content: center;
     padding: 8px 12px;
     font-size: 15px;
+  }
+
+  /* LA PASTILLE DES CHIFFRES DISPARAÎT SUR TÉLÉPHONE.
+
+     Mesurée sur un écran de 390, elle couvre 90 % de la largeur : il ne reste
+     que vingt pixels de texte défilant de chaque côté, illisibles et
+     clignotants. Ce n'est plus un bandeau, c'est du bruit. Retirée, le
+     défilement retrouve toute la largeur et redevient ce qu'il est.
+
+     Les chiffres qu'elle portait ne sont pas perdus : ils sont dans le CV et
+     dans les fiches d'expérience. Sur un écran large elle garde sa place, où
+     elle ne couvre qu'un tiers de la bande. */
+  .bandeau-stat {
+    display: none;
   }
 
   /* LA FLÈCHE DISPARAÎT SUR TÉLÉPHONE. Avec elle, un bouton de 170 px n'offrait
