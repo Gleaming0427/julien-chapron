@@ -228,31 +228,38 @@ export function initDecodage(): void {
    the width of its longest phrase, with the text centred inside — the
    alternations change the words, never the layout. */
 
-/* Les phrases qui défilent sous le nom. Trois règles les gouvernent.
+/* Les phrases qui défilent sous le nom. Quatre règles les gouvernent.
 
-   UN VERBE DIFFÉRENT À CHAQUE FOIS. Les quatre d'avant commençaient toutes par
-   « Je crée des » : dès la deuxième on ne lisait plus que le dernier mot, et la
-   ligne devenait une liste de technologies déguisée en phrase.
+   LA PRÉPOSITION SUIT LA NATURE DE L'OUTIL, et c'est ce qui manquait : on écrit
+   EN TypeScript ou EN SQL — ce sont des langues, on écrit dedans — mais AVEC
+   React, Node ou Cypress, qui sont des outils dont on se sert. « Des interfaces
+   en React » n'est pas du français de métier, et un recruteur technique
+   l'entend au premier coup d'œil. Quand la technologie nomme la chose elle-même
+   — « des API REST », « des interfaces React » —, l'apposition suffit et vaut
+   mieux que n'importe quelle préposition. Et l'on publie SUR npm, qui est un
+   lieu.
 
-   LE VRAI GESTE, pas la catégorie. « Des backends en Node » ne dit rien que
-   tout le monde ne puisse écrire ; typer, modéliser, déployer, tester,
-   publier — ce sont des actes, et chacun est vérifiable dans le CV.
+   UN VERBE DIFFÉRENT À CHAQUE FOIS. Répété, il transforme la ligne en liste de
+   technologies déguisée en phrase : dès la deuxième on ne lit plus que le
+   dernier mot.
 
-   UNE LONGUEUR RESSERRÉE, entre 26 et 35 caractères. La ligne est figée à la
-   largeur de la PLUS LONGUE d'entre elles, les autres venant se centrer dedans
-   (voir basculer) : une phrase qui dépasse élargit la boîte pour toutes, et sur
-   un téléphone elle la fait déborder. Toute phrase ajoutée ici doit tenir dans
-   ce gabarit. */
+   LE GESTE, PAS LA CATÉGORIE. Concevoir, modéliser, déployer, tester, publier
+   sont des actes, et chacun est vérifiable dans le CV. « Des backends » ne dit
+   rien que tout le monde ne puisse écrire.
+
+   UNE LONGUEUR RESSERRÉE, sous 36 caractères. La ligne est figée à la largeur
+   de la PLUS LONGUE d'entre elles, les autres venant se centrer dedans (voir
+   basculer) : une phrase qui dépasse élargit la boîte pour toutes. */
 const SOUS_TITRES = [
-  "Je crée des API en REST et GraphQL",
-  "J'écris des services en Node.js",
-  "Je monte des interfaces en React",
-  "Je type le code en TypeScript",
+  "Je conçois des API REST et GraphQL",
+  "J'écris des services avec Node.js",
+  "Je développe des interfaces React",
+  "Je type mon code en TypeScript",
   "Je modélise les données en SQL",
-  "Je déploie en Docker et Kubernetes",
-  "Je teste de bout en bout en Cypress",
-  "Je porte le mobile en React Native",
-  "Je publie mes libs sur npm",
+  "Je déploie avec Docker et Kubernetes",
+  "Je teste avec Jest et Cypress",
+  "Je code le mobile avec React Native",
+  "Je publie mes paquets sur npm",
 ];
 /** How long each phrase holds before the next scramble. */
 const TENUE_SOUS_TITRE = 6000;
