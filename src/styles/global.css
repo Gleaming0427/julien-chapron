@@ -137,66 +137,6 @@ body {
   margin: 0;
 }
 
-/* ---------- le halo qui gonfle les points du fond ----------
-
-   Au passage du curseur — ou du doigt — les points gris du fond enflent et
-   passent à l'orange, en s'éteignant progressivement vers les bords du halo.
-
-   COMMENT. Les points du fond viennent d'un `background-image` posé sur le
-   `body` : une image répétée, dont ni la taille ni la couleur ne peuvent
-   varier d'un point à l'autre. Les faire enfler un par un est donc hors
-   d'atteinte en CSS.
-
-   On superpose alors une SECONDE trame, au même pas, avec des points plus gros
-   et orange, et on la découpe avec un masque circulaire centré sur le curseur.
-   Là où le masque est plein, on voit les gros points orange ; là où il
-   s'efface, les petits points gris reparaissent. L'œil lit un renflement qui
-   suit la main, alors que rien n'a bougé : ce sont deux trames superposées et
-   un trou qui se déplace.
-
-   Elle est posée sur .dark-zone, et pas sur le body : c'est là que les points
-   se voient. La .light-zone a son fond orange plein, qui couvre ceux du body.
-
-   L'ALIGNEMENT est le point délicat. La trame du body prend son origine en
-   haut du document, celle-ci en haut de la zone sombre — deux origines
-   différentes, donc deux grilles décalées, et les gros points tomberaient à
-   côté des petits. ui.ts mesure ce décalage et l'écrit dans --halo-cale ; sans
-   lui, l'effet trahit immédiatement qu'il s'agit de deux couches. */
-.dark-zone::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  /* Sous le contenu de la zone, au-dessus du fond du body. */
-  z-index: 0;
-  pointer-events: none;
-  background-image: radial-gradient(rgba(255, 77, 0, 0.85) 2.6px, transparent 3px);
-  background-size: var(--trame-pas);
-  background-position: 0 var(--halo-cale, 0px);
-  /* Le halo : plein au centre, éteint au bord. C'est lui, le dégradé. */
-  -webkit-mask-image: radial-gradient(
-    circle var(--halo-r, 120px) at var(--halo-x, -999px) var(--halo-y, -999px),
-    #000 0%,
-    rgba(0, 0, 0, 0.45) 50%,
-    transparent 100%
-  );
-  mask-image: radial-gradient(
-    circle var(--halo-r, 120px) at var(--halo-x, -999px) var(--halo-y, -999px),
-    #000 0%,
-    rgba(0, 0, 0, 0.45) 50%,
-    transparent 100%
-  );
-  opacity: var(--halo-op, 0);
-  transition: opacity 0.35s ease;
-}
-
-/* Rien de tout cela si la personne a demandé moins d'animation : l'effet suit
-   le geste, il n'a pas de raison d'être pour qui a dit ne pas en vouloir. */
-@media (prefers-reduced-motion: reduce) {
-  .dark-zone::before {
-    display: none;
-  }
-}
-
 /* The banner block: 30vh between the hero and the effect (a faster
    arrival at that point). */
 /* DEUX RANGÉES, et non trois calques empilés au jugé.
