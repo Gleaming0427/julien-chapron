@@ -1519,10 +1519,24 @@ button.chip {
   opacity: var(--sortie-rail, 1);
   position: sticky;
   top: 0;
-  /* This is where the defect showed: at 100vh, the bottom of the block —
-     the carousel dots with it — slid under Safari iOS's toolbar. */
+  /* LA HAUTEUR SUIT LA FENÊTRE, EN TEMPS RÉEL.
+
+     Trois unités, trois comportements sur iOS. `vh` vaut toujours la GRANDE
+     hauteur, barre d'outils rentrée : à 100vh, le bas du bloc — les flèches du
+     carrousel avec lui — passait sous la barre quand elle est sortie. `svh`
+     vaut toujours la PETITE : le panneau ne bouge plus, mais quand la barre se
+     rentre la fenêtre grandit sous lui et découvre une bande de plusieurs
+     dizaines de pixels, qui prenait la couleur du rail — le gros carré noir en
+     bas de page, mangeant les flèches et la trame de points.
+
+     `dvh` vaut la hauteur COURANTE : le panneau épouse la fenêtre à tout
+     instant, donc il n'y a plus ni bande découverte ni contenu sous la barre.
+     C'est précisément le cas pour lequel cette unité existe. Les deux lignes
+     au-dessus restent comme repli pour les navigateurs qui l'ignorent, dans
+     l'ordre du moins bon au meilleur. */
   height: 100vh;
   height: 100svh;
+  height: 100dvh;
   overflow: hidden;
 }
 

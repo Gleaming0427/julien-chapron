@@ -838,18 +838,15 @@ export async function initHero3D(): Promise<void> {
      Le prix est connu et assumé : au pas du globe, le visage fait 42 nœuds de
      large, soit quatre par œil. Pour retrouver du détail SANS refermer la
      matière, il faut agrandir le portrait — pas resserrer sa trame. */
-  /* LE VISAGE EST UN CRAN PLUS FIN QUE LE GLOBE, et le facteur est calculé,
-     pas choisi. Au pas du globe le portrait fait 85 points de large : sur les
-     336 px qu'il occupe, cela donne un écart de 3,96 px pour des points de
-     1,30 — ils n'occupent qu'un tiers de leur case, et le visage se lit en
-     gros grain.
+  /* LE PAS DU VISAGE EST EXACTEMENT CELUI DU GLOBE. Un nœud tous les LAT_STEP
+     radians, comme entre deux parallèles sur une sphère de rayon 1 : les points
+     du visage sont espacés comme ceux des continents, ni plus ni moins.
 
-     À 1,5, l'écart tombe à 2,64 px : les points en couvrent la moitié, ce qui
-     est franc sans jamais se toucher, et le visage passe à 128 points de
-     large. Un continent supporte le gros grain, un visage non — il se
-     reconnaît à ses petits détails. */
-  const FINESSE_VISAGE = 1.5;
-  const portrait = await echantillonnerPortrait(chemin, (LAT_STEP * DEG) / FINESSE_VISAGE);
+     Essayé une fois et demie plus fin — 127 points de large au lieu de 85, avec
+     un écart de 2,64 px pour des points de 1,30, donc sans qu'aucun se touche.
+     Écarté : à l'œil, le gros grain rend mieux. Ce qui se calcule bien ne se
+     regarde pas toujours bien, et c'est le regard qui tranche. */
+  const portrait = await echantillonnerPortrait(chemin, LAT_STEP * DEG);
 
   /* L'ordre des rangs compte : le vivier est trié du plus clair au plus
      sombre. Les TERRES — points blancs et épais — prennent donc la tête, et
