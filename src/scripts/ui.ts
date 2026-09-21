@@ -37,7 +37,11 @@ window.scrollTo(0, 0);
 // Smooth scrolling, award-winning-site style (Lenis): only if the user
 // has not asked to reduce motion.
 if (!reducedMotion) {
-  const lenis = new Lenis({ duration: 1.1 });
+  /* 0,85 au lieu de 1,1. Chaque cran de molette glissait pendant plus d'une
+     seconde : la distance parcourue est pourtant la même, c'est l'inertie qui
+     donnait cette impression de traîner derrière le geste. Assez court pour
+     répondre, assez long pour que le défilement reste lissé. */
+  const lenis = new Lenis({ duration: 0.85 });
   window.lenis = lenis;
 }
 
@@ -146,10 +150,19 @@ const carouselTrack = document.querySelector<HTMLElement>(".carousel-track");
    en montrant l'animation 3D ; en supprimant l'autoscroll, on a découvert le
    vide sans le combler.
 
-   0,25 place l'arrivée à 0,92 écran (0,5 + 0,25/1,5 × 2,5 de course) et amorce
-   le fondu d'entrée dès 0,85, pendant que le profil finit de s'effacer : les
-   deux blocs se croisent au lieu de se succéder. */
-const POIDS = [0.25, 1.25];
+   L'arrivée se calcule ainsi : 0,5 + POIDS[0]/POIDS_TOTAL × (hauteur du rail
+   en écrans − 0,5). Elle doit tomber AVANT la disparition du texte du profil,
+   qui est à PROFIL_PALIER + PROFIL_SORTIE = 0,6 + 0,24 = 0,84 écran.
+
+   0,25 ne le faisait plus. Il plaçait l'arrivée à 0,917 sur un rail de 3
+   écrans, soit 70 px APRÈS que le texte ait disparu : un trou, petit mais
+   réel. Le commentaire d'origine visait juste, mais il comptait sur une sortie
+   de profil à 0,32 — la constante a été ramenée à 0,24 depuis, sans que les
+   poids suivent.
+
+   0,27 sur un rail de 220vh place l'arrivée à 0,80 écran : les deux blocs se
+   croisent de nouveau, le parcours étant là avant que le profil ne soit parti. */
+const POIDS = [0.27, 1.25];
 const POIDS_TOTAL = POIDS.reduce((a, b) => a + b, 0);
 
 /** Rail progress (0 → 1) converted into block position (0 → 4). */

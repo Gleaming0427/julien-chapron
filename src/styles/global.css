@@ -1455,20 +1455,32 @@ button.chip {
      absolute screens and do not move with this value.
      The negative margins cancel the gutters of the light zone:
      the 100vw items fit exactly in the screen. */
-  /* 300vh, contre 580vh auparavant.
+  /* 220vh, contre 300 puis 580 auparavant.
 
      Les 580vh payaient deux choses qui n'existent plus : la mise en scène du
      parcours, qui coûtait 2,3 écrans de molette et se joue maintenant au temps
      (specform.ts), et le défilé des trois fiches, qui en coûtait 1,95 et se
-     pilote maintenant à la main. Mesuré sur l'ancien rail : 9 paliers sans
-     aucun changement à l'écran, dont 5 crans de molette à vide après la
-     dernière fiche.
+     pilote maintenant à la main.
+
+     300vh en payait encore une troisième. Relevé sur le rail en production, de
+     dix en dix pour cent :
+
+       0 → 16 %   430 px   rien, le bloc profil est simplement à l'écran
+       16 → 48 %  865 px   le profil s'efface, le parcours arrive
+       48 → 65 %  460 px   rien, temps de lecture de la fiche
+       65 → 100 % 945 px   le bloc s'efface en sortie
+
+     Soit plus d'un écran entier de molette pour la seule disparition du bloc.
+     C'est cela qu'on ne trouvait pas fluide, et à raison : on tournait la
+     molette sans que rien ne réponde.
 
      Ce qu'il reste à financer, et rien d'autre : le panneau est épinglé sur
-     (hauteur - 1 écran), soit 2 écrans ici. Le texte du profil en consomme
-     0,92 (palier 0,6 + sortie 0,32, voir profilout.ts), ce qui laisse ~1,1
-     écran pour tenir le bloc parcours à l'écran le temps qu'on le parcoure. */
-  height: 300vh;
+     (hauteur - 0,5 écran), soit 1,7 écran ici. Le texte du profil en consomme
+     0,84 (palier 0,6 + sortie 0,24, voir profilout.ts), et POIDS place
+     l'arrivée du parcours à 0,80 — juste avant, pour que les deux se croisent.
+     Reste ~0,4 écran de lecture puis la sortie. CETTE HAUTEUR ET LES POIDS SE
+     RÈGLENT ENSEMBLE : changer l'une sans l'autre rouvre le trou. */
+  height: 220vh;
   margin-top: 8px;
   margin-inline: calc(-1 * var(--gutter));
   /* The pinned panel is 100svh tall, the height of the window with the toolbar
