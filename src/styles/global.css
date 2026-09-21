@@ -47,9 +47,16 @@
      be written twice, and twice again in the phone version. 64 px left a
      79 px empty black band under the orange card, card margin included. */
   --pied-bas: 10px;
-  /* Real header height, measured on load: a content
-     "screen" is the window height minus this sticky bar. */
-  --header-h: 57px;
+  /* The navbar is gone: a content "screen" is the whole window. The
+     variable stays so the layouts that compensated for the sticky bar keep
+     working, with nothing to compensate. */
+  --header-h: 0px;
+  /* The stats band that replaced the navbar: the hero shares the first
+     screen with it. */
+  /* Deux rangées à loger : le défilement surmonté de sa pastille, puis la barre
+     du nom. À 96 px il ne restait que trois pixels entre le bas de la pastille
+     et le filet — assez pour ne pas se toucher, pas assez pour que ça respire. */
+  --bandeau-h: clamp(112px, 13.5vh, 148px);
   /* svh = the window height with the address bar VISIBLE, so the smallest
      one. On iOS, 100vh equals the height with the bar hidden: any 100vh
      block overflows under the toolbar and its bottom becomes invisible.
@@ -120,27 +127,138 @@ body {
 
 /* The banner block: 30vh between the hero and the effect (a faster
    arrival at that point). */
+/* DEUX RANGÉES, et non trois calques empilés au jugé.
+
+   Le bandeau défilant, la pastille et le filet étaient tous les trois posés en
+   absolu dans la même boîte, avec des décalages en dur. Résultat mesuré sur un
+   écran de 1600 : le filet à y = 61 et le texte défilant de 33 à 74 — donc
+   TRANCHÉ EN DEUX par le filet, et débordant sur la ligne du nom. Ce n'était
+   pas un réglage à corriger : trois éléments centrés sur des références
+   différentes finissent toujours par se croiser quelque part.
+
+   Une grille règle cela par construction. La rangée du haut porte le défilement
+   et la pastille — qui se superposent VOLONTAIREMENT, la pastille flottant
+   au-dessus du texte qui passe. La rangée du bas porte le nom et les logos, et
+   son filet est une bordure haute, donc rien ne peut plus le traverser. */
 .bandeau-block {
   position: relative;
-  height: 30vh;
+  /* The band replaces the navbar: it leads the page, so it takes a
+     header's height, not a section's. */
+  height: var(--bandeau-h);
+  display: grid;
+  grid-template-rows: 1fr auto;
 }
 
 .dark-zone .bandeau-block .marquee {
+  grid-row: 1;
+  grid-column: 1;
+  /* Même raison que pour la pastille : .dark-zone .marquee porte une entrée en
+     fondu retardée de 0,9 s, qui laissait la bande vide à l'ouverture. Seul le
+     bandeau de tête y échappe ; les autres marquees de la page la gardent.
+     Le défilement, lui, n'est pas touché : il vit sur .marquee-track. */
+  animation: none;
+  opacity: 1;
+  transform: none;
   margin-top: 0;
   margin-bottom: 0;
-  height: 100%;
+  /* Plus de height: 100% : la rangée donne sa hauteur, et elle s'arrête au
+     filet. Le débordement est coupé, pour qu'un mot un peu haut ne vienne
+     jamais mordre sur la barre du dessous. */
+  min-height: 0;
+  overflow: hidden;
   display: flex;
   align-items: center;
 }
 
-/* The key figure floats at the center, on top of the scrolling. */
+/* The key figure floats at the center of the space ABOVE the domain line,
+   on top of the scrolling. */
 .bandeau-stat {
-  position: absolute;
-  inset: 0;
+  /* Même case que le défilement : la pastille flotte dessus, et sur lui seul.
+     Son `inset` d'avant la calait sur le bas du bloc moins 30 à 40 px, une
+     valeur qui n'avait aucun rapport avec la hauteur réelle du filet — d'où son
+     bord bas posé pile sur lui. */
+  grid-row: 1;
+  grid-column: 1;
   z-index: 1;
   display: grid;
   place-items: center;
   pointer-events: none;
+}
+
+/* The band's bottom line: the domain on the left, the social logos on
+   the right — the navbar's two ends, under an orange hairline that runs
+   the whole width of the band. */
+/* Le filet va D'UN BORD À L'AUTRE de l'écran, et non d'un bord à l'autre de la
+   colonne de texte. Il était calé sur `left: 0 / right: 0`, ce qui le rapportait
+   à la boîte de .bandeau-block — elle-même posée dans .container, qui garde une
+   marge latérale de --gutter. Le trait s'arrêtait donc à vingt pixels des bords,
+   et une barre de navigation qui s'arrête avant le bord n'est plus une barre :
+   c'est un encadré.
+
+   Les marges négatives valent EXACTEMENT --gutter, ce qui amène le filet pile
+   sur les bords. Un `width: 100vw` y serait arrivé aussi, mais 100vw compte la
+   barre de défilement : le filet dépasserait d'une quinzaine de pixels sous
+   elle, et le html { overflow-x: clip } masquerait le débordement sans le
+   corriger. Ici il n'y a rien à masquer. */
+.bandeau-ligne {
+  grid-row: 2;
+  grid-column: 1;
+  /* Dans le flux de la grille, et non en absolu : sa hauteur devient celle de
+     la rangée, donc la rangée du dessus s'arrête exactement où il commence. */
+  position: relative;
+  margin-left: calc(-1 * var(--gutter));
+  margin-right: calc(-1 * var(--gutter));
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  /* Centré, et non calé sur la ligne de base : les logos n'ont pas de ligne de
+     base, et ils pendaient sous le nom. */
+  align-items: center;
+  border-top: 1px solid rgba(255, 77, 0, 0.4);
+  /* Le contenu retrouve la marge que le filet vient d'abandonner. Du blanc
+     au-dessus ET au-dessous du nom : une barre de navigation a une hauteur,
+     elle n'est pas une ligne de texte collée sous un trait. */
+  padding: 12px var(--gutter) 10px;
+}
+
+/* The domain, in orange like the old "Home" brand. */
+.bandeau-domaine {
+  font-family: var(--font-mono);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--orange);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  /* Sur une seule ligne, toujours. Replié en deux, le nom poussait les logos
+     hors de l'axe et la barre cessait de se lire comme une barre. */
+  white-space: nowrap;
+}
+
+.bandeau-domaine:hover {
+  color: var(--green);
+  text-decoration: none;
+}
+
+.bandeau-reseaux {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.bandeau-reseaux a {
+  display: grid;
+  place-items: center;
+  color: var(--text-dim);
+  transition: color 0.2s ease;
+}
+
+.bandeau-reseaux a:hover {
+  color: var(--orange);
+}
+
+.bandeau-reseaux svg {
+  width: 19px;
+  height: 19px;
 }
 
 /* Translucent blurred pill, in the style of the site (header, label). */
@@ -156,7 +274,14 @@ body {
   border-radius: 12px;
   background: rgba(22, 27, 34, 0.45);
   backdrop-filter: blur(36px);
-  animation: stat-in 1s ease-out 0.8s both;
+  /* PAS D'ANIMATION D'ENTRÉE ICI. Elle démarrait après huit dixièmes de
+     seconde, `both` tenant la pastille à l'opacité 0 jusque-là : le bandeau
+     s'ouvrait donc vide, et se remplissait sous les yeux. Une barre de
+     navigation est le repère de la page — elle est là avant qu'on regarde, ou
+     elle n'est pas un repère.
+     (Les autres blocs gardent la leur : eux arrivent au défilement, et il est
+     juste qu'ils se composent au moment où on les atteint.) */
+  animation: none;
   font-family: var(--font-sans);
   font-size: var(--fs-body);
   font-weight: 600;
@@ -166,6 +291,23 @@ body {
 
 .bandeau-stat-inner .sep {
   color: var(--orange);
+}
+
+/* The sweep that runs around the pill's outline: an orange segment travels
+   the border, bright at the head and fading out behind it — the same effect
+   the « disponible · Toulouse » badge used to carry. The angle lives in a
+   custom property animated by the keyframes; without @property support the
+   gradient simply stays fixed and nothing breaks. */
+@property --badge-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes badge-sweep {
+  to {
+    --badge-angle: 360deg;
+  }
 }
 
 /* The same light sweep on the outline as the « disponible · Toulouse » badge. */
@@ -437,6 +579,9 @@ html.menu-ouvert .site-header {
 }
 
 .site-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   color: var(--orange);
   font-weight: 700;
   font-family: var(--font-mono);
@@ -446,6 +591,44 @@ html.menu-ouvert .site-header {
 .site-name:hover {
   text-decoration: none;
   color: var(--green);
+}
+
+/* The Toulouse beacon: the same orange as the dot on the globe, placed
+   before the name. A soft aura always surrounds it, and it blinks gently —
+   a ping that expands and fades, like a packet reaching the city, never a
+   strobe. */
+.site-dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--orange);
+  box-shadow:
+    0 0 9px 1px rgba(255, 77, 0, 0.45),
+    0 0 0 0 rgba(255, 77, 0, 0.4);
+  animation: toulouse-blink 2.4s ease-in-out infinite;
+}
+
+@keyframes toulouse-blink {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow:
+      0 0 9px 1px rgba(255, 77, 0, 0.45),
+      0 0 0 0 rgba(255, 77, 0, 0.4);
+  }
+  50% {
+    opacity: 0.3;
+    box-shadow:
+      0 0 9px 1px rgba(255, 77, 0, 0.15),
+      0 0 0 11px rgba(255, 77, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-dot {
+    animation: none;
+  }
 }
 
 /* The burger: a dark pill at the end of the bar, three strokes. It only
@@ -668,13 +851,13 @@ html.menu-ouvert .menu-voile {
 
   /* The hero is there from the outset, with no staging. The title's mask is
      reset, otherwise it would stay frozen on its starting state. */
-  .hero-name {
+  .hero-role {
     -webkit-mask-image: none;
     mask-image: none;
     filter: none;
   }
 
-  .hero-name,
+  .hero-role,
   .hero-overline,
   .hero-sub,
   .hero-actions,
@@ -729,9 +912,16 @@ html.menu-ouvert .menu-voile {
   gap: 8px;
 }
 
-/* One full screen each, content centered. */
+/* One full screen each, content centered. The hero shares the first
+   screen with the band above it, so its share is what is left. */
 .dark-zone .hero-top {
-  min-height: var(--screen);
+  min-height: calc(var(--screen) - var(--bandeau-h));
+}
+
+/* The dark runway between the hero and the tear (see index.astro): the
+   band's former footprint, now empty — the sheet's rise keeps its depth. */
+.apres-hero {
+  height: 30vh;
 }
 
 .dark-zone .hero-top {
@@ -962,20 +1152,32 @@ html.menu-ouvert .menu-voile {
 .hero-overline {
   margin: 0 0 10px;
   font-family: var(--font-mono);
-  font-size: var(--fs-body);
+  /* A step above the body size it had: it introduces the name, it must be
+     noticed, without shouting over the title. */
+  font-size: clamp(19px, 1.55vw, 26px);
   color: var(--text-dim);
 }
 
-.hero-name {
+/* The name inside the greeting carries the orange, like the navbar brand. */
+.hero-overline-nom {
+  color: var(--orange);
+}
+
+.hero-role {
   margin: 0;
   font-family: var(--font-sans);
-  font-size: var(--fs-h1);
-  /* Semi-bold weight: this is the rendering of the Axiom hero ("Complex problems.
-     Elegant solutions.") — the 800 looked heavier than theirs. */
-  font-weight: 600;
-  line-height: 1.04;
-  letter-spacing: -0.03em;
+  /* The title of the hero: the role, as it read in the subtitle, but grown
+     to the name's former stature — it carries the block on its own now. */
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 300;
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  /* White like the name it replaced; only "full-stack" carries the orange. */
   color: var(--text);
+}
+
+.hero-role em {
+  font-style: italic;
 }
 
 .hero-sub {
@@ -984,11 +1186,9 @@ html.menu-ouvert .menu-voile {
   /* Archivo light: the text looked bold at the default weight. */
   font-weight: 300;
   color: var(--text-dim);
-}
-
-.hero-sub em {
-  font-style: italic;
-  color: var(--green);
+  /* The crossfade into the code line, once the globe is formed (decodage.ts
+     releases the entrance animation before fading). */
+  transition: opacity 0.6s ease;
 }
 
 /* The hero buttons, Axiom "Get in touch" style: text in double
@@ -1026,6 +1226,19 @@ html.menu-ouvert .menu-voile {
 .axiom-btn-dark {
   background: #0b0c0d;
   color: #f3f1ec;
+}
+
+/* Ghost variant: one orange line, no fill — the quiet neighbour of the
+   solid button. */
+.axiom-btn-ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--orange);
+}
+
+.axiom-btn-ghost:hover {
+  background: rgba(255, 77, 0, 0.08);
+  filter: none;
 }
 
 /* The square and the arrow are black and white, whatever the button. */
@@ -1090,7 +1303,7 @@ html.menu-ouvert .menu-voile {
    slide, and its fade zone sweeps the text. The blur dissipates at the same
    time. If masks are not handled, the rule is ignored and the title
    displays normally — never invisible. */
-.hero-name {
+.hero-role {
   -webkit-mask-image: linear-gradient(90deg, #000 0 35%, rgba(0, 0, 0, 0) 65%);
   mask-image: linear-gradient(90deg, #000 0 35%, rgba(0, 0, 0, 0) 65%);
   -webkit-mask-size: 300% 100%;
@@ -1098,11 +1311,11 @@ html.menu-ouvert .menu-voile {
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   animation:
-    hero-name-wipe 1.6s cubic-bezier(0.33, 0, 0.2, 1) 0.25s both,
-    hero-name-sharpen 1.6s ease-out 0.25s both;
+    hero-role-wipe 1.6s cubic-bezier(0.33, 0, 0.2, 1) 0.25s both,
+    hero-role-sharpen 1.6s ease-out 0.25s both;
 }
 
-@keyframes hero-name-wipe {
+@keyframes hero-role-wipe {
   from {
     -webkit-mask-position: 100% 0;
     mask-position: 100% 0;
@@ -1113,7 +1326,7 @@ html.menu-ouvert .menu-voile {
   }
 }
 
-@keyframes hero-name-sharpen {
+@keyframes hero-role-sharpen {
   from {
     transform: translateY(16px);
   }
@@ -1138,13 +1351,26 @@ html.menu-ouvert .menu-voile {
 
 /* The subtitle and the chips only arrive once the title is settled
    (0.25 s of delay + 1.6 s of sweep), picking up its light blur. */
-.hero-sub,
 .hero-cta {
   animation: hero-soft-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* The availability line enters like the project cards of block 5: it slides
+   in from the left with their easing — one line where the cards alternate
+   sides — once the title has settled. */
 .hero-sub {
-  animation-delay: 1.85s;
+  animation: hero-slide-in 0.62s cubic-bezier(0.22, 0.61, 0.36, 1) 1.85s both;
+}
+
+@keyframes hero-slide-in {
+  from {
+    opacity: 0;
+    transform: translate3d(-40px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .hero-actions { animation-delay: 1.95s; }
@@ -1639,25 +1865,77 @@ html:not(.js) .exp-slides .experience:first-child {
   cursor: default;
 }
 
-/* Les points ont été retirés : le compteur porte seul la position, centré
-   entre les deux flèches. Deux marges automatiques le placent au milieu quelle
-   que soit la largeur des boutons. */
-.exp-compteur {
-  margin: 0 auto;
-  font-family: var(--font-mono);
-  font-size: var(--fs-small);
-  color: var(--text-dim);
-  font-variant-numeric: tabular-nums;
+/* Navigation: dots linked by a thin line, centred between the two arrows.
+   The current dot fills as a pie and the line that leads to it fills with
+   it: you always see where you are between two cards.
+   --f, set by the script, goes from 0 (empty dot) to 1 (full dot). */
+.exp-dots {
+  --dot: 12px;
+  --lien: 54px;
+  position: relative;
+  /* Width to content: without it the container stretches over the whole
+     column and the lines would overflow far beyond the dots. */
+  width: fit-content;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--lien);
 }
 
-.exp-compteur b {
-  color: var(--text);
-  font-weight: 600;
+.exp-dot {
+  position: relative;
+  width: var(--dot);
+  height: var(--dot);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  /* The travelled part full, the rest in gray: a pie that fills clockwise
+     from noon. */
+  background: conic-gradient(
+    var(--green) calc(var(--f, 0) * 1turn),
+    var(--border) 0
+  );
+  cursor: pointer;
 }
 
-.exp-compteur span {
-  margin: 0 3px;
-  opacity: 0.5;
+/* The line that joins a dot to the previous one carries its OWN variable
+   (--l), separate from the dot's fill (--f): the path travelled is read on
+   the line, and only one dot is ever lit. */
+.exp-dot + .exp-dot::before {
+  content: "";
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  width: var(--lien);
+  height: 1px;
+  translate: 0 -50%;
+  background: linear-gradient(
+    to right,
+    var(--green) 0 calc(var(--l, 0) * 100%),
+    var(--border) 0
+  );
+  pointer-events: none;
+}
+
+/* Without JS — and on the very first frame, before the script has set
+   --f — the first dot is already full: we are on it. The inline style
+   written by the script wins afterwards. */
+.exp-dot:first-child {
+  --f: 1;
+}
+
+.exp-dot:hover {
+  /* A discreet ring: the target stays small, there has to be feedback. */
+  box-shadow: 0 0 0 3px var(--border);
+}
+
+.exp-dot:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+
+.exp-dot.is-active {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 30%, transparent);
 }
 
 /* The watermark number, very faded, behind the content. */
@@ -1928,7 +2206,15 @@ html:not(.js) .exp-slides .experience:first-child {
    head, title and description in the middle, note and links at the foot. */
 .projet-grille {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  /* minmax(0, 1fr) and not 1fr: a 1fr track keeps an automatic minimum of
+     min-content, and the longest note, set on a single line, claimed a
+     396 px column against 318 for its neighbours. The floor is released:
+     the four columns are strictly equal. */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* Every row is as tall as the tallest one: the four cards are all the
+     same size, in both directions, whatever their content — at 2×2 the two
+     rows match, stacked on a phone the four cards match. */
+  grid-auto-rows: 1fr;
   border: 1px solid rgba(243, 241, 236, 0.12);
   border-radius: var(--radius);
   /* The cards slide in from beside themselves: the travel is clipped by the
@@ -2089,47 +2375,27 @@ html:not(.js) .exp-slides .experience:first-child {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-dim);
-  /* A single line, always: notes on one or two lines
-     offset the feet of the cards from each other. */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* May wrap onto a second line. Kept on one line, the longest note —
+     "application mobile d'argent de poche" — either lost its end to an
+     ellipsis or forced its column 78 px wider than its neighbours. With
+     the columns strictly equal and the rows equal by construction, the
+     wrap costs nothing: the feet still line up at the bottom. */
+  white-space: normal;
 }
 
 /* La carte était un cul-de-sac : le pied annonçait des liens depuis
    l'origine sans jamais en porter. Seuls les projets qui ont une page de
    détail en affichent un, les autres gardent leur pied d'une seule ligne. */
 .projet-lien {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
+  /* A plain link, no button chrome: the card itself is the target. The
+     global link underline on hover is the only affordance, and it is
+     enough — the extra border it used to double with is gone. */
+  align-self: flex-start;
   font-family: var(--font-mono);
   font-size: var(--fs-small);
   letter-spacing: 0.06em;
   color: var(--text);
   text-decoration: none;
-}
-
-.projet-lien svg {
-  width: 15px;
-  height: 15px;
-  color: var(--green);
-  transition: transform 0.25s ease;
-}
-
-.projet-lien:hover svg,
-.projet-lien:focus-visible svg {
-  transform: translateX(4px);
-}
-
-.projet-lien span {
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.25s ease;
-}
-
-.projet-lien:hover span,
-.projet-lien:focus-visible span {
-  border-bottom-color: var(--green);
 }
 
 /* Toute la carte est cliquable, pas seulement les deux mots du pied : le lien
@@ -2150,17 +2416,9 @@ html:not(.js) .exp-slides .experience:first-child {
   background: rgba(243, 241, 236, 0.03);
 }
 
-.projet-etape:has(.projet-lien):hover .projet-lien svg {
-  transform: translateX(4px);
-}
-
-.projet-etape:has(.projet-lien):hover .projet-lien span {
-  border-bottom-color: var(--green);
-}
-
 @media (max-width: 1080px) {
   .projet-grille {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .projet-etape:nth-child(2n) {
@@ -2173,12 +2431,9 @@ html:not(.js) .exp-slides .experience:first-child {
 }
 
 @media (max-width: 720px) {
-  /* minmax(0, 1fr) and not 1fr: a 1fr track keeps an automatic minimum of
-     min-content, and the note at its foot is set `white-space: nowrap`. The
-     column therefore claimed 372 px inside a 350 px block — measured, the
-     page was 3 px wider than the screen and became draggable sideways on
-     iOS, where the body no longer clips anything (see further down). The
-     floor is released here, and the note is allowed to wrap just below. */
+  /* One column: the cards stack, each full-width. The min-content floor is
+     already released at the base, so nothing can widen the column past the
+     screen (see further down: the body no longer clips on iOS). */
   .projet-grille {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -2190,16 +2445,6 @@ html:not(.js) .exp-slides .experience:first-child {
 
   .projet-etape:last-child {
     border-bottom: 0;
-  }
-
-  /* The note is kept on a single line so that the feet of the cards line up
-     from one column to the next. In a single column there is nothing left to
-     line it up with, and the longest of them — "application mobile d'argent
-     de poche", 342 px of text in a 310 px column — was losing its end to an
-     ellipsis. It wraps here, which is also what keeps the column from
-     claiming more width than the screen. */
-  .projet-note {
-    white-space: normal;
   }
 }
 
@@ -2266,12 +2511,11 @@ html:not(.js) .exp-slides .experience:first-child {
   gap: clamp(13px, 1.7vh, 20px);
 }
 
-/* The call to action, on its own line and centred. Under the statistics it
-   read as their appendix, pushed into a corner, when it is the one thing the
-   page is asking for. */
-.footer-appel {
-  display: flex;
-  justify-content: center;
+/* The call to action sits under the statement, on the left: it is the one
+   thing the page is asking for, so it leads the sheet instead of hanging
+   at the bottom of it. */
+.footer-cta {
+  margin-top: clamp(18px, 2.5vh, 28px);
 }
 
 /* The statement on the left, the statistics on the right — the foot of the
@@ -3128,6 +3372,13 @@ html:not(.js) .exp-slides .experience:first-child {
    this block silently lost — the menu button stayed at 40 px and the dots'
    spacing at 54. At equal specificity, order decides. */
 @media (pointer: coarse) {
+  /* The touch zone extends without moving the visible dot: it keeps its
+     12 px, but becomes reachable over 44. */
+  .exp-dot::after {
+    content: "";
+    position: absolute;
+    inset: -16px;
+  }
 
   .burger {
     width: 44px;
@@ -3146,6 +3397,11 @@ html:not(.js) .exp-slides .experience:first-child {
     min-height: 44px;
   }
 
+  /* The dots space out a little: two 44 px targets side by side must not
+     overlap. */
+  .exp-dots {
+    --lien: 46px;
+  }
 }
 
 /* ---------- banner: stacked on phone ----------
@@ -3157,18 +3413,12 @@ html:not(.js) .exp-slides .experience:first-child {
    Placed at the end of the file on purpose — at equal specificity, order
    decides, and the original rules sit higher up. */
 @media (max-width: 720px) {
-  .bandeau-block {
-    height: auto;
-    min-height: 30vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: clamp(16px, 3vh, 28px);
-  }
-
-  .bandeau-stat {
-    position: static;
-    inset: auto;
+  /* The pill wraps onto two lines on a narrow screen: smaller type keeps it
+     compact, so the domain line keeps its place under it. */
+  .bandeau-stat-inner {
+    font-size: var(--fs-small);
+    padding: 6px 16px;
+    gap: 2px 10px;
   }
 
   .bandeau-stat-inner {
@@ -3306,6 +3556,10 @@ html:not(.js) .exp-slides .experience:first-child {
 
   .exp-spec dd {
     color: var(--text-dim);
+  }
+
+  .exp-dots {
+    margin-top: 10px;
   }
 
 }

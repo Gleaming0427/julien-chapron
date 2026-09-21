@@ -64,12 +64,13 @@ export const identity = {
   email: "voyage7981@proton.me",
   github: "https://github.com/Gleaming0427",
   githubLabel: "github.com/Gleaming0427",
+  linkedin: "https://www.linkedin.com/in/julien-chapron-6275a8269",
   npm: "https://www.npmjs.com/~armored1486",
   npmLabel: "npmjs.com/~armored1486",
   availability: "Disponible immédiatement · Remote ou hybride Toulouse",
 };
 
-// « Toujours en équipe » repeats word for word the tagline of the journey block:
+// « Principalement en équipe » repeats word for word the tagline of the journey block:
 // the two phrasings must stay identical, otherwise the site contradicts itself
 // from one screen to the next.
 // Deliberately understated. « Sur ma dernière mission » rather than « chez
@@ -79,11 +80,14 @@ export const identity = {
 // which is an order of magnitude. Every sentence must be defensible
 // as is in an interview.
 export const profile =
-  "Sept ans à construire des applications web, toujours en équipe. Sur ma dernière mission : un portail de visualisation d'API suivi par 5 000 ingénieurs Renault, puis des applications de supervision sur une flotte d'environ 200 000 véhicules électriques. Mon métier, c'est surtout d'entrer dans du code existant et de le faire évoluer sans rien casser. À côté, j'aime publier mes propres projets, en lien avec ma veille technique.";
+  "Sept ans à construire des applications web, principalement en équipe. Sur ma dernière mission, j'ai contribué à un portail de documentation suivi par 5 000 ingénieurs Renault, puis à des applications de supervision sur une flotte d'environ 200 000 véhicules électriques. À côté, j'aime publier mes propres projets, en lien avec ma veille technique.";
 
 export const experiences: Experience[] = [
   {
-    claim: "200 000 véhicules électriques sous supervision.",
+    // Reads on from the figure printed just above it, not as a line of its
+    // own: « +100 000 véhicules » / « en supervision ». The two other claims
+    // are whole sentences because nothing sits above them to continue.
+    claim: "supervisés.",
     metric: "5 000 utilisateurs",
     stat: "200 000",
     statUnit: "véhicules",
@@ -93,7 +97,7 @@ export const experiences: Experience[] = [
     period: "2022 – 2026",
     context: "Automobile, véhicule électrique, outils internes : documentation d'API et supervision de flotte · Full remote",
     bullets: [
-      "Portail de documentation de l'API véhicule, suivi par 5 000 ingénieurs Renault.",
+      "Portail de documentation suivi par 5 000 ingénieurs Renault.",
       "Deux back-ends de flotte : configuration à distance et traitement des données remontées.",
       "Déploiements Docker / Kubernetes, intégration continue GitLab CI, tests Jest et Cypress.",
     ],
@@ -133,9 +137,9 @@ export const experiences: Experience[] = [
     // management plan, Réseau Express Vélo of Toulouse Métropole, Airbus
     // and Ariane Group assignments). The applications were the tooling for
     // that business — that is what the card now says.
-    // « Temps réel » was removed: the term describes nothing. What matters
-    // is the observable effect, the absence of a page reload.
-    claim: "Outiller la consultation, du questionnaire au résultat.",
+    // « En temps réel » is justified here: the sentence names the observable
+    // effect, the answers arriving over WebSocket without a page reload.
+    claim: "Outiller la consultation.",
     metric: "front et back",
     stat: "3",
     statUnit: "ans",
@@ -147,17 +151,25 @@ export const experiences: Experience[] = [
     bullets: [
       "Applications de questionnaires et de tests de personnalité, du front-end au back-end.",
       "Front-end Vue.js avec Vuex, back-end Laravel, bases MySQL conçues et intégrées.",
-      "Réponses poussées au navigateur en WebSocket : les résultats évoluent sans rechargement.",
+      "Réponses en temps réel grâce au WebSocket.",
     ],
   },
 ];
 
+// What is really used, not what a CV usually says. Every entry is backed by a
+// mission or a project above; the cloud tooling that only appears in personal
+// projects (SST, AWS Lambda, DynamoDB, Firebase…) stays on those project
+// cards, where it is honest. Ordered by real usage, most hours first —
+// the old list read like a keyword dump.
+// Vitest and PostgreSQL are the exceptions: listed past the first two of
+// their row, the layout already shows them dimmed — known, but not where
+// the real hours are.
 export const skills: SkillGroup[] = [
-  { category: "Langages", skills: ["TypeScript", "JavaScript", "Python", "PHP", "SQL"] },
-  { category: "Front-end", skills: ["React.js", "React Native", "Vue.js (Vuex)", "Astro", "HTML / CSS"] },
-  { category: "Back-end", skills: ["Node.js (Express)", "API REST", "GraphQL", "Laravel", "PostgreSQL", "MySQL"] },
-  { category: "Cloud & infrastructure", skills: ["Docker", "Kubernetes", "GCP", "AWS Lambda", "DynamoDB", "SST", "Firebase", "Linux"] },
-  { category: "Tests & CI/CD", skills: ["Jest", "Cypress", "Vitest", "GitLab CI", "GitHub Actions", "Git"] },
+  { category: "Langages", skills: ["TypeScript", "JavaScript", "PHP", "SQL", "Python"] },
+  { category: "Front-end", skills: ["React.js", "Vue.js (Vuex)", "HTML / CSS", "React Native", "Astro"] },
+  { category: "Back-end", skills: ["Node.js (Express)", "API REST", "GraphQL", "PostgreSQL", "Laravel", "MySQL"] },
+  { category: "Cloud & infrastructure", skills: ["Docker", "Kubernetes", "GCP", "GitLab CI", "Git", "Linux"] },
+  { category: "Tests", skills: ["Jest", "Cypress", "Vitest"] },
   { category: "Méthodes", skills: ["Agile / Scrum", "revues de code"] },
 ];
 

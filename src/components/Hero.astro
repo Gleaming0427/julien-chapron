@@ -24,14 +24,23 @@ const portraitUrl = base === "/" ? "/julien-chapron.webp" : `${base}/julien-chap
   <div class="hero-top">
     <div class="hero-col">
       <div class="hero-title">
-        <p class="hero-overline"><span class="prompt">$</span> qui suis-je</p>
-        <h1 class="hero-name">{identity.name}</h1>
-        <p class="hero-sub">Développeur <em>full-stack</em> · remote ou hybride Toulouse</p>
+        <p class="hero-overline">Hello, je suis <span class="hero-overline-nom">Julien Chapron</span></p>
+        <h1 class="hero-role">Développeur <em>full-stack</em></h1>
+        <p class="hero-sub">disponible en remote ou hybride à Toulouse</p>
         <div class="hero-actions">
           <a class="axiom-btn" href={pdfUrl} download="CV_Julien_Chapron.pdf">
             <span class="axiom-btn-text-col">
               <span class="axiom-btn-text-row">Télécharger mon CV</span>
               <span class="axiom-btn-text-row" aria-hidden="true">Télécharger mon CV</span>
+            </span>
+            <span class="axiom-btn-arrow-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h17.4" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
+            </span>
+          </a>
+          <a class="axiom-btn axiom-btn-ghost" href={`mailto:${identity.email}`}>
+            <span class="axiom-btn-text-col">
+              <span class="axiom-btn-text-row">Contactez-moi</span>
+              <span class="axiom-btn-text-row" aria-hidden="true">Contactez-moi</span>
             </span>
             <span class="axiom-btn-arrow-box">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h17.4" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>

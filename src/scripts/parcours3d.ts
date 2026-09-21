@@ -1,12 +1,17 @@
-// The 3D form of the parcours block: a donut of points, with the same
-// care as the hero globe. The sequence between the profile block and the
-// parcours block is entirely driven by --spec-form, that is, by the POSITION
-// of the rail — no clock of its own in this module:
-// 1. the black points enter FROM THE TOP RIGHT and line up on the torus
+// The 3D form of the parcours block: clouds of points with the same care as
+// the hero globe — a car, a satellite and a gear, one per card of the
+// carousel. The subjects are not decorative: the car stands behind the four
+// years at Renault, on the electric vehicles' API and on fleet supervision,
+// and the others behind their own cards. Nothing is loaded: each shape is an
+// outline drawn in code, see construireVoiture.
+// The sequence between the profile block and the parcours block is entirely
+// driven by --spec-form, that is, by the POSITION of the rail — no clock of
+// its own in this module:
+// 1. the black points enter FROM THE TOP RIGHT and settle onto the body
 //    (up to 0.34); scrolling back up, they leave by the same path;
 // 2. a black panel sweeps across the screen from the right, and each point
 //    whitens at the precise moment the panel's edge passes it;
-// 3. the donut spins around its axis, continuously.
+// 3. the car turns on its vertical axis, continuously.
 // The block's grid, for its part, does not fade here: it stays full until
 // the exit, and it is the skills block that erases its own (ui.ts).
 // The automatic behaviour therefore does NOT come from here: it is ui.ts that
@@ -59,16 +64,28 @@ const NOIR_FIN = 0.26;
    the entire donut off. */
 const RETRAIT = 0.22;
 
-/** Reading tilt of the donut, in radians. Flat, we would see a circle.
-    Carried by `spin`, so it also applies to the start positions:
-    poserLesDeparts() must compensate for it. */
-const TILT = 0.95;
+/* THE VIEW IS FIXED. The car does not turn: it is posed, once, at the angle
+   a press photograph would use — three quarters from the front, the eye a
+   little above the roof line. Two angles set it and neither ever changes.
+   Both are carried by `spin`, so they also apply to the start positions:
+   poserLesDeparts() must compensate for them. */
+
+/** How far above the car the eye sits, in radians. About twelve degrees:
+    enough to read the roof and all four wheels, not so much that the profile
+    flattens out. */
+const TILT = 0.21;
+/** Rotation on the vertical axis. At zero the car is dead side-on, the
+    flattest view there is; this brings the nose round towards the viewer. */
+const POSE = 0.62;
 
 /** Point count on desktop; phones run at half (see initParcours3D). */
 const COUNT_BASE = 2200;
-/** Outer radius of the torus (R + r), plus the jitter given to the points. */
-const RAYON_EXT = 0.91;
-/** Phone: what is left between the ring and the edge of the screen. */
+/** Half-length of the car, plus the jitter given to the points. */
+const RAYON_EXT = 0.99;
+/** Half-height of the tallest form — the gear, tip to tip: what the vertical
+    clamp has to keep in frame. */
+const DEMI_HAUT = 0.65;
+/** Phone: what is left between the car and the edge of the screen. */
 const MARGE_TEL = 16;
 const FOV = 42;
 const HALF_FOV_TAN = Math.tan((FOV * Math.PI) / 180 / 2);
@@ -79,17 +96,516 @@ function graine(i: number, n: number): number {
   return v - Math.floor(v);
 }
 
-/** A point on the surface of a donut (torus), brought back into the unit sphere. */
-function surLeTore(i: number): [number, number, number] {
-  const u = graine(i, 1.7) * Math.PI * 2;
-  const v = graine(i, 5.3) * Math.PI * 2;
-  const R = 0.6;
-  const r = 0.27;
+/* ---------------------------------------------------------------------------
+   The car.
+
+   Drawn here rather than loaded. A glTF model costs 200 kB to 2 MB, plus its
+   loader and a licence to check, and we would throw its triangles away:
+   nothing of it is kept but the surface, as points. The outline below is the
+   whole asset — the roof line from the nose to the tail, then the underside
+   back the other way with a wheel arch cut into it at each axle.
+
+   x runs along the length, y along the height, both in scene units.
+   --------------------------------------------------------------------------- */
+
+/* Proportions taken off the reference picture and checked against the real
+   thing: 5.68 m long, 2.03 m wide, 1.79 m tall. The length spans 1.94 scene
+   units, so the width lands at 0.69 and the height at 0.61 — the body reads
+   WIDER THAN IT IS TALL from the front, which is the first thing a car does
+   and the first thing my earlier attempt got wrong. */
+const ESSIEU_Y = -0.14;
+const ESSIEU_AV = -0.58;
+const ESSIEU_AR = 0.62;
+/** Half-width of the body at its widest. */
+const DEMI_LARGE = 0.33;
+
+/** One wheel arch, cut UPWARDS into the underside, from rear to front.
+    Angular and not round: on this design the arches are flat-topped
+    trapezoids, and a semicircle there softened the one shape that should
+    not be soft. */
+function arche(cx: number): [number, number][] {
   return [
-    (R + r * Math.cos(v)) * Math.cos(u),
-    (R + r * Math.cos(v)) * Math.sin(u),
-    r * Math.sin(v),
+    [cx + 0.23, ESSIEU_Y],
+    [cx + 0.18, 0.08],
+    [cx - 0.18, 0.08],
+    [cx - 0.23, ESSIEU_Y],
   ];
+}
+
+/** Closed side profile. Straight segments only — the whole character of this
+    body is that it has no curve anywhere: one long rising line from the nose
+    to the top of the windscreen, a nearly flat roof, one sharp break down to
+    the bed, then a flat bed rail to a vertical tail. */
+const PROFIL: [number, number][] = [
+  [-0.95, -0.14], // front bumper, bottom
+  [-0.97, 0.015], // the nose: the front face is near vertical, barely raked
+  [-0.44, 0.125], // cowl — end of the bonnet's straight run
+  [-0.04, 0.305], // the apex, top of the windscreen
+  [0.26, 0.285], // roof, rear: it barely falls away
+  [0.4, 0.115], // the break, straight down onto the bed
+  [0.97, 0.1], // bed rail, to the tail
+  [0.95, -0.14], // tail, bottom
+  ...arche(ESSIEU_AR),
+  ...arche(ESSIEU_AV),
+];
+
+/** Cumulative perimeter of PROFIL — lets the outline be walked at even spacing. */
+const PERIMETRE: number[] = (() => {
+  const cum = [0];
+  for (let i = 0; i < PROFIL.length; i++) {
+    const [ax, ay] = PROFIL[i]!;
+    const [bx, by] = PROFIL[(i + 1) % PROFIL.length]!;
+    cum.push(cum[i]! + Math.hypot(bx - ax, by - ay));
+  }
+  return cum;
+})();
+
+/** Ray casting: is (x, y) inside the profile? */
+function dansProfil(x: number, y: number): boolean {
+  let dedans = false;
+  for (let i = 0, j = PROFIL.length - 1; i < PROFIL.length; j = i++) {
+    const [xi, yi] = PROFIL[i]!;
+    const [xj, yj] = PROFIL[j]!;
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) dedans = !dedans;
+  }
+  return dedans;
+}
+
+/** Half-width of the body at (x, y): what gives the profile its volume. */
+function demiLargeur(x: number, y: number): number {
+  /* Nearly constant along the length: this body is a slab, and it only draws
+     in at the very nose and the very tail. A generous taper made it a lozenge
+     seen from above, which is what a sports car does and this does not. */
+  const filant = 1 - 0.28 * Math.pow(Math.min(1, Math.abs(x) / 0.97), 5);
+  /* Tumblehome: the cabin leans in above the shoulder line, so the roof is
+     markedly narrower than the body. On this shape it is pronounced, and it is
+     half of what makes the thing recognisable from three quarters. */
+  const serre = y > 0.125 ? 1 - 0.45 * ((y - 0.125) / 0.18) : 1;
+  return DEMI_LARGE * filant * serre;
+}
+
+/* ---------------------------------------------------------------------------
+   Le satellite.
+
+   Il accompagne la fiche AERIS — quatre ans de données atmosphériques, dont la
+   source est justement en orbite. Dessiné en code comme la voiture, pour les
+   mêmes raisons : rien à charger, rien à licencier.
+
+   Ce qui le NOMME tient en trois choses, et le reste est du décor : deux
+   grandes ailes plates couvertes de cellules, un corps compact au milieu, une
+   antenne parabolique au-dessus. Le quadrillage des ailes fait l'essentiel du
+   travail — c'est la seule chose qui ne ressemble à rien d'autre.
+   --------------------------------------------------------------------------- */
+
+/** Les ailes s'étendent de ±AILE_PRES à ±AILE_LOIN, sur AILE_HAUT de demi-hauteur. */
+const AILE_PRES = 0.2;
+const AILE_LOIN = 0.97;
+const AILE_HAUT = 0.115;
+/** Demi-dimensions du corps. */
+const CORPS: [number, number, number] = [0.13, 0.17, 0.12];
+
+/** Les ailes tiennent dans le plan XY, et ce n'est pas indifférent : sous
+    Rx(TILT)·Ry(POSE), la normale de ce plan ressort à 0,80 en Z, donc on les
+    voit largement. Posées à plat (plan XZ) elles seraient vues par la tranche —
+    la normale n'y sort qu'à 0,21 — et deux grandes ailes réduites à deux traits
+    ne disent plus rien du tout. */
+function construireSatellite(count: number): [number, number, number][] {
+  const points: [number, number, number][] = [];
+
+  /* LES AILES. Une grille régulière, en trois éléments séparés par un joint :
+     c'est le quadrillage qui se lit comme des cellules photovoltaïques, et il
+     n'y a pas d'autre façon de le dire en points. Les colonnes du joint sont
+     sautées plutôt que rapprochées — un panneau solaire est fait de morceaux
+     distincts, et ce vide-là est ce qui le montre. */
+  const COLONNES = 42;
+  const RANGEES = 12;
+  // Deux colonnes vides par joint, et non une : à une seule, le vide faisait
+  // l'épaisseur d'un point et les trois éléments se lisaient comme un seul.
+  const JOINTS = [13, 14, 27, 28];
+  for (const cote of [-1, 1]) {
+    for (let c = 0; c < COLONNES; c++) {
+      if (JOINTS.includes(c)) continue;
+      const fx = (c + 0.5) / COLONNES;
+      const x = cote * (AILE_PRES + (AILE_LOIN - AILE_PRES) * fx);
+      for (let r = 0; r < RANGEES; r++) {
+        const y = -AILE_HAUT + ((r + 0.5) / RANGEES) * 2 * AILE_HAUT;
+        points.push([x, y, 0]);
+      }
+    }
+  }
+
+  /* LE LONGERON de chaque aile : une ligne dense sur le bord haut et le bord
+     bas. Sans lui la grille s'effiloche sur ses bords et l'aile n'a plus de
+     contour — or c'est un objet manufacturé, il a des arêtes nettes. */
+  const nLongeron = Math.round(count * 0.09);
+  for (let k = 0; k < nLongeron; k++) {
+    const f = (k + 0.5) / nLongeron;
+    const cote = k % 2 === 0 ? -1 : 1;
+    const x = cote * (AILE_PRES + (AILE_LOIN - AILE_PRES) * ((f * 2) % 1));
+    points.push([x, f < 0.5 ? AILE_HAUT : -AILE_HAUT, 0]);
+  }
+
+  /* LE CORPS : une boîte. Ses douze arêtes d'abord, denses, puis un semis
+     léger sur les faces — la même recette que la voiture, pour la même
+     raison : ce sont les arêtes qui donnent le volume. */
+  const [bx, by, bz] = CORPS;
+  const COINS: [number, number, number][] = [];
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) for (const sz of [-1, 1]) {
+    COINS.push([sx * bx, sy * by, sz * bz]);
+  }
+  const ARETES: [number, number][] = [];
+  for (let a = 0; a < 8; a++) {
+    for (let b = a + 1; b < 8; b++) {
+      // Deux coins sont reliés s'ils ne diffèrent que sur UN axe.
+      let differences = 0;
+      for (let k = 0; k < 3; k++) if (COINS[a]![k] !== COINS[b]![k]) differences++;
+      if (differences === 1) ARETES.push([a, b]);
+    }
+  }
+  const nCorps = Math.round(count * 0.16);
+  for (let k = 0; k < nCorps; k++) {
+    const [a, b] = ARETES[k % ARETES.length]!;
+    const t = graine(k, 2.3);
+    points.push([
+      COINS[a]![0] + (COINS[b]![0] - COINS[a]![0]) * t,
+      COINS[a]![1] + (COINS[b]![1] - COINS[a]![1]) * t,
+      COINS[a]![2] + (COINS[b]![2] - COINS[a]![2]) * t,
+    ]);
+  }
+  const nFaces = Math.round(count * 0.035);
+  for (let k = 0; k < nFaces; k++) {
+    const u = graine(k, 5.1) * 2 - 1;
+    const v = graine(k, 8.7) * 2 - 1;
+    const face = k % 3;
+    const signe = k % 2 === 0 ? 1 : -1;
+    if (face === 0) points.push([signe * bx, u * by, v * bz]);
+    else if (face === 1) points.push([u * bx, signe * by, v * bz]);
+    else points.push([u * bx, v * by, signe * bz]);
+  }
+
+  /* L'ANTENNE PARABOLIQUE, en anneaux concentriques. Un disque plein se lirait
+     comme une tache ; les anneaux disent la surface courbe, et c'est ainsi
+     qu'on dessine une parabole depuis toujours. Elle est orientée vers le haut
+     et vers nous — une antenne qui pointerait ailleurs se verrait par la
+     tranche, et ne serait plus qu'un trait. */
+  const CENTRE: [number, number, number] = [0.03, 0.39, 0.05];
+  const RAYON_ANT = 0.17;
+  /* Parabole VOLONTAIREMENT plate. À 0,34 le bord reculait de 0,03 sur un
+     rayon de 0,15 : vue de biais, la coupelle se refermait en cône et se
+     lisait comme un cornet. Plus ouverte, elle garde sa silhouette de disque,
+     qui est ce à quoi on reconnaît une antenne. */
+  const FOCALE = 0.6;
+  // Axe de visée, normalisé, puis deux vecteurs qui tendent le plan du disque.
+  const axe = [0.3, 0.62, 0.72];
+  const nAxe = Math.hypot(axe[0]!, axe[1]!, axe[2]!);
+  const d: [number, number, number] = [axe[0]! / nAxe, axe[1]! / nAxe, axe[2]! / nAxe];
+  // u = d × Y, normalisé ; v = d × u. Orthogonaux par construction.
+  let u: [number, number, number] = [d[2], 0, -d[0]];
+  const nU = Math.hypot(u[0], u[1], u[2]);
+  u = [u[0] / nU, u[1] / nU, u[2] / nU];
+  const v: [number, number, number] = [
+    d[1] * u[2] - d[2] * u[1],
+    d[2] * u[0] - d[0] * u[2],
+    d[0] * u[1] - d[1] * u[0],
+  ];
+  const nAntenne = Math.round(count * 0.17);
+  const ANNEAUX = 6;
+  /* Les points se répartissent sur les anneaux au PRORATA DE LEUR
+     CIRCONFÉRENCE. À nombre égal par anneau, l'anneau du centre — vingt fois
+     plus court que celui du bord — recevait autant de points que lui : le
+     centre virait au pâté plein et on ne voyait plus de cercles du tout. */
+  let sommeRayons = 0;
+  for (let a = 1; a <= ANNEAUX; a++) sommeRayons += a;
+  const parAnneau: number[] = [];
+  for (let a = 1; a <= ANNEAUX; a++) {
+    parAnneau.push(Math.round((nAntenne * a) / sommeRayons));
+  }
+  let anneau = 0;
+  let restant = parAnneau[0]!;
+  for (let k = 0; k < nAntenne; k++) {
+    while (restant <= 0 && anneau < ANNEAUX - 1) {
+      anneau++;
+      restant = parAnneau[anneau]!;
+    }
+    restant--;
+    const r = RAYON_ANT * ((anneau + 1) / ANNEAUX);
+    const a = graine(k, 3.7) * Math.PI * 2;
+    // Creux parabolique : le bord recule par rapport au centre.
+    const creux = -(r * r) / (2 * FOCALE);
+    points.push([
+      CENTRE[0] + u[0] * r * Math.cos(a) + v[0] * r * Math.sin(a) + d[0] * creux,
+      CENTRE[1] + u[1] * r * Math.cos(a) + v[1] * r * Math.sin(a) + d[1] * creux,
+      CENTRE[2] + u[2] * r * Math.cos(a) + v[2] * r * Math.sin(a) + d[2] * creux,
+    ]);
+  }
+
+  /* LE MÂT qui porte l'antenne, et une perche d'instrument sous le corps.
+     Tout ce qui reste du budget passe ici : deux lignes, mais ce sont elles
+     qui rattachent l'antenne au corps — sans mât, elle flotte. */
+  for (let k = 0; points.length < count; k++) {
+    const t = ((k * 0.61803) % 1 + 1) % 1; // suite équirépartie, sans paquets
+    if (k % 3 === 2) {
+      // La perche, vers le bas.
+      points.push([0.02, -by - t * 0.16, 0.02]);
+    } else {
+      points.push([
+        t * CENTRE[0],
+        by + t * (CENTRE[1] - by),
+        t * CENTRE[2],
+      ]);
+    }
+  }
+
+  return points;
+}
+
+/* ---------------------------------------------------------------------------
+   L'engrenage.
+
+   La troisième fiche est Ethics Group : trois ans à outiller la consultation
+   publique — questionnaires, diagnostics — pour un cabinet dont le métier est
+   la transformation des organisations. Un engrenage est l'objet qui dit cela,
+   et il est dessiné en code comme la voiture et le satellite, pour les mêmes
+   raisons : rien à charger, rien à licencier.
+
+   IL EST VOLONTAIREMENT PAUVRE. La version d'avant portait des trous
+   d'allègement, un moyeu en saillie, une rainure de clavette — tout ce qu'un
+   vrai pignon a. Rendu en points, cela donnait une rosace : la couronne de
+   trous formait des pétales qui noyaient les dents, et on ne lisait plus un
+   engrenage mais un napperon. Un objet ne se reconnaît pas à la somme de ses
+   détails ; il se reconnaît à ce qui n'appartient qu'à lui.
+
+   Ici, cela tient en trois choses. LES DENTS, qui sont toute la signature.
+   L'ÉPAISSEUR, donnée par le décalage entre les deux faces. LE TROU au centre,
+   sans lequel une roue dentée est un soleil. Rien d'autre.
+
+   Le disque tient dans le plan XY, comme les ailes du satellite : sous
+   Rx(TILT)·Ry(POSE) sa normale ressort à 0,80 en Z. Posé autrement, on le
+   verrait par la tranche, et un engrenage vu par la tranche n'est qu'un trait.
+   --------------------------------------------------------------------------- */
+
+/** Douze dents, franches. Au-delà d'une quinzaine, à la taille où la forme
+    s'affiche, le creux entre deux dents devient plus étroit qu'un point et la
+    couronne se referme en cercle lisse. */
+const DENTS = 12;
+const R_TETE = 0.62; // sommet des dents
+const R_PIED = 0.47; // pied des dents
+/** Part du pas occupée par le plat du sommet. À 0,5 les dents et les creux ont
+    la même largeur, ce qui est le dessin le plus lisible qui soit. */
+const PART_DENT = 0.48;
+const DEMI_Z = 0.06; // demi-épaisseur du disque
+const R_ALESAGE = 0.17; // le trou central
+
+function construireEngrenage(count: number): [number, number, number][] {
+  const points: [number, number, number][] = [];
+
+  /* Le profil : un polygone fermé, quatre sommets par dent — pied, montée du
+     flanc, plat du sommet, descente. Que des segments droits et des flancs
+     radiaux, le même parti que la carrosserie, qui n'a de courbe nulle part.
+     Pas de congé au pied des dents : à cette taille, un angle vif est ce que
+     l'œil attend d'un dessin, pas un défaut de la pièce. */
+  const COINS: [number, number][] = [];
+  const PAS = (Math.PI * 2) / DENTS;
+  for (let d = 0; d < DENTS; d++) {
+    const a0 = d * PAS;
+    const creux = ((1 - PART_DENT) * PAS) / 2;
+    COINS.push([R_PIED * Math.cos(a0), R_PIED * Math.sin(a0)]);
+    COINS.push([R_TETE * Math.cos(a0 + creux), R_TETE * Math.sin(a0 + creux)]);
+    COINS.push([R_TETE * Math.cos(a0 + PAS - creux), R_TETE * Math.sin(a0 + PAS - creux)]);
+    COINS.push([R_PIED * Math.cos(a0 + PAS), R_PIED * Math.sin(a0 + PAS)]);
+  }
+
+  /** Le contour parcouru à pas constant, exactement comme la voiture parcourt
+      son profil : c'est ce qui donne une ligne, et non un semis. */
+  const PERIM: number[] = (() => {
+    const cum = [0];
+    for (let i = 0; i < COINS.length; i++) {
+      const [ax, ay] = COINS[i]!;
+      const [bx, by] = COINS[(i + 1) % COINS.length]!;
+      cum.push(cum[i]! + Math.hypot(bx - ax, by - ay));
+    }
+    return cum;
+  })();
+  const tour = PERIM[COINS.length]!;
+  const surLeTour = (f: number): [number, number] => {
+    const d = f * tour;
+    let seg = 0;
+    while (seg < COINS.length - 1 && PERIM[seg + 1]! < d) seg++;
+    const [ax, ay] = COINS[seg]!;
+    const [bx, by] = COINS[(seg + 1) % COINS.length]!;
+    const long = PERIM[seg + 1]! - PERIM[seg]!;
+    const t = long > 0 ? (d - PERIM[seg]!) / long : 0;
+    return [ax + (bx - ax) * t, ay + (by - ay) * t];
+  };
+
+  /* LA DENTURE, face avant. La ligne la plus forte du dessin : elle porte à
+     elle seule toute la silhouette. */
+  const nPres = Math.round(count * 0.4);
+  for (let k = 0; k < nPres; k++) {
+    const [x, y] = surLeTour((k + 0.5) / nPres);
+    points.push([x, y, DEMI_Z]);
+  }
+
+  /* LA DENTURE, face arrière, plus maigre. Sous l'inclinaison elle dépasse de
+     la première : ce décalage entre les deux lignes EST l'épaisseur du disque,
+     et il n'y a pas d'autre façon de la montrer avec des points. */
+  const nLoin = Math.round(count * 0.22);
+  for (let k = 0; k < nLoin; k++) {
+    const [x, y] = surLeTour((k + 0.5) / nLoin);
+    points.push([x, y, -DEMI_Z]);
+  }
+
+  /* LES FLANCS DES DENTS, d'une face à l'autre, à chaque sommet du profil.
+     Sans eux les deux dentures se lisent comme deux découpes de papier posées
+     l'une derrière l'autre, et non comme une pièce épaisse. */
+  const nFlancs = Math.round(count * 0.16);
+  for (let k = 0; k < nFlancs; k++) {
+    const [x, y] = COINS[k % COINS.length]!;
+    const t = (Math.floor(k / COINS.length) + 0.5) / Math.ceil(nFlancs / COINS.length);
+    points.push([x, y, -DEMI_Z + 2 * DEMI_Z * t]);
+  }
+
+  /* LE TROU, sur les deux faces. */
+  const nTrou = Math.round(count * 0.1);
+  for (let k = 0; k < nTrou; k++) {
+    const a = ((k + 0.5) / nTrou) * Math.PI * 2 * 2; // deux tours : une face chacun
+    points.push([
+      R_ALESAGE * Math.cos(a),
+      R_ALESAGE * Math.sin(a),
+      k * 2 < nTrou ? DEMI_Z : -DEMI_Z,
+    ]);
+  }
+
+  /* LE VOILE, entre le trou et le pied des dents. Une TRAME RÉGULIÈRE, et non
+     des anneaux concentriques : en anneaux, le voile se lisait comme une cible
+     — cinq cercles emboîtés qui tiraient l'œil au centre, alors que tout ce qui
+     nomme la pièce est sur son bord.
+
+     Volontairement clairsemé : c'est un fond, pas un sujet, et tout ce qu'on
+     lui donne, on le retire aux dents. Son seul rôle est d'empêcher le trou de
+     flotter au milieu d'une couronne vide. */
+  const nVoile = Math.max(0, count - points.length);
+  if (nVoile > 0) {
+    const aire = Math.PI * (R_PIED * R_PIED - R_ALESAGE * R_ALESAGE);
+    const pasVoile = Math.sqrt(aire / (nVoile * 0.866));
+    const rangee = pasVoile * 0.86603;
+    const places: [number, number][] = [];
+    const lignes = Math.ceil(R_PIED / rangee);
+    const colonnes = Math.ceil(R_PIED / pasVoile) + 1;
+    for (let r = -lignes; r <= lignes; r++) {
+      const y = r * rangee;
+      for (let c = -colonnes; c <= colonnes; c++) {
+        // Une rangée sur deux décalée d'un demi-pas : trame hexagonale.
+        const x = (c + (r % 2 === 0 ? 0 : 0.5)) * pasVoile;
+        const d = Math.hypot(x, y);
+        if (d > R_ALESAGE + pasVoile * 0.5 && d < R_PIED - pasVoile * 0.5) places.push([x, y]);
+      }
+    }
+    // Prélèvement régulier : au hasard, il ferait des amas.
+    const saut = places.length / nVoile;
+    for (let k = 0; k < nVoile && places.length > 0; k++) {
+      const [x, y] = places[Math.min(places.length - 1, Math.floor(k * saut))]!;
+      points.push([x, y, DEMI_Z]);
+    }
+  }
+
+  return points;
+}
+
+/** Index in PROFIL, exclusive, past which the vertices are wheel arches and
+    not folds of the body. The cross edges stop there: bars laid across an
+    arch read as wheel-well liners, which is clutter at this size. */
+const PLIS_CORPS = 8;
+
+/** The car as a point cloud: a wireframe of its folds, then the wheels.
+
+    This is drawn as EDGES, with only a thin haze of surface behind them. Two
+    filled flanks came out as a blob the shape of a car; one filled flank plus
+    scattered outline points was better but still a haze. What this body
+    actually is, is a dozen flat panels meeting at hard creases — so the creases
+    are the drawing, and everything else is support. */
+function construireVoiture(count: number): [number, number, number][] {
+  const points: [number, number, number][] = [];
+  const tour = PERIMETRE[PROFIL.length]!;
+
+  /** Walks the outline at a given fraction of its length. */
+  const surLeContour = (f: number): [number, number] => {
+    const d = f * tour;
+    let seg = 0;
+    while (seg < PROFIL.length - 1 && PERIMETRE[seg + 1]! < d) seg++;
+    const [ax, ay] = PROFIL[seg]!;
+    const [bx, by] = PROFIL[(seg + 1) % PROFIL.length]!;
+    const long = PERIMETRE[seg + 1]! - PERIMETRE[seg]!;
+    const t = long > 0 ? (d - PERIMETRE[seg]!) / long : 0;
+    return [ax + (bx - ax) * t, ay + (by - ay) * t];
+  };
+
+  /* THE NEAR CREASE: the whole outline, on the flank turned towards us. The
+     strongest line in the picture, and rightly so — it is the one that carries
+     the bonnet's straight run, the apex, and the break down onto the bed.
+     Which flank is the near one is decided by POSE: the panel's normal comes
+     out at +0.80 in Z under Rx(TILT)·Ry(POSE), so it is the +Z side.
+     THIS DEPENDS ON THE POSE, and the pose is fixed for good; if POSE ever
+     changed sign, these signs would have to follow. */
+  const nPres = Math.round(count * 0.3);
+  for (let k = 0; k < nPres; k++) {
+    const [x, y] = surLeContour((k + 0.5) / nPres);
+    points.push([x, y, demiLargeur(x, y)]);
+  }
+
+  /* THE FAR CREASE, thinner: at three quarters it shows above the roof line
+     and past the tail, and that offset between the two lines is most of what
+     says the thing has a width. */
+  const nLoin = Math.round(count * 0.2);
+  for (let k = 0; k < nLoin; k++) {
+    const [x, y] = surLeContour((k + 0.5) / nLoin);
+    points.push([x, y, -demiLargeur(x, y)]);
+  }
+
+  /* THE CROSS FOLDS, joining the two creases at each corner of the body: the
+     front face, the foot and the top of the windscreen, the back of the roof,
+     the break onto the bed, the tail. These are what turn two parallel
+     outlines into a solid — without them the eye reads two flat cut-outs. */
+  const nTraverse = Math.round(count * 0.14);
+  for (let k = 0; k < nTraverse; k++) {
+    const [x, y] = PROFIL[k % PLIS_CORPS]!;
+    const w = demiLargeur(x, y);
+    points.push([x, y, -w + 2 * w * ((Math.floor(k / PLIS_CORPS) + 0.5) / Math.ceil(nTraverse / PLIS_CORPS))]);
+  }
+
+  /* THE FLANK ITSELF, kept deliberately thin. It is there so the body does not
+     read as see-through, not to be looked at: any denser and it swallows the
+     creases, which is the mistake the first two attempts made. */
+  const nFlanc = Math.round(count * 0.14);
+  const vise = points.length + nFlanc;
+  for (let essai = 0; points.length < vise && essai < nFlanc * 40; essai++) {
+    const x = -0.99 + graine(essai, 1.7) * 1.98;
+    const y = -0.16 + graine(essai, 5.3) * 0.48;
+    if (!dansProfil(x, y)) continue;
+    points.push([x, y, demiLargeur(x, y)]);
+  }
+
+  /* THE WHEELS — the near pair only, for the same reason the far flank is not
+     drawn: on a solid car the far wheels sit behind the body, and points hide
+     nothing, so drawing them only scattered noise across the middle of the
+     silhouette. Everything left in the budget goes here, split between the two:
+     the arches are cut deep into the underside, and a wheel that does not fill
+     its arch leaves a hole where the eye expects the heaviest part of the car. */
+  const RAYON_ROUE = 0.16;
+  const BOUDIN = 0.055;
+  const VOIE = 0.27;
+  for (let k = 0; points.length < count; k++) {
+    const u = graine(k, 3.1) * Math.PI * 2;
+    const v = graine(k, 7.7) * Math.PI * 2;
+    const rayon = RAYON_ROUE + BOUDIN * Math.cos(v);
+    points.push([
+      (k % 2 === 0 ? ESSIEU_AV : ESSIEU_AR) + rayon * Math.cos(u),
+      ESSIEU_Y + rayon * Math.sin(u),
+      VOIE + BOUDIN * Math.sin(v),
+    ]);
+  }
+
+  return points;
 }
 
 export function initParcours3D(): void {
@@ -178,15 +694,46 @@ export function initParcours3D(): void {
   const phase = new Float32Array(COUNT);
   const teintes = new Float32Array(COUNT * 3);
 
+  /* THREE FORMS, and the cloud passes from one to the next as the carousel
+     advances. The car belongs to Renault, the satellite to AERIS — whose data
+     comes from orbit — and the gear to Ethics Group, whose business is
+     transformation. The three are built once, here; `cible` is only a blend
+     of the two neighbours, recomputed when the blend moves. The same point
+     keeps its rank in all three forms, so it travels in a straight line from
+     its place in one to its place in the next: the most legible, most
+     discreet transformation. */
+  const voiture = construireVoiture(COUNT);
+  const satellite = construireSatellite(COUNT);
+  const engrenage = construireEngrenage(COUNT);
+  const formeVoiture = new Float32Array(COUNT * 3);
+  const formeSatellite = new Float32Array(COUNT * 3);
+  const formeEngrenage = new Float32Array(COUNT * 3);
+
   for (let i = 0; i < COUNT; i++) {
-    const [x, y, z] = surLeTore(i);
-    // A slight jitter gives the surface its texture.
-    const jx = (graine(i, 9.1) - 0.5) * 0.04;
-    const jy = (graine(i, 9.7) - 0.5) * 0.04;
-    const jz = (graine(i, 11.3) - 0.5) * 0.04;
-    cible[i * 3] = x + jx;
-    cible[i * 3 + 1] = y + jy;
-    cible[i * 3 + 2] = z + jz;
+    /* A slight jitter gives the surface its texture. Half what the donut
+       carried: there it only roughened a tube, here it eats into an outline
+       that has to stay recognisable — at 0.04 the roof line and the nose both
+       went soft, and the panel joints of the satellite closed up. The SAME
+       jitter for all three forms: drawn twice, it would add a parasitic
+       displacement to every point during the transformation. */
+    const jx = (graine(i, 9.1) - 0.5) * 0.02;
+    const jy = (graine(i, 9.7) - 0.5) * 0.02;
+    const jz = (graine(i, 11.3) - 0.5) * 0.02;
+    const [vx, vy, vz] = voiture[i]!;
+    formeVoiture[i * 3] = vx + jx;
+    formeVoiture[i * 3 + 1] = vy + jy;
+    formeVoiture[i * 3 + 2] = vz + jz;
+    const [sx, sy, sz] = satellite[i]!;
+    formeSatellite[i * 3] = sx + jx;
+    formeSatellite[i * 3 + 1] = sy + jy;
+    formeSatellite[i * 3 + 2] = sz + jz;
+    const [ex, ey, ez] = engrenage[i]!;
+    formeEngrenage[i * 3] = ex + jx;
+    formeEngrenage[i * 3 + 1] = ey + jy;
+    formeEngrenage[i * 3 + 2] = ez + jz;
+    cible[i * 3] = formeVoiture[i * 3]!;
+    cible[i * 3 + 1] = formeVoiture[i * 3 + 1]!;
+    cible[i * 3 + 2] = formeVoiture[i * 3 + 2]!;
 
     // Spreading of the starts, wide: it is what gives the arrival its
     // perceived duration. Tightened, the 2200 points settle almost together and
@@ -248,14 +795,10 @@ export function initParcours3D(): void {
   let texteT = 0;
   let texteB = 0;
 
-  /** The donut's own rotation, accumulated. Declared HERE, before
-      poserLesDeparts() which reads it: further down, the initialization call
-      touched it in its dead zone and the whole module failed to start. */
-  let angle = 0;
-
   /** Framing used at the last computation of the starts, to know when to
-      redo it. */
-  let departsPour = { z: 0, aspect: 0, x: 0, y: 0, a: 0 };
+      redo it. It no longer carries the rotation: POSE never moves, so there is
+      nothing there to have changed. */
+  let departsPour = { z: 0, aspect: 0, x: 0, y: 0 };
 
   /** Places the waiting cloud OFF-SCREEN IN THE TOP RIGHT. The bounds are
       deduced from the camera's real field and the group's offset, never
@@ -278,18 +821,16 @@ export function initParcours3D(): void {
     // rotation crushes it. Measured, points supposed to start above the top
     // edge (1.43) ended up at 0.16 — that is, right in frame.
     // So we aim for a WORLD position and apply the INVERSE rotation.
-    // `spin` applies Rx(TILT) then Rz(angle) — in that order, three.js's XYZ Euler
-    // giving world = Rx · Rz · local. To get a wanted
-    // WORLD position, the two must therefore be undone: first Rx, then Rz.
-    // Undoing only the tilt was not enough: `angle` accumulates
-    // while the donut turns, so that on the way back the waiting cloud
-    // ended up rotated by as much and crossed the page. The
-    // "sometimes" came from there — the position depended on the time spent on
-    // block 2.
+    // `spin` applies Rx(TILT) then Ry(angle) — in that order, three.js's XYZ
+    // Euler giving world = Rx · Ry · local. To get a wanted WORLD position,
+    // the two must therefore be undone: first Rx, then Ry.
+    // Undoing only the tilt is not enough even now that the pose is fixed:
+    // POSE is a quarter of a turn's worth of rotation, and left in, it sent the
+    // waiting cloud across the page instead of off its top right corner.
     const cT = Math.cos(TILT);
     const sT = Math.sin(TILT);
-    const cA = Math.cos(angle);
-    const sA = Math.sin(angle);
+    const cA = Math.cos(POSE);
+    const sA = Math.sin(POSE);
     for (let i = 0; i < COUNT; i++) {
       const wx = xMin + graine(i, 51.7) * 2.4;
       const wy = yMin + graine(i, 57.1) * 1.8;
@@ -297,12 +838,12 @@ export function initParcours3D(): void {
       // Rx(-TILT)
       const ay = cT * wy + sT * wz;
       const az = -sT * wy + cT * wz;
-      // then Rz(-angle)
-      relais[i * 3] = cA * wx + sA * ay;
-      relais[i * 3 + 1] = -sA * wx + cA * ay;
-      relais[i * 3 + 2] = az;
+      // then Ry(-angle)
+      relais[i * 3] = cA * wx - sA * az;
+      relais[i * 3 + 1] = ay;
+      relais[i * 3 + 2] = sA * wx + cA * az;
     }
-    departsPour = { z: camera.position.z, aspect: camera.aspect, x: finaleX, y: finaleY, a: angle };
+    departsPour = { z: camera.position.z, aspect: camera.aspect, x: finaleX, y: finaleY };
   };
   poserLesDeparts();
   (geometrie.getAttribute("position") as THREE.BufferAttribute).array.set(relais);
@@ -379,7 +920,7 @@ export function initParcours3D(): void {
     // On a wide screen the intro is already centred, this offset is zero and
     // the clamp never bites.
     const demiHauteur = camera.position.z * HALF_FOV_TAN;
-    const limite = Math.max(0, demiHauteur - RAYON_EXT - demiHauteur * 0.06);
+    const limite = Math.max(0, demiHauteur - DEMI_HAUT - demiHauteur * 0.06);
     finaleY = Math.max(-limite, Math.min(limite, finaleY));
     texteL = (place.left - vue.left) / vue.width;
     texteR = (place.right - vue.left) / vue.width;
@@ -424,6 +965,10 @@ export function initParcours3D(): void {
   let canvasEfface = false;
   /** Last value of `avance` written into the position buffer. */
   let avancePrec = -1;
+  /** 0 = the car, 1 = the satellite, 2 = the gear. Smoothed, so the form
+      reshapes instead of jumping when the card changes. */
+  let melange = 0;
+  let melangePrec = -1;
 
   const tick = (): void => {
     /* Nothing to draw yet? Then draw nothing. Two cases: the layer is off
@@ -467,7 +1012,10 @@ export function initParcours3D(): void {
     }
     {
       const t = performance.now();
-      const dt = Math.min(0.05, (t - tPrec) / 1000);
+      /* The elapsed time is no longer read by anything — nothing in the scene
+         advances by itself now that the pose is fixed. The stamp is still kept
+         up to date, because the branch above resets it when the block leaves
+         the screen and that reset has to have something to reset. */
       tPrec = t;
 
       // UNE SEULE horloge pour toute la séquence. Elle vivait ici, recalculée
@@ -499,16 +1047,15 @@ export function initParcours3D(): void {
       const avance = 1 - Math.pow(1 - volBrut, 3);
       if (
         // Only while a point is still in flight. Past that the starts are
-        // never read again, and `angle` — which advances on every frame once
-        // the donut spins — kept re-triggering this loop of 2200 sines and
-        // cosines for the whole time the block was on screen, for a result
-        // nothing used.
+        // never read again, and re-running this loop of 2200 sines and cosines
+        // for the whole time the block is on screen produces a result nothing
+        // uses. Back when the form turned, the advancing angle alone was enough
+        // to re-trigger it on every single frame.
         avance < 1 &&
         (departsPour.z !== camera.position.z ||
           departsPour.aspect !== camera.aspect ||
           departsPour.x !== finaleX ||
-          departsPour.y !== finaleY ||
-          departsPour.a !== angle)
+          departsPour.y !== finaleY)
       ) {
         poserLesDeparts();
       }
@@ -537,6 +1084,32 @@ export function initParcours3D(): void {
       // points are on their target, and rewriting them then handing the
       // buffer back to the GPU changes nothing on screen. The rotation is
       // carried by the group, not by the positions.
+      /* WHICH FORM. The open card is written on <html> by ui.ts. The car
+         holds the first — Renault — the satellite takes over on the second,
+         AERIS, and the gear holds the third, Ethics Group: a firm whose
+         business is transforming organisations, so a gear is the honest
+         object there. The smoothing is deliberately slow: it is a
+         transformation to watch happen, not a replacement. */
+      const fiche = Number(sticky.ownerDocument.documentElement.dataset.fiche ?? "0");
+      const viseMelange = Math.min(2, Math.max(0, fiche));
+      melange += (viseMelange - melange) * 0.06;
+      if (Math.abs(viseMelange - melange) < 0.0015) melange = viseMelange;
+
+      if (melange !== melangePrec) {
+        /* Two legs, one walk: 0 → 1 goes from the car to the satellite,
+           1 → 2 from the satellite to the gear. The same linear blend on
+           both legs, so the two morphs read as one continuous reshaping. */
+        for (let k = 0; k < COUNT * 3; k++) {
+          const depuis = melange <= 1 ? formeVoiture[k]! : formeSatellite[k]!;
+          const vers = melange <= 1 ? formeSatellite[k]! : formeEngrenage[k]!;
+          const part = melange <= 1 ? melange : melange - 1;
+          cible[k] = depuis + (vers - depuis) * part;
+        }
+        melangePrec = melange;
+        // Les positions découlent de `cible` : elles doivent être réécrites.
+        avancePrec = -1;
+      }
+
       if (avance !== avancePrec) {
         for (let i = 0; i < COUNT; i++) {
           // The coefficients follow the spread: with a delay of up to
@@ -638,8 +1211,8 @@ export function initParcours3D(): void {
       // the leftmost points capping at 59% white.
       const bord = 1.5 - couverture * 1.65;
       const demiH = camera.position.z * HALF_FOV_TAN;
-      const cosA = Math.cos(angle);
-      const sinA = Math.sin(angle);
+      const cosA = Math.cos(POSE);
+      const sinA = Math.sin(POSE);
       const cosT = Math.cos(TILT);
       const sinT = Math.sin(TILT);
       /** Membership of a band [min, max], with a MARGIN fade. */
@@ -650,12 +1223,13 @@ export function initParcours3D(): void {
         const lx = tableau[i * 3]!;
         const ly = tableau[i * 3 + 1]!;
         const lz = tableau[i * 3 + 2]!;
-        // Position on screen. Own rotation (Z) then tilt (X);
-        // rotation.y is 0, and X does not touch the abscissa axis.
-        const rx = cosA * lx - sinA * ly;
-        const ry = sinA * lx + cosA * ly;
+        // Position on screen. The turntable (Y) then the viewing angle (X);
+        // rotation.z is 0. Y mixes X and Z, and X then mixes Y and Z: unlike
+        // with the donut, the depth of a point now moves it sideways too.
+        const rx = cosA * lx + sinA * lz;
+        const rz = -sinA * lx + cosA * lz;
         const sx = 0.5 + (groupe.position.x + rx) / (2 * demiW);
-        const sy = 0.5 - (groupe.position.y + cosT * ry - sinT * lz) / (2 * demiH);
+        const sy = 0.5 - (groupe.position.y + cosT * ly - sinT * rz) / (2 * demiH);
         const b = Math.min(1, Math.max(0, 0.5 + (sx - bord) / 0.2));
         const masque = bande(sx, texteL, texteR) * bande(sy, texteT, texteB);
         const e =
@@ -671,29 +1245,24 @@ export function initParcours3D(): void {
       groupe.position.x = finaleX;
       groupe.position.y = finaleY;
 
-      // Once settled, the donut spins on its own — but AROUND ITS OWN AXIS.
-      // It is drawn in the XY plane, so its axis of symmetry is Z: making
-      // it rotate around Y presented it edge-on at every
-      // half-turn (apparent area dropping to 33%), which made it
-      // literally disappear. Around Z the silhouette can no longer close
-      // up, and the rotation stays readable: the points are drawn at
-      // random, the cloud has no symmetry of revolution.
-      // THE ATTITUDE IS FIXED. It was so little fixed before that the donut
-      // changed orientation on every visit: the X and Y angles were
-      // multiplied by `pose`, so that at the moment the pose engaged
-      // they swung from 0 to sin(performance.now() · …) — that is,
-      // to a value that depends on how long the page has been
-      // open. The donut formed flat then went off at an angle, with no
-      // visible reason. No more swaying at all: it forms in the exact
-      // attitude it will keep.
+      /* THE ATTITUDE IS FIXED, ENTIRELY. The car is posed at TILT and POSE and
+         never moves again: the arrival of the points is the whole of the
+         motion here, and once they have landed the shape holds still, like a
+         car photographed on a stand.
+         The donut it replaces did turn, and had to: it was a ring drawn at
+         random, so only its grain appeared to move. Turning is not free for a
+         car. Around Z it would tumble nose over tail; around Y it passes
+         through a head-on view where a body three times longer than it is wide
+         loses most of its silhouette. Held at three quarters, it reads at every
+         moment.
+         These three lines are written on every frame rather than once: `spin`
+         is shared with the entry animation, and an attitude set only at start-up
+         was the old bug — the X and Y angles used to be multiplied by a factor
+         that rose from zero, so the form swung into place from a different
+         orientation on every visit. */
       spin.rotation.x = TILT;
-      spin.rotation.y = 0;
-      // Only the rotation on the donut's axis remains — the silhouette
-      // therefore never moves, it is the grain of the cloud that we see turning. The
-      // speed rises progressively: no break at the engagement.
-      const pose = Math.min(1, Math.max(0, (noir - 0.6) / 0.4));
-      angle += dt * 0.18 * pose;
-      spin.rotation.z = angle;
+      spin.rotation.y = POSE;
+      spin.rotation.z = 0;
 
       // No guard on document.hidden, neither here nor around the state.
       // This flag is true in contexts where the page is nevertheless fully

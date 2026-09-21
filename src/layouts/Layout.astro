@@ -119,46 +119,6 @@ const ficheAuteur = {
       <span class="pct">000%</span>
     </div>
 
-    <header class="site-header">
-      <div class="inner">
-        <a class="site-name" href={url("/")}>
-          <span class="nav-text-col">
-            <span class="nav-text-row">Home</span>
-            <span class="nav-text-row" aria-hidden="true">Home</span>
-          </span>
-        </a>
-        <a class="axiom-btn axiom-btn-nav" href={`mailto:${identity.email}`}>
-          <span class="axiom-btn-text-col">
-            <span class="axiom-btn-text-row">Contactez-moi</span>
-            <span class="axiom-btn-text-row" aria-hidden="true">Contactez-moi</span>
-          </span>
-          <span class="axiom-btn-arrow-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h17.4" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
-          </span>
-        </a>
-        <button class="burger" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-            <line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="20" y2="17" />
-          </svg>
-        </button>
-      </div>
-    </header>
-
-    <div class="menu-voile" aria-hidden="true">
-      <nav class="menu" aria-label="Navigation principale">
-        <a class="menu-lien" href={url("/")}>Accueil</a>
-        <a class="axiom-btn" href={`mailto:${identity.email}`}>
-          <span class="axiom-btn-text-col">
-            <span class="axiom-btn-text-row">Contactez-moi</span>
-            <span class="axiom-btn-text-row" aria-hidden="true">Contactez-moi</span>
-          </span>
-          <span class="axiom-btn-arrow-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h17.4" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
-          </span>
-        </a>
-      </nav>
-    </div>
-
     <main class="container" id="main" tabindex="-1">
       <slot />
     </main>

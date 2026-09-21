@@ -43,8 +43,8 @@ const iconesProjet: Record<IconeProjet, string> = {
        second. The tear window is anchored on its last screen: the dark
        content scrolls behind while the sheet rises. -->
   <div class="dark-zone">
-    <Hero />
-
+    <!-- The stats band leads, between the navbar and the hero: it is the
+         first thing the page says. -->
     <div class="bandeau-block">
       <div class="bandeau-stat" aria-hidden="true">
         <span class="bandeau-stat-inner">
@@ -55,8 +55,29 @@ const iconesProjet: Record<IconeProjet, string> = {
           <span>+35 dépôts de production</span>
         </span>
       </div>
-      <Marquee items={marqueeSkills} tightBottom />
+      <Marquee items={marqueeSkills} />
+      <!-- The band's bottom line: the domain on the left, the social logos
+           on the right — the navbar's two ends. -->
+      <div class="bandeau-ligne">
+        <a class="bandeau-domaine" href={url("/")}>julien-chapron.com</a>
+        <div class="bandeau-reseaux">
+          <a href={identity.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
+          </a>
+          <a href={identity.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg>
+          </a>
+        </div>
+      </div>
     </div>
+
+    <Hero />
+
+    <!-- The dark runway between the hero and the tear: the band used to sit
+         there; now it leads the page, so this empty stretch keeps the
+         sheet's rise where it was — the effect happens lower, not right
+         under the hero. -->
+    <div class="apres-hero" aria-hidden="true"></div>
 
     <!-- The white sheet rises from the bottom: a simple rectangle in
          scaleY from its bottom edge. The container wrapping it carries the
@@ -135,7 +156,7 @@ const iconesProjet: Record<IconeProjet, string> = {
     <div class="spec-layout">
     <div class="spec-intro">
       <p class="spec-eyebrow">parcours</p>
-      <h2 class="spec-headline">Sept ans en production. <span>Toujours en équipe.</span></h2>
+      <h2 class="spec-headline">Sept ans en production. <span>Principalement en équipe.</span></h2>
       <p class="spec-lead">Trois missions, de la recherche publique à la voiture électrique connectée.</p>
     </div>
     <div class="exp-carousel">
@@ -180,22 +201,30 @@ const iconesProjet: Record<IconeProjet, string> = {
           ))
         }
       </div>
-      <!-- La barre de navigation des fiches. Les points seuls ne disaient ni
-           combien il y en a, ni dans quel sens on avance : le compteur donne
-           la première information, les flèches la seconde. -->
+      <!-- The dots carry the position, centred between the two arrows: one
+           dot per card, and the travelled line fills behind the current one.
+           Each dot is a tab, so the group announces where you are to a
+           screen reader. -->
       <div class="exp-nav">
         <button type="button" class="exp-fleche" data-pas="-1" aria-label="Expérience précédente">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 12H3" /><path d="m8.8 6.8-5.2 5.2 5.2 5.2" /></svg>
         </button>
 
-        <!-- Le compteur porte seul la position, au centre entre les deux
-             flèches. aria-live l'annonce au changement : sans les points, il
-             est le seul à dire où l'on en est, y compris au lecteur d'écran. -->
-        <p class="exp-compteur" role="status" aria-live="polite">
-          <span class="visually-hidden">Expérience </span>
-          <b class="exp-compteur-actuel">1</b><span aria-hidden="true">/</span
-          ><span class="visually-hidden"> sur </span>{experiences.length}
-        </p>
+        <div class="exp-dots" role="tablist" aria-label="Choisir une expérience">
+          {
+            experiences.map((exp, i) => (
+              <button
+                type="button"
+                class:list={["exp-dot", i === 0 && "is-active"]}
+                role="tab"
+                aria-selected={i === 0 ? "true" : "false"}
+                tabindex={i === 0 ? 0 : -1}
+              >
+                <span class="visually-hidden">{exp.company}</span>
+              </button>
+            ))
+          }
+        </div>
 
         <button type="button" class="exp-fleche" data-pas="1" aria-label="Expérience suivante">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.6 12H21" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
@@ -213,10 +242,10 @@ const iconesProjet: Record<IconeProjet, string> = {
          sections, reached by simply scrolling the page. -->
   <Section command="cat competences.md" class="section-skills section-apres">
     <p class="spec-eyebrow">compétences</p>
-    <h2 class="spec-headline">Spécifications techniques. <span>Ce que j'utilise vraiment.</span></h2>
+    <h2 class="spec-headline">Ce que j'utilise. <span>Dans ma stack.</span></h2>
     <p class="spec-lead">
       Sur chaque ligne, les deux premières sont celles où j'ai le plus
-      d'heures de vol.
+      d'expérience.
     </p>
     <div class="skill-sheet">
       {
@@ -258,10 +287,7 @@ const iconesProjet: Record<IconeProjet, string> = {
           <footer class="projet-pied">
             <p class="projet-note">{project.tagline}</p>
             {project.page && (
-              <a class="projet-lien" href={url(project.page)}>
-                <span>Voir le projet</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h17.4" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
-              </a>
+              <a class="projet-lien" href={url(project.page)}>Voir le projet</a>
             )}
           </footer>
         </article>
@@ -279,6 +305,15 @@ const iconesProjet: Record<IconeProjet, string> = {
         <div class="footer-propos">
           <h2>Disponible pour votre équipe.</h2>
           <p>Dites-moi ce que vous construisez, on regarde ensemble ce que j'y apporte.</p>
+          <a class="axiom-btn axiom-btn-dark footer-cta" href={`mailto:${identity.email}`}>
+            <span class="axiom-btn-text-col">
+              <span class="axiom-btn-text-row">Contactez-moi</span>
+              <span class="axiom-btn-text-row" aria-hidden="true">Contactez-moi</span>
+            </span>
+            <span class="axiom-btn-arrow-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h17.4" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
+            </span>
+          </a>
         </div>
         <div class="footer-droite">
           <dl class="footer-stats">
@@ -292,21 +327,6 @@ const iconesProjet: Record<IconeProjet, string> = {
             </div>
           </dl>
         </div>
-      </div>
-
-      <!-- The call to action on its own line, centred. Tucked under the two
-           statistics it read as their appendix, off in a corner, when it is
-           the one thing the page is asking for. -->
-      <div class="footer-appel">
-        <a class="axiom-btn axiom-btn-dark" href={`mailto:${identity.email}`}>
-          <span class="axiom-btn-text-col">
-            <span class="axiom-btn-text-row">Contactez-moi</span>
-            <span class="axiom-btn-text-row" aria-hidden="true">Contactez-moi</span>
-          </span>
-          <span class="axiom-btn-arrow-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h17.4" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
-          </span>
-        </a>
       </div>
 
       <div class="footer-separateur" aria-hidden="true"></div>

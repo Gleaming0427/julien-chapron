@@ -188,7 +188,10 @@ const VENUS: [number, number][] = [
    secours : l'ouverture ne doit jamais rester sans forme. */
 async function echantillonnerPortrait(
   url: string,
-  combien: number,
+  /** Écart voulu entre deux points voisins, en unités de scène. C'est lui qui
+      commande le nombre de places, et non l'inverse : un nombre fixe donne une
+      densité juste à une seule largeur d'écran et fausse à toutes les autres. */
+  ecart: number,
 ): Promise<Float32Array | null> {
   try {
     const image = new Image();
@@ -196,7 +199,10 @@ async function echantillonnerPortrait(
     image.src = url;
     await image.decode();
 
-    const n = 240;
+    /* Résolution de travail = celle de la PHOTO, 160 px. Elle était lue sur
+       une toile de 240 : un agrandissement, qui n'invente aucun détail et
+       coûte deux fois plus de pixels à parcourir. */
+    const n = Math.max(32, Math.min(image.naturalWidth, image.naturalHeight));
     const toile = document.createElement("canvas");
     toile.width = n;
     toile.height = n;
@@ -232,81 +238,106 @@ async function echantillonnerPortrait(
     }
     if (sujet < n * n * 0.05) return null;
 
-    /* ---------- 2. courbe de contraste ----------
-       La luminance est d'abord ramenée à l'étendue RÉELLE du sujet : une
-       photo n'utilise jamais tout le noir au tout blanc, et sans ce recadrage
-       la moitié de l'échelle est perdue.
+    /* ---------- 2. la trame, au pas du globe ----------
+       LE VISAGE EST FAIT COMME LE GLOBE, et c'est tout le principe.
 
-       Le plancher tombe de 0,20 à 0,10 : à 0,20 les zones sombres recevaient
-       presque autant de points que les claires, les lunettes et la bouche ne
-       se creusaient pas, et le visage devenait une bouillie uniforme. Ce sont
-       ces creux-là qui font reconnaître quelqu'un.
+       Le globe est une grille régulière : un pas constant en latitude et en
+       longitude, et AUCUN point supprimé. Chaque nœud est dessiné — blanc s'il
+       tombe sur une terre, gris fin s'il tombe sur une mer. Ce n'est donc pas
+       la densité qui dessine les continents, c'est la CLASSIFICATION. C'est ce
+       qui leur donne des bords francs et cet aspect posé.
 
-       L'exposant reste MODÉRÉ (1,15). Poussé à 1,9, la densité et le tri par
-       ton se cumulaient sur la même zone : le front, qui est la partie la
-       plus éclairée, recevait à la fois le plus de points ET tous les points
-       blancs, et virait au pavé saturé. Les deux mécanismes ont des rôles
-       distincts — la densité fait le modelé, le tri fait la valeur — et il ne
-       faut pas qu'ils tirent ensemble. */
-    const PLANCHER = 0.1;
+       Le portrait suit exactement la même règle, et au même pas : un nœud tous
+       les LAT_STEP radians, comme sur la sphère, si bien que les deux formes
+       ont littéralement le même grain. Les zones claires du visage prennent le
+       blanc épais, les sombres le gris fin, et rien n'est retiré.
+
+       Deux essais ont échoué avant d'arriver là, et pour la même raison de
+       fond : ils ENLEVAIENT des points. Le semis pondéré par la luminance
+       faisait des paquets et des trous ; la trame à coupe partielle laissait un
+       champ de points épars sur le blouson, que l'œil lit comme du bruit. Le
+       globe ne retire jamais rien — c'est précisément pour ça qu'il est net.
+
+       Le réseau est HEXAGONAL : sur une trame carrée un point a quatre voisins
+       à `pas` et quatre autres à `pas × 1,41`, donc deux écarts. Sur
+       l'hexagonal les six voisins sont tous à `pas` exactement. */
     const ETENDUE = Math.max(0.001, maxi - mini);
-    const poids = new Float32Array(n * n);
-    const cumul = new Float32Array(n * n);
-    let total = 0;
-    for (let i = 0; i < n * n; i++) {
-      if (lum[i]! >= 0) {
-        const norme = (lum[i]! - mini) / ETENDUE;
-        poids[i] = PLANCHER + (1 - PLANCHER) * Math.pow(norme, 1.15);
-      }
-      total += poids[i]!;
-      cumul[i] = total;
-    }
-    if (total <= 0) return null;
+    const pas = Math.max(1, (ecart / ECHELLE_PORTRAIT) * n);
+    const hauteurRangee = pas * 0.86603;
+    /* Le ton d'un nœud est la MOYENNE de sa cellule, et non la valeur du seul
+       pixel sous lui. Lu au pixel, un nœud tombant sur une monture de lunettes
+       sortait noir pendant que son voisin, à deux pixels de là, sortait clair :
+       de l'aliasing pur. Moyenner sur la cellule, c'est réduire l'image à la
+       résolution de la trame — la seule façon correcte de la sous-échantillonner. */
+    const demiCellule = Math.max(1, Math.round(pas / 2));
 
-    /* ---------- 3. tirage pondéré ----------
-       Chaque point est tiré dans la distribution complète, puis secoué à
-       l'intérieur de son pixel : la densité suit exactement la courbe et la
-       couverture reste régulière, sans les amas du tirage par rejet. */
+    const places: { x: number; y: number; l: number }[] = [];
+    for (let r = 0; ; r++) {
+      const py = (r + 0.5) * hauteurRangee;
+      if (py >= n) break;
+      // Une rangée sur deux décalée d'un demi-pas : c'est ce qui fait l'hexagone.
+      for (let px = (r % 2) * pas * 0.5 + pas * 0.5; px < n; px += pas) {
+        let somme = 0;
+        let vus = 0;
+        let fond = 0;
+        for (let dy = -demiCellule; dy <= demiCellule; dy++) {
+          const yy = (py + dy) | 0;
+          if (yy < 0 || yy >= n) continue;
+          for (let dx = -demiCellule; dx <= demiCellule; dx++) {
+            const xx = (px + dx) | 0;
+            if (xx < 0 || xx >= n) continue;
+            const v = lum[yy * n + xx]!;
+            if (v < 0) fond++;
+            else {
+              somme += v;
+              vus++;
+            }
+          }
+        }
+        // Un nœud dont la cellule est majoritairement du fond n'est pas sur le
+        // sujet : sans ce test, la silhouette se frangeait d'une bordure floue.
+        if (vus === 0 || fond > vus) continue;
+        places.push({
+          x: (px / n - 0.5) * ECHELLE_PORTRAIT,
+          y: (0.5 - py / n) * ECHELLE_PORTRAIT,
+          l: (somme / vus - mini) / ETENDUE,
+        });
+      }
+    }
+    if (places.length < 200) return null;
+
     let graine = 1;
     const tirage = (): number => {
       graine = (graine * 16807) % 2147483647;
       return graine / 2147483647;
     };
 
-    const places: { x: number; y: number; l: number }[] = [];
-    for (let i = 0; i < combien; i++) {
-      const cible = tirage() * total;
-      // Recherche dichotomique dans le cumul.
-      let bas = 0;
-      let haut = n * n - 1;
-      while (bas < haut) {
-        const mid = (bas + haut) >> 1;
-        if (cumul[mid]! < cible) bas = mid + 1;
-        else haut = mid;
-      }
-      const px = bas % n;
-      const py = (bas / n) | 0;
-      places.push({
-        x: ((px + tirage()) / n - 0.5) * 1.7,
-        y: (0.5 - (py + tirage()) / n) * 1.7,
-        l: lum[bas]! < 0 ? 0 : lum[bas]!,
-      });
-    }
+    /* ---------- 3. tri par luminance : ce qui dessine ----------
+       Les nuages ont des tailles et des couleurs différentes — terres en blanc
+       épais, mers en gris fin. Rangés du plus clair au plus sombre, les nœuds
+       les plus lumineux reviennent au nuage blanc et les autres au gris. Le
+       partage se fait donc au rang, exactement dans la proportion terres/mers
+       du globe : environ trois nœuds sur dix passent en blanc, ce qui tombe
+       juste pour un visage éclairé de face.
 
-    /* ---------- 4. tri par luminance ----------
-       C'est ce qui donne au portrait ses DEUX tons. Les nuages ont des tailles
-       et des couleurs différentes — terres en blanc épais, mers en gris fin —
-       et ils puisaient jusqu'ici au hasard dans le même vivier, ce qui
-       gâchait cette matière. Rangées du plus clair au plus sombre, les places
-       les plus lumineuses reviennent au nuage blanc et les autres au gris.
+       Le tri est TRAMÉ, et c'est indispensable. Trié sur la seule luminance, le
+       partage est un seuil net : le front, uniformément la zone la plus
+       éclairée, passait en blanc à 100 % et se figeait en pavé plein, comme une
+       casquette. En secouant la clé de tri, quelques gris se mêlent aux hautes
+       lumières et quelques blancs aux demi-teintes : la frontière devient un
+       dégradé, ce qu'on attend d'une image en points.
 
-       Le tri est TRAMÉ, et c'est indispensable. Trié sur la seule luminance,
-       le partage est un seuil net : le front, uniformément la zone la plus
-       éclairée, passait en blanc à 100 % et se figeait en pavé plein, comme
-       une casquette. En secouant la clé de tri, quelques gris se mêlent aux
-       hautes lumières et quelques blancs aux demi-teintes : la frontière
-       devient un dégradé de trame, ce qu'on attend d'une image en points. */
-    const AMPLITUDE_TRAME = 0.45;
+       C'est ici, et nulle part ailleurs, que se joue le modelé du visage — d'où
+       une amplitude mesurée. Trop forte, un nœud sur deux change de valeur sans
+       rapport avec l'image et le visage part en confettis.
+
+       Descendue de 0,30 à 0,17 pour les YEUX. Le désordre n'a aucun effet sur
+       une large plage de même ton — une joue reste une joue — mais il efface ce
+       qui ne fait que quelques nœuds : à 0,30, la moitié des nœuds d'un œil
+       basculaient en blanc et l'œil disparaissait dans la peau. Un dégradé plus
+       raide est le prix à payer, et il se paie sur les zones lisses, là où il
+       ne se voit pas. */
+    const AMPLITUDE_TRAME = 0.17;
     places.sort(
       (a, b) =>
         b.l + (tirage() - 0.5) * AMPLITUDE_TRAME - (a.l + (tirage() - 0.5) * AMPLITUDE_TRAME),
@@ -322,6 +353,12 @@ async function echantillonnerPortrait(
     return null;
   }
 }
+
+/** Largeur du portrait en unités de scène. À 2, il tient exactement la place
+    du globe qui lui succède — la forme change, l'encombrement non. C'est aussi
+    ce qui lui donne le plus de définition : la trame gardant un écart constant
+    À L'ÉCRAN, doubler la taille quadruple le nombre de points, donc le détail. */
+const ECHELLE_PORTRAIT = 2.0;
 
 /** Le point est-il dans la silhouette ? Lancer de rayon horizontal. */
 function dansVenus(x: number, y: number): boolean {
@@ -347,8 +384,9 @@ function dansVenus(x: number, y: number): boolean {
    mêmes points, déplacés. Onze ans de pierre qui deviennent sept ans de
    code. */
 
-/** Temps pendant lequel la statue tient, une fois dressée. */
-const TENUE_BLOC = 1.0;
+/** Temps pendant lequel la statue tient, une fois dressée. The face is the
+    point of the opening: it is given the time to be looked at. */
+const TENUE_BLOC = 3.5;
 /** Durée de la taille : le bloc devient sphère. */
 const TAILLE = 1.9;
 /** Instant où le globe est entièrement dégagé. */
@@ -373,11 +411,17 @@ export function pointCloud(
   /** Décale les tirages de la statue : deux nuages de même graine
       rempliraient exactement les mêmes places. */
   graine: number,
-  /** Positions tirées de la photo, ou null si elle n'a pas pu être lue. */
+  /** LA TRANCHE de places tirées de la photo qui revient à ce nuage — pas le
+      vivier entier : chacun reçoit la sienne, si bien qu'ils ne peuvent plus se
+      superposer. Elle est plus COURTE que le nuage, et c'est voulu : les points
+      qu'elle ne couvre pas restent hors champ pendant que le portrait tient.
+      Vaut null si la photo n'a pas pu être lue. */
   portrait: Float32Array | null,
-  /** Rang du premier point de ce nuage dans le vivier du portrait : les deux
-      nuages y puisent des places distinctes au lieu de se superposer. */
-  debut: number,
+  /** Ce que la caméra montre, en unités de scène, au moment de l'ouverture.
+      C'est ce qui dit à quelle hauteur lâcher les points et à quelle distance
+      garer ceux qui attendent : en dur, les deux étaient justes sur un écran
+      et faux sur tous les autres. */
+  cadrage: { demiHauteur: number; rayon: number },
 ): Cloud {
   const count = positions.length;
   const target = new Float32Array(count * 3);
@@ -397,30 +441,39 @@ export function pointCloud(
       return v - Math.floor(v);
     };
 
-    /* La place du point dans la statue : tirage au sort dans le rectangle
-       englobant, rejeté tant qu'il tombe hors de la silhouette. Déterministe,
-       donc la statue est la même à chaque visite.
-
-       Le tirage est indexé sur `graine` pour que les deux nuages — terres et
-       mers — remplissent la statue SANS se superposer : à graine identique
-       ils auraient produit la même suite, et les points se seraient empilés
-       deux par deux au lieu de couvrir la surface. */
     let vx = 0;
     let vy = 0;
     let profondeur = 0;
+    /* Le point tombe-t-il sur le portrait, ou attend-il son tour ? */
+    let aSaPlace = true;
 
-    if (portrait) {
-      // Une place du vivier par point, sans réemploi entre les deux nuages.
-      const j = ((debut + i) * 2) % portrait.length;
-      vx = portrait[j]!;
-      vy = portrait[j + 1]!;
+    if (portrait && i * 2 < portrait.length) {
+      // Une place de la tranche par point, dans l'ordre, sans réemploi.
+      vx = portrait[i * 2]!;
+      vy = portrait[i * 2 + 1]!;
       /* Épaisseur faible et purement aléatoire : c'est une image, pas un
          buste. Une vraie profondeur demanderait la carte de relief du visage,
          qu'une photo ne donne pas — et un faux volume déformerait les
          traits, donc la ressemblance. */
       profondeur = (noise(graine + 7.9) - 0.5) * 0.14;
+    } else if (portrait) {
+      /* Pas de place dans le portrait : le point attend en haut, hors champ,
+         au-dessus de la place qu'il occupera sur le globe. Son bloc sera son
+         point de départ, donc la première phase ne le déplace pas d'un pixel ;
+         il ne tombe qu'avec la taille, et rejoint la sphère avec les autres.
+         C'est ce qui allège le portrait sans rien retirer au globe. */
+      aSaPlace = false;
+      vx = p.x;
+      vy = p.y;
+      profondeur = p.z;
     } else {
-      // Secours : la silhouette dessinée, si la photo n'a pas pu être lue.
+      /* Secours : la silhouette dessinée, si la photo n'a pas pu être lue.
+         Tirage au sort dans le rectangle englobant, rejeté tant qu'il tombe
+         hors de la silhouette. Déterministe, donc la statue est la même à
+         chaque visite — et indexé sur `graine`, pour que les deux nuages la
+         remplissent SANS se superposer : à graine identique ils auraient
+         produit la même suite, et les points se seraient empilés deux par deux
+         au lieu de couvrir la surface. */
       for (let essai = 0; essai < 24; essai++) {
         vx = (noise(graine + essai * 3.71) - 0.5) * 0.8;
         vy = (noise(graine + 11.3 + essai * 5.17) - 0.5) * 2.05;
@@ -433,16 +486,68 @@ export function pointCloud(
     bloc[i * 3] = vx;
     bloc[i * 3 + 1] = vy;
     bloc[i * 3 + 2] = profondeur;
-    // Offset in the XY plane of the GLOBE — and not of the screen, contrary to
-    // what this comment used to say: the group rotates, so this offset tips into
-    // depth as the rotation goes. The points can therefore graze the
-    // camera; that is harmless since the size no longer depends on
-    // the distance (see the material below).
-    const angle = noise(12.9898) * Math.PI * 2;
-    const away = 4.5 + noise(78.233) * 7;
-    start[i * 3] = p.x + Math.cos(angle) * away;
-    start[i * 3 + 1] = p.y + Math.sin(angle) * away;
-    start[i * 3 + 2] = p.z;
+
+    /* D'OÙ le point arrive. Les deux populations n'arrivent PAS de la même
+       façon, et c'est délibéré : seul le portrait tombe du ciel. */
+    if (aSaPlace) {
+      /* LA PLUIE, pour les points du portrait. Le point garde son abscisse et
+         sa profondeur et ne se voit ajouter que de la hauteur : il tombe donc
+         tout droit sur sa propre place, et le visage se compose colonne par
+         colonne comme une pluie qui se fige.
+
+         La chute se mesure sur l'axe Y DU GLOBE et non de l'écran. Les deux
+         coïncident ici, et c'est vérifié plutôt que supposé : pendant toute
+         cette phase `degage` vaut zéro, donc le lacet comme l'inclinaison sont
+         annulés (voir la boucle de rendu) et la scène est droite, face à nous.
+
+         Hauteurs étalées de 5,5 à 12 : il faut dépasser le haut du cadre, qui
+         vaut environ 2 unités sur un grand écran et jusqu'à 5 sur un téléphone
+         étroit, où la scène est petite et le canevas haut. Étalées, aussi, pour
+         que les points ne descendent pas d'une même ligne. */
+      /* La hauteur de lâcher se DÉDUIT du cadre : juste au-dessus du bord
+         haut, plus un étalement pour que les points ne descendent pas d'une
+         même ligne. En dur à 5,5–12, elle dépassait à peine le bord sur un
+         téléphone étroit — où le cadre fait cinq unités de haut — et valait
+         quatre fois la hauteur utile sur un grand écran, où les points
+         arrivaient alors en traits, trop vite pour qu'on les voie tomber. */
+      const chute = cadrage.demiHauteur + 0.8 + noise(78.233) * 3;
+      start[i * 3] = vx;
+      start[i * 3 + 1] = vy + chute;
+      start[i * 3 + 2] = profondeur;
+    } else {
+      /* L'ESSAIM, pour les points qui ne font que le globe. Ils attendent hors
+         champ dans une direction tirée au sort autour de leur place, comme
+         avant la pluie, et convergent vers la sphère au moment de la taille :
+         le globe se forme donc exactement comme il l'a toujours fait.
+
+         Une chute leur irait mal, d'ailleurs. Elle n'a de sens que tant que la
+         scène est droite ; à ce moment-là elle ne l'est plus — l'inclinaison et
+         le lacet reviennent avec `degage`, et « le haut » du globe n'est plus
+         le haut de l'écran.
+
+         Le décalage est pris dans le plan XY DU GLOBE : le groupe tourne, si
+         bien qu'il bascule en profondeur à mesure de la rotation. Les points
+         peuvent donc frôler la caméra ; c'est sans conséquence puisque leur
+         taille ne dépend pas de la distance (voir la matière plus bas). */
+      /* HORS DU CADRE, et c'est le point entier de ce calcul. Ces points-là ne
+         font que passer dans l'ancienne version : ils partaient de 4,5 à 11,5
+         unités et fonçaient vers la sphère en une seconde et demie. Ils
+         STATIONNENT désormais pendant toute la durée du portrait — et une
+         distance de 4,5 unités tombe DANS le champ, qui en fait plus de cinq
+         de haut sur un téléphone. D'où les points semés sur les côtés de
+         l'écran et par-dessus le titre pendant que le visage se tient.
+         On part donc du rayon réellement visible, avec une marge. */
+      const angle = noise(12.9898) * Math.PI * 2;
+      const away = cadrage.rayon * 1.15 + 1 + noise(78.233) * 4;
+      start[i * 3] = p.x + Math.cos(angle) * away;
+      start[i * 3 + 1] = p.y + Math.sin(angle) * away;
+      start[i * 3 + 2] = p.z;
+      // Son bloc EST son départ : la première phase ne le déplace pas d'un
+      // pixel, il ne s'ébranle qu'avec la taille.
+      bloc[i * 3] = start[i * 3]!;
+      bloc[i * 3 + 1] = start[i * 3 + 1]!;
+      bloc[i * 3 + 2] = start[i * 3 + 2]!;
+    }
     delay[i] = noise(21.317) * STAGGER;
   }
 
@@ -682,15 +787,100 @@ export async function initHero3D(): Promise<void> {
   const chemin =
     base?.closest("body")?.querySelector<HTMLImageElement>(".hero-portrait")?.src ??
     "/julien-chapron.webp";
-  const portrait = await echantillonnerPortrait(chemin, land.length + sea.length);
+  /* Le portrait ne prend PAS tous les points du globe, et le nombre qu'il en
+     prend n'est pas un réglage : il se DÉDUIT du pas de la trame et de la
+     surface du sujet — environ quatre mille, soit un point du globe sur cinq.
+
+     Un point par point du globe, il en recevait vingt-deux mille sur la surface
+     d'un visage : les places se touchaient et l'image se refermait en une masse
+     pleine. Une part fixe du total ne réglait rien non plus, puisque la même
+     quantité s'étale sur une scène de 225 px comme sur une de 600.
+
+     Les points qui n'ont pas de place ne disparaissent pas pour autant : ils
+     restent où ils sont nés, hors champ, et ne rejoignent la scène qu'au moment
+     de la taille (voir pointCloud). La sphère finale garde donc exactement le
+     même nombre de points qu'avant. */
+  /* LE CADRE, tel que resize() va le régler, calculé ici avec la MÊME formule :
+     le globe de diamètre 2 occupe 84 % du petit côté de la scène, donc une
+     unité vaut `uniteEnPx` pixels, et le canevas — qui couvre tout l'écran —
+     montre `vue / uniteEnPx` unités de part et d'autre du centre. Recopier la
+     formule plutôt que la deviner est ce qui garantit que les départs, les
+     attentes et les arrivées restent tous d'accord entre eux. */
+  const cadre = (base ?? stage).getBoundingClientRect();
+  const vue = layer.getBoundingClientRect();
+  const uniteEnPx = Math.max(1, (Math.min(cadre.width, cadre.height) * 0.84) / 2);
+  const demiHauteurVue = Math.max(1, vue.height) / 2 / uniteEnPx;
+  const demiLargeurVue = Math.max(1, vue.width) / 2 / uniteEnPx;
+  const cadrage = {
+    demiHauteur: demiHauteurVue,
+    rayon: Math.hypot(demiHauteurVue, demiLargeurVue),
+  };
+
+  /* L'écart entre deux points du portrait EST celui du globe : un pas de
+     LAT_STEP degrés, soit la distance entre deux parallèles sur une sphère de
+     rayon 1. Les deux formes ont ainsi rigoureusement le même grain, et le
+     visage se lit comme se lisent les continents.
+
+     Cet écart ne dépend pas de la taille de l'écran, et c'est juste : le globe
+     non plus. Une grande scène montre les deux plus gros, une petite les montre
+     plus petits, mais jamais plus ou moins serrés l'un que l'autre. */
+  /* LE PAS DU VISAGE EST EXACTEMENT CELUI DU GLOBE. Un nœud tous les LAT_STEP
+     radians, comme entre deux parallèles sur une sphère de rayon 1 : les points
+     du visage sont donc espacés comme ceux des continents, ni plus ni moins, et
+     ils se touchent exactement dans les mêmes conditions — c'est-à-dire jamais
+     tant que l'écran est assez fin.
+
+     Il a valu 1,7 fois plus fin, pour gagner en définition dans les yeux. C'était
+     une erreur d'arbitrage : à ce pas-là le blanc se refermait en masse pleine,
+     les points fusionnaient, et des points fusionnés se lisent comme des traits.
+     Le visage y gagnait des détails qu'il perdait aussitôt dans la pâte.
+
+     Le prix est connu et assumé : au pas du globe, le visage fait 42 nœuds de
+     large, soit quatre par œil. Pour retrouver du détail SANS refermer la
+     matière, il faut agrandir le portrait — pas resserrer sa trame. */
+  const portrait = await echantillonnerPortrait(chemin, LAT_STEP * DEG);
 
   /* L'ordre des rangs compte : le vivier est trié du plus clair au plus
      sombre. Les TERRES — points blancs et épais — prennent donc la tête, et
      les MERS — gris fins — la suite. C'est ce qui donne au portrait ses deux
      valeurs : le visage éclairé en blanc franc, les cheveux et la veste en
      gris discret. Inversé, on obtenait un négatif illisible. */
-  const landCloud = pointCloud(land, 0xffffff, 2.6, 1, 63.7, portrait, 0);
-  const seaCloud = pointCloud(sea, 0x8b949e, 1.6, 0.6, 12.9898, portrait, land.length);
+  const placesTotal = portrait ? portrait.length / 2 : 0;
+  /* LA PART DE BLANC EST MESURÉE SUR LA PHOTO, pas héritée du globe.
+
+     Elle valait la proportion terres/mers — 31 % — parce que les deux nuages
+     se partageaient le vivier au prorata de leur taille. Cette proportion
+     décrit la géographie de la Terre ; elle n'a aucune raison de décrire un
+     visage, et sur celui-ci elle tombait mal : le sommet du crâne, très
+     éclairé, est la zone la plus claire de la photo et raflait à lui seul tout
+     le blanc, laissant le visage en gris. On lisait un bonnet blanc sur une
+     tête grise.
+
+     Relevé sur l'image : 46 % du sujet est au-dessus de 0,50 de luminance,
+     44 % au-dessus de 0,60, 40 % au-dessus de 0,70. Ce palier entre 0,60 et
+     0,70 est la cassure nette entre la PEAU ÉCLAIRÉE — crâne, front, joues,
+     nez — et tout le reste : lunettes, ombres, sweat. C'est là qu'il faut
+     couper, et 42 % tombe au milieu du palier.
+
+     Les points de terre qui n'obtiennent pas de place attendent hors champ
+     comme les autres : le globe n'y perd rien. */
+  const PART_BLANCHE = 0.42;
+  const placesTerre = Math.min(land.length, Math.round(placesTotal * PART_BLANCHE));
+  const landCloud = pointCloud(
+    land, 0xffffff, 2.6, 1, 63.7,
+    portrait ? portrait.subarray(0, placesTerre * 2) : null,
+    cadrage,
+  );
+  /* Le gris passe de 1,6 à 1,15 : nettement plus fin que le blanc, qui garde
+     sa taille pleine. C'est ce qui sépare les deux valeurs autrement que par la
+     couleur — le blanc fait une matière pleine, le gris une poussière. À taille
+     presque égale, les deux se lisaient comme une seule masse, sur le visage
+     comme sur le globe. */
+  const seaCloud = pointCloud(
+    sea, 0x8b949e, 1.15, 0.6, 12.9898,
+    portrait ? portrait.subarray(placesTerre * 2) : null,
+    cadrage,
+  );
   spin.add(seaCloud.points, landCloud.points);
 
   /* Toulouse reprend un point à elle : c'est l'ancre du trait pointillé qui
@@ -849,9 +1039,9 @@ export async function initHero3D(): Promise<void> {
 
     // Setback such that the sphere (diameter 2) occupies the height of its
     // slot, while the canvas itself fills the whole screen.
-    // The globe occupies 84% of the frame: there remains room for the
-    // widest orbits to fit entirely in the window.
-    const wanted = Math.min(slot.height, slot.width) * 0.84;
+    // The globe occupies 80% of the frame: large enough to fill the slot's
+    // height, small enough for the widest orbits to stay readable.
+    const wanted = Math.min(slot.height, slot.width) * 0.8;
     camera.position.z = view.height / (wanted * HALF_FOV_TAN);
     camera.updateProjectionMatrix();
 
@@ -962,6 +1152,23 @@ export async function initHero3D(): Promise<void> {
     }
 
     const degage = degagement(t);
+    /* LE SIGNAL PART AU DÉBUT DE LA TAILLE, et non à sa fin.
+
+       La ligne du hero — la disponibilité qui cède la place au code, voir
+       initSousTitre — doit changer PENDANT que les points se transforment,
+       puisque c'est le même geste : la forme devient globe, la phrase devient
+       autre chose. Attendu sur `degage >= 1`, le signal partait à 5,2 s, soit
+       après la transformation ; le sondage y ajoutait jusqu'à 0,4 s et le fondu
+       0,6 s de plus, si bien que la phrase changeait à 6,2 s — une seconde
+       pleine après que le globe se soit posé, donc sans rapport visible avec
+       lui.
+
+       Lancé dès que la taille s'amorce, le fondu s'achève vers 4 s, au milieu
+       de la transformation. Le nom de l'attribut dit toujours « globe » : c'est
+       bien le passage au globe qu'il annonce, simplement à son début. */
+    if (degage > 0) {
+      document.documentElement.dataset.globe = "1";
+    }
 
     if (!dragging) {
       // Inertia after release, then resumption of the slow rotation.

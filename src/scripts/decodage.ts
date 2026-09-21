@@ -48,6 +48,17 @@ interface Libelle {
 export function initDecodage(): void {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+  /* On a touch screen the labels wrap tightly. The glyphs come from the
+     system's Japanese font, whose advance width and line box are BOTH
+     larger than the Latin font's: at full size a glyph re-wraps the row
+     and grows the line, and the whole table jumps on every cycle. Shrunk
+     to about half, the kana fit inside the slot of the French character
+     they replace — no wider, no taller — and the effect keeps its orange
+     spark without moving a single line. */
+  const TAILLE_GLYPHE = window.matchMedia("(max-width: 720px), (pointer: coarse)").matches
+    ? "0.55em"
+    : "1em";
+
   const bloc = document.querySelector<HTMLElement>(".section-skills");
   if (!bloc) return;
 
@@ -64,15 +75,19 @@ export function initDecodage(): void {
     depart: i * PAS_LIBELLE,
   }));
 
-  /** Freezes the width of each label of the BATCH on its final text. Without this,
-      the ideograms — twice as wide as a Latin letter — would make
-      the whole table swell then deflate on every frame. */
+  /** Freezes the width of each label of the BATCH on its final text. Without
+      this, the glyphs — wider than a Latin letter — would make the whole
+      block swell then deflate on every frame. The display is only touched
+      for non-block elements: turning a block (the family headings) into an
+      inline-block would seat it on the text baseline and shift the row. */
   const figerLesLargeurs = (lot: Libelle[]): void => {
     for (const l of lot) {
       l.el.style.minWidth = "";
       const largeur = l.el.getBoundingClientRect().width;
       l.el.style.minWidth = `${Math.ceil(largeur)}px`;
-      l.el.style.display = "inline-block";
+      if (getComputedStyle(l.el).display !== "block") {
+        l.el.style.display = "inline-block";
+      }
       l.el.style.whiteSpace = "nowrap";
     }
   };
@@ -123,7 +138,9 @@ export function initDecodage(): void {
             // the effect. The site's orange (#ff4d00) is lightened: the
             // ideograms are fine strokes that grey out at this size
             // on a black background — lightened, the eye finds the same orange there.
-            sortie += `<span style="color:#ff7133">${glyphe()}</span>`;
+            // Sized and lined to fit the French character's slot: line-height 1
+            // keeps the line box on the Latin font's metrics.
+            sortie += `<span style="color:#ff7133;font-size:${TAILLE_GLYPHE};line-height:1">${glyphe()}</span>`;
             enCours = true;
           } else {
             sortie += echapper(c);
@@ -149,19 +166,18 @@ export function initDecodage(): void {
     image();
   };
 
-  /* Relance périodique : COUPÉE.
+  /* Periodic relaunch: ACTIVE.
 
-     Le décodage d'entrée reste, et rejoue à chaque retour du bloc à l'écran :
-     l'effet garde son moment. Ce qui est coupé, c'est la boucle qui
-     rebrouillait un lot d'étiquettes toutes les 2,5 à 4 s pendant qu'on lit.
+     The entrance decode stays, and replays on every return of the block to
+     the screen. What is back on is the loop that re-scrambles a batch of
+     labels every 2.5 to 4 s while the table is being read: the effect keeps
+     going randomly in this block instead of stopping after the entrance.
 
-     Mesuré sur le site en ligne : 37 % des relevés avaient au moins une
-     étiquette en katakana. C'est le tableau que le visiteur scanne pour
-     savoir si tu fais du Kubernetes — l'endroit le plus cher de la page pour
-     rendre du texte illisible, et il l'était plus d'un tiers du temps.
-
-     Repasser cette constante à true restaure le comportement d'origine. */
-  const RELANCE_PERIODIQUE: boolean = false;
+     It had been cut for legibility — measured on the live site, 37 % of the
+     samples had at least one label in katakana while the visitor scans the
+     table for a skill. Set this constant back to false to restore that
+     calmer behaviour. */
+  const RELANCE_PERIODIQUE: boolean = true;
 
   let dedans = false;
   let minuterie = 0;
@@ -199,4 +215,169 @@ export function initDecodage(): void {
     },
     { threshold: 0.35 },
   ).observe(bloc);
+}
+
+/* ---------- the hero's line, once the globe is formed ----------
+
+   The availability line gives way to what the globe is made of: the code.
+   hero3d writes html[data-globe] when the sphere is fully formed; the line
+   then CROSSFADES into "Je crée des backends en Node" and alternates the
+   whole phrase through the skills, scrambled in the block-4 way. Two
+   rules: the availability → code transition is a fade, not a scramble —
+   it is a change of subject, not a spelling; and the line is frozen at
+   the width of its longest phrase, with the text centred inside — the
+   alternations change the words, never the layout. */
+
+/* Les phrases qui défilent sous le nom. Trois règles les gouvernent.
+
+   UN VERBE DIFFÉRENT À CHAQUE FOIS. Les quatre d'avant commençaient toutes par
+   « Je crée des » : dès la deuxième on ne lisait plus que le dernier mot, et la
+   ligne devenait une liste de technologies déguisée en phrase.
+
+   LE VRAI GESTE, pas la catégorie. « Des backends en Node » ne dit rien que
+   tout le monde ne puisse écrire ; typer, modéliser, déployer, tester,
+   publier — ce sont des actes, et chacun est vérifiable dans le CV.
+
+   UNE LONGUEUR RESSERRÉE, entre 26 et 35 caractères. La ligne est figée à la
+   largeur de la PLUS LONGUE d'entre elles, les autres venant se centrer dedans
+   (voir basculer) : une phrase qui dépasse élargit la boîte pour toutes, et sur
+   un téléphone elle la fait déborder. Toute phrase ajoutée ici doit tenir dans
+   ce gabarit. */
+const SOUS_TITRES = [
+  "Je crée des API en REST et GraphQL",
+  "J'écris des services en Node.js",
+  "Je monte des interfaces en React",
+  "Je type le code en TypeScript",
+  "Je modélise les données en SQL",
+  "Je déploie en Docker et Kubernetes",
+  "Je teste de bout en bout en Cypress",
+  "Je porte le mobile en React Native",
+  "Je publie mes libs sur npm",
+];
+/** How long each phrase holds before the next scramble. */
+const TENUE_SOUS_TITRE = 6000;
+/** Duration of the crossfade between the availability line and the code. */
+const FONDU = 600;
+
+export function initSousTitre(): void {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const el = document.querySelector<HTMLElement>(".hero-sub");
+  if (!el) return;
+
+  /* The glyphs' font (the system's Japanese face) is wider AND taller than
+     the Latin: at three quarters the kana stay readable while their extra
+     width spills past the frozen box — visible, never moving. */
+  const TAILLE_GLYPHE = "0.75em";
+
+  let animation = 0;
+  let bascule = false;
+  let etat = 0;
+
+  /** Scrambles the line into the given text; calls `fin` once settled. */
+  const jouer = (texte: string, fin: () => void): void => {
+    cancelAnimationFrame(animation);
+    const debut = performance.now();
+
+    const image = (): void => {
+      const t = performance.now() - debut;
+      let sortie = "";
+      let enCours = false;
+      for (let i = 0; i < texte.length; i++) {
+        const c = texte[i]!;
+        if (fixe(c)) {
+          sortie += echapper(c);
+          continue;
+        }
+        const ouverture = i * PAS_CARACTERE;
+        if (t < ouverture) {
+          // Not its turn yet: the character stays as is.
+          sortie += echapper(c);
+        } else if (t < ouverture + BROUILLAGE) {
+          sortie += `<span style="color:#ff7133;font-size:${TAILLE_GLYPHE};line-height:1">${glyphe()}</span>`;
+          enCours = true;
+        } else {
+          sortie += echapper(c);
+        }
+      }
+      el.innerHTML = sortie;
+      if (enCours) {
+        animation = requestAnimationFrame(image);
+      } else {
+        el.textContent = texte;
+        fin();
+      }
+    };
+
+    image();
+  };
+
+  const alterner = (): void => {
+    etat = (etat + 1) % SOUS_TITRES.length;
+    jouer(SOUS_TITRES[etat]!, () => {
+      window.setTimeout(alterner, TENUE_SOUS_TITRE);
+    });
+  };
+
+  /** The availability line gives way to the code: a crossfade, not a
+      scramble. The entrance animation has long finished by then — its fill
+      would hold opacity 1 over the transition, so it is released first. */
+  const basculer = (): void => {
+    el.style.animation = "none";
+    el.style.opacity = "0";
+    window.setTimeout(() => {
+      // Freeze the line at its longest phrase, centred: measured while the
+      // line is invisible, so the settling never shows.
+      el.style.display = "inline-block";
+      el.style.whiteSpace = "nowrap";
+      let large = 0;
+      for (const s of SOUS_TITRES) {
+        el.textContent = s;
+        large = Math.max(large, el.getBoundingClientRect().width);
+      }
+      /* MAIS SEULEMENT SI ELLE TIENT. Mesuré sur un écran de 265 px : la plus
+         longue phrase demandait 311 px, et `nowrap` la figeait à cette largeur —
+         elle sortait donc de l'écran des deux côtés. Le gel de la largeur sert à
+         empêcher la ligne de sauter d'une phrase à l'autre ; il ne doit pas se
+         payer d'un débordement.
+
+         Trop étroit, on rend le retour à la ligne et on fige la HAUTEUR à la
+         place : la phrase passe sur deux lignes, et comme la hauteur ne bouge
+         plus, rien ne saute davantage qu'avant. C'est le même remède appliqué à
+         l'autre axe. */
+      const place = (el.parentElement?.getBoundingClientRect().width ?? large) - 2;
+      if (large <= place) {
+        el.style.width = `${Math.ceil(large)}px`;
+      } else {
+        el.style.whiteSpace = "normal";
+        el.style.width = "100%";
+        let haut = 0;
+        for (const s of SOUS_TITRES) {
+          el.textContent = s;
+          haut = Math.max(haut, el.getBoundingClientRect().height);
+        }
+        el.style.minHeight = `${Math.ceil(haut)}px`;
+      }
+      el.textContent = SOUS_TITRES[0]!;
+      el.style.textAlign = "center";
+      el.style.opacity = "1";
+      window.setTimeout(alterner, TENUE_SOUS_TITRE);
+    }, FONDU);
+  };
+
+  /* The cue comes from hero3d.ts: the globe is formed. Polling rather than
+     an event — the two modules do not know each other. */
+  const surveiller = (): void => {
+    if (document.documentElement.dataset.globe === "1") {
+      if (bascule) return;
+      bascule = true;
+      basculer();
+      return;
+    }
+    /* Sondage serré : à 400 ms, le signal pouvait être vu avec presque une
+       demi-seconde de retard — sur une transformation qui dure moins de deux
+       secondes, c'est un quart du geste, et la synchronisation se perdait. */
+    window.setTimeout(surveiller, 80);
+  };
+  surveiller();
 }

@@ -113,8 +113,12 @@ requestAnimationFrame(loop);
     .then((module) => module.initProfilOut())
     .catch(() => {});
   // Decoding of the skills block labels, on its entry into the screen.
+  // And the hero's line, once the globe is formed.
   import("./decodage")
-    .then((module) => module.initDecodage())
+    .then((module) => {
+      module.initDecodage();
+      module.initSousTitre();
+    })
     .catch(() => {});
   import("./parcours3d")
     .then((module) => module.initParcours3D())
@@ -226,19 +230,6 @@ function applyCarousel(): void {
 // Section numbers (1-5): entrance from right to left on scroll,
 // continuously in both directions.
 const numSections = Array.from(document.querySelectorAll<HTMLElement>(".section"));
-
-const header = document.querySelector<HTMLElement>(".site-header");
-
-// --screen (one "screen" of content) equals the window minus the
-// sticky header. Measured rather than hard-coded: the header grows when
-// the navigation wraps on a small screen.
-if (header) {
-  const measureHeader = (): void => {
-    document.documentElement.style.setProperty("--header-h", `${header.offsetHeight}px`);
-  };
-  measureHeader();
-  new ResizeObserver(measureHeader).observe(header);
-}
 
 /* The projects arrive from the side, one card out of two from the left, the
    other from the right, staggered. Everything else is in the CSS: this only
@@ -389,11 +380,15 @@ function onScroll(): void {
     }
   }
 
-  // The effect starts when the center of the marquee is at the middle of the screen:
-  // the marquee had the whole page to be read.
-  const marquee = darkZone?.querySelector<HTMLElement>(".marquee") ?? null;
-  const triggerPage = darkZone && marquee
-    ? marquee.getBoundingClientRect().top + window.scrollY + marquee.offsetHeight / 2 - vh / 2
+  // The effect starts when the center of the dark runway below the hero is
+  // at the middle of the screen: the band and the hero have then had the
+  // whole first screen to be read. It used to hang on the marquee, which
+  // sat where the runway is now — with the band moved up to the navbar's
+  // place, the marquee's trigger was already passed at scroll zero and the
+  // sheet rose from the start.
+  const piste = darkZone?.querySelector<HTMLElement>(".apres-hero") ?? null;
+  const triggerPage = darkZone && piste
+    ? piste.getBoundingClientRect().top + window.scrollY + piste.offsetHeight / 2 - vh / 2
     : Infinity;
   const risen = darkZone ? root.scrollTop - triggerPage : Infinity;
 
@@ -401,7 +396,7 @@ function onScroll(): void {
   // the screen: we measure its gap and lower the sheet by as much,
   // so that the torn edge starts right from the bottom of the screen.
   const darkBottom = darkZone ? darkZone.offsetTop + darkZone.offsetHeight : 0;
-  const hang = darkZone && marquee ? Math.max(0, vh - (darkBottom - triggerPage)) : 0;
+  const hang = darkZone && piste ? Math.max(0, vh - (darkBottom - triggerPage)) : 0;
 
   if (tearSheet && tearWindow && tearFilter) {
     // The sheet fills its wrapper and grows from the wrapper's bottom edge,
@@ -456,17 +451,17 @@ window.addEventListener(
    scroll revient à demander au visiteur de déduire un sens de lecture d'un
    geste qui n'a pas le même axe. C'était la cause, pas le réglage.
 
-   Il se pilote donc par un vrai geste : flèches, balayage au doigt, flèches
-   du clavier. Et les fiches se déplacent, car c'est le déplacement — pas le
-   fondu — qui dit où l'on va.
+   Il se pilote donc par un vrai geste : flèches, points, balayage au doigt,
+   flèches du clavier. Et les fiches se déplacent, car c'est le déplacement —
+   pas le fondu — qui dit où l'on va.
 
-   Les points de navigation ont été retirés : ils répétaient ce que le
-   compteur « 1 / 3 » dit déjà en toutes lettres. C'est lui qui porte la
-   position, et son aria-live l'annonce au lecteur d'écran. */
+   The navigation dots carry the position, one per card: the current dot
+   lights, and the line behind it shows the path travelled. They are tabs in
+   a tablist, announced to the screen reader as a group. */
 
 const expSlides = Array.from(document.querySelectorAll<HTMLElement>(".exp-slides .experience"));
+const expDots = Array.from(document.querySelectorAll<HTMLButtonElement>(".exp-dot"));
 const expFleches = Array.from(document.querySelectorAll<HTMLButtonElement>(".exp-fleche"));
-const expCompteur = document.querySelector<HTMLElement>(".exp-compteur-actuel");
 
 let ficheActive = 0;
 
@@ -491,24 +486,43 @@ function montrerFiche(cible: number): void {
     f.disabled = ficheActive + pas < 0 || ficheActive + pas > dernier;
   });
 
-  if (expCompteur) expCompteur.textContent = String(ficheActive + 1);
+  expDots.forEach((dot, i) => {
+    dot.classList.toggle("is-active", i === ficheActive);
+    dot.setAttribute("aria-selected", i === ficheActive ? "true" : "false");
+    // One dot in the tab order at a time: the group is walked with the
+    // arrows, as a role="tablist" expects.
+    dot.tabIndex = i === ficheActive ? 0 : -1;
+    // --f lights THE current dot, and it alone. --l fills the line that
+    // leads to it: the path travelled reads without lighting several dots.
+    dot.style.setProperty("--f", i === ficheActive ? "1" : "0");
+    dot.style.setProperty("--l", i <= ficheActive ? "1" : "0");
+  });
+
+  /* The open card is written into the DOM for the 3D scene: it decides which
+     form shows behind — the car for Renault, the satellite for AERIS, the
+     gear for Ethics Group. An attribute rather than an import: the two
+     modules do not know each other and have no reason to start — one drives
+     a layout, the other a rendering. The DOM is already their common ground,
+     as for --volet-entree. */
+  document.documentElement.dataset.fiche = String(ficheActive);
 }
 
 if (expSlides.length > 1) {
   expFleches.forEach((f) => {
     f.addEventListener("click", () => montrerFiche(ficheActive + Number(f.dataset.pas || "0")));
   });
+  expDots.forEach((dot, i) => dot.addEventListener("click", () => montrerFiche(i)));
+
   document.querySelector(".exp-carousel")?.addEventListener("keydown", (event) => {
     const key = (event as KeyboardEvent).key;
     const pas = key === "ArrowRight" ? 1 : key === "ArrowLeft" ? -1 : 0;
     if (!pas) return;
     event.preventDefault();
     montrerFiche(ficheActive + pas);
-    /* Le focus suit la flèche correspondante. Il allait sur le point courant ;
-       les points ayant disparu, sans cela il resterait sur un bouton qui vient
-       peut-être d'être désactivé en bout de série — et le focus serait perdu. */
-    const arrivee = expFleches.find((f) => Number(f.dataset.pas || "0") === pas);
-    if (arrivee && !arrivee.disabled) arrivee.focus();
+    /* The focus follows the current dot: without it, it would stay on a
+       button that may just have been disabled at the end of the series —
+       and the focus would be lost. */
+    expDots[ficheActive]?.focus();
   });
 
   /* Balayage au doigt. Seuil en pixels ET tolérance verticale : sans la
