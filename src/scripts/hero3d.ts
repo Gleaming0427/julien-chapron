@@ -838,7 +838,18 @@ export async function initHero3D(): Promise<void> {
      Le prix est connu et assumé : au pas du globe, le visage fait 42 nœuds de
      large, soit quatre par œil. Pour retrouver du détail SANS refermer la
      matière, il faut agrandir le portrait — pas resserrer sa trame. */
-  const portrait = await echantillonnerPortrait(chemin, LAT_STEP * DEG);
+  /* LE VISAGE EST UN CRAN PLUS FIN QUE LE GLOBE, et le facteur est calculé,
+     pas choisi. Au pas du globe le portrait fait 85 points de large : sur les
+     336 px qu'il occupe, cela donne un écart de 3,96 px pour des points de
+     1,30 — ils n'occupent qu'un tiers de leur case, et le visage se lit en
+     gros grain.
+
+     À 1,5, l'écart tombe à 2,64 px : les points en couvrent la moitié, ce qui
+     est franc sans jamais se toucher, et le visage passe à 128 points de
+     large. Un continent supporte le gros grain, un visage non — il se
+     reconnaît à ses petits détails. */
+  const FINESSE_VISAGE = 1.5;
+  const portrait = await echantillonnerPortrait(chemin, (LAT_STEP * DEG) / FINESSE_VISAGE);
 
   /* L'ordre des rangs compte : le vivier est trié du plus clair au plus
      sombre. Les TERRES — points blancs et épais — prennent donc la tête, et
@@ -866,8 +877,21 @@ export async function initHero3D(): Promise<void> {
      comme les autres : le globe n'y perd rien. */
   const PART_BLANCHE = 0.42;
   const placesTerre = Math.min(land.length, Math.round(placesTotal * PART_BLANCHE));
+  /* LA TAILLE DES POINTS EST DONNÉE EN PIXELS PHYSIQUES, pas en pixels CSS :
+     three.js passe `size` directement à gl_PointSize, qui s'exprime dans le
+     tampon de rendu. Écrite en dur, elle valait donc 1,3 px CSS sur un écran
+     Retina et 2,6 sur un écran ordinaire — un facteur deux sur le poids visuel
+     du dessin, selon la machine.
+
+     Ce n'est pas une subtilité : c'est ce qui m'a fait croire, en réglant le
+     portrait sur un aperçu non-Retina, que les points se touchaient, et
+     revenir sur une trame plus fine qui, elle, allait très bien sur l'écran
+     visé. En multipliant par le rapport de pixels, la taille devient constante
+     À L'ŒIL partout. Les valeurs choisies redonnent exactement le rendu actuel
+     d'un écran Retina, qui est celui sur lequel tout a été réglé. */
+  const grain = Math.min(window.devicePixelRatio || 1, 2);
   const landCloud = pointCloud(
-    land, 0xffffff, 2.6, 1, 63.7,
+    land, 0xffffff, 1.3 * grain, 1, 63.7,
     portrait ? portrait.subarray(0, placesTerre * 2) : null,
     cadrage,
   );
@@ -877,7 +901,7 @@ export async function initHero3D(): Promise<void> {
      presque égale, les deux se lisaient comme une seule masse, sur le visage
      comme sur le globe. */
   const seaCloud = pointCloud(
-    sea, 0x8b949e, 1.15, 0.6, 12.9898,
+    sea, 0x8b949e, 0.575 * grain, 0.6, 12.9898,
     portrait ? portrait.subarray(placesTerre * 2) : null,
     cadrage,
   );

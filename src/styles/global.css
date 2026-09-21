@@ -3154,6 +3154,22 @@ html:not(.js) .exp-slides .experience:first-child {
     font-size: 15px;
   }
 
+  /* LE SOUS-TITRE TIENT SUR UNE LIGNE.
+
+     « disponible en remote ou hybride à Toulouse » réclamait 357 px pour 350
+     disponibles sur un écran de 390 : SEPT PIXELS, et la ligne basculait en
+     deux, ce qui décalait tout ce qui suit et faisait paraître le portrait de
+     travers.
+
+     La taille suit donc la largeur de l'écran au lieu d'être fixe. Le rapport
+     vient de la mesure : cette phrase occupe 0,447 fois sa taille de police
+     par caractère, soit 18,8 px de police pour chaque pixel de largeur utile.
+     `5,2vw - 2px` reste sous cette limite de 390 jusqu'à 320 px, et le `min`
+     garde la taille d'origine dès qu'il y a la place. */
+  .hero-sub {
+    font-size: min(19px, calc(5.2vw - 2px));
+  }
+
   /* LA PASTILLE DES CHIFFRES DISPARAÎT SUR TÉLÉPHONE.
 
      Mesurée sur un écran de 390, elle couvre 90 % de la largeur : il ne reste
