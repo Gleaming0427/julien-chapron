@@ -3164,8 +3164,34 @@ html:not(.js) .exp-slides .experience:first-child {
     flex: 1 1 auto;
     min-width: max-content;
     justify-content: center;
-    padding: 8px 12px;
+    /* Allégés d'un cran : 14 px, un rembourrage plus court, et 40 px de haut
+       au lieu de 44.
+
+       Ces 44 px ne venaient pas du rembourrage mais d'un `min-height` posé
+       plus bas sur TOUS les boutons en tactile — une cible de toucher
+       délibérée, qu'on ne lève donc pas à la légère. Elle reste en place
+       partout ailleurs ; seuls les deux du hero passent à 40, parce qu'à 44
+       sur un hero de 730 px la paire pesait plus lourd que le titre.
+
+       40 px reste très au-dessus des 24 qu'exige le critère de taille de cible
+       (WCAG 2.5.8, niveau AA). On passe sous les 44 pt de la recommandation
+       Apple, qui est un conseil et non une norme — c'est un arbitrage, et il
+       est assumé. */
+    padding: 6px 12px;
+    font-size: 14px;
+    min-height: 40px;
+  }
+
+  /* LE CHAPEAU REPREND SA PLACE DANS LA HIÉRARCHIE.
+
+     « Hello, je suis Julien Chapron » faisait 19 px sur téléphone, soit PLUS
+     que le sous-titre qui le suit à 18,3. Un chapeau introduit le nom : il
+     annonce, il ne pèse pas. À 15 px il redevient un lever de rideau, et
+     l'écart avec le titre à 36 px se lit enfin comme une hiérarchie au lieu de
+     trois lignes de poids voisin. */
+  .hero-overline {
     font-size: 15px;
+    margin-bottom: 8px;
   }
 
   /* LE SOUS-TITRE TIENT SUR UNE LIGNE.
