@@ -3109,6 +3109,62 @@ html:not(.js) .exp-slides .experience:first-child {
   }
 }
 
+/* LES DEUX BOUTONS DU HERO, CÔTE À CÔTE SUR TÉLÉPHONE.
+
+   Empilés, ils coûtaient 100 px de haut — deux fois 44 plus l'écart — sur les
+   730 px que le hero occupe en tout. Côte à côte, 44.
+
+   Ils réclamaient 392 px pour 350 disponibles sur un écran de 390. Les 42 px
+   manquants sont repris là où ils ne se voient pas : les rembourrages, l'écart
+   interne, et la flèche qui perd quatre pixels. La police descend d'un point.
+
+   `flex-wrap` et une base de 140 px font le reste TOUT SEULS : au-dessous d'à
+   peu près 300 px de place, les deux ne tiennent plus et se réempilent
+   d'eux-mêmes. Aucun point de rupture à maintenir, et rien qui déborde sur un
+   téléphone étroit — ce qui serait arrivé avec une largeur imposée.
+
+   La hauteur ainsi libérée ne profite PAS au globe, qui est bridé par la
+   largeur (voir hero3d.ts) : elle revient au titre et à l'air autour. */
+@media (max-width: 720px) {
+  .hero-actions {
+    width: 100%;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  /* `min-width: max-content` plutôt qu'une base devinée. Une base de 140 px
+     laissait les deux boutons côte à côte sur un écran de 360, où chacun ne
+     recevait que 155 px pour un libellé qui en réclame 161 : « Télécharger mon
+     CV » y ressortait tronqué, avec un pixel de débordement en prime.
+
+     La largeur du contenu n'est pas un nombre qu'on devine — elle dépend de la
+     police, de sa graisse, du rendu du navigateur. En la demandant au moteur,
+     le bouton ne peut PAS devenir plus étroit que son texte, et `flex-wrap`
+     réempile les deux d'eux-mêmes dès qu'ils ne tiennent plus. Vérifié : côte à
+     côte à 390, empilés à 360 et à 320, jamais un libellé coupé. */
+  .hero-actions .axiom-btn {
+    flex: 1 1 auto;
+    min-width: max-content;
+    justify-content: center;
+    padding: 8px 12px;
+    font-size: 15px;
+  }
+
+  /* LA FLÈCHE DISPARAÎT SUR TÉLÉPHONE. Avec elle, un bouton de 170 px n'offrait
+     que 118 px au texte pour 137 réclamés : « Télécharger mon CV » sortait
+     tronqué en « Télécharger mon C ». Elle coûtait 28 px — sa boîte et l'écart
+     qui la précède — soit exactement ce qui manquait.
+
+     Ce n'est pas une perte. Sur un écran tactile elle ne signale rien que le
+     bouton ne dise déjà : il n'y a pas de survol à annoncer, et son rôle de
+     repère visuel ne tient que dans la mise en page large, où les boutons sont
+     posés côte à côte avec de l'air autour. Un libellé entier vaut mieux qu'un
+     libellé coupé suivi d'une flèche. */
+  .hero-actions .axiom-btn-arrow-box {
+    display: none;
+  }
+}
+
 @media (max-width: 640px) {
   .container {
     /* The gutter MUST equal --gutter: the full-width sections cancel it

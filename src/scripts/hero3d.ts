@@ -1037,11 +1037,27 @@ export async function initHero3D(): Promise<void> {
     renderer.setSize(view.width, view.height);
     camera.aspect = view.width / view.height;
 
-    // Setback such that the sphere (diameter 2) occupies the height of its
-    // slot, while the canvas itself fills the whole screen.
-    // The globe occupies 80% of the frame: large enough to fill the slot's
-    // height, small enough for the widest orbits to stay readable.
-    const wanted = Math.min(slot.height, slot.width) * 0.8;
+    /* Setback such that the sphere (diameter 2) occupies the height of its
+       slot, while the canvas itself fills the whole screen. The globe occupies
+       80% of the frame: large enough to fill the slot's height, small enough
+       for the widest orbits to stay readable.
+
+       SUR TÉLÉPHONE, IL SE MESURE SUR LA LARGEUR. `min(hauteur, largeur)` prend
+       le petit côté de la scène : sur un écran large c'est la hauteur, et le
+       réglage est juste. Sur un téléphone c'est la LARGEUR — la scène y est un
+       bandeau posé au-dessus du titre, plus large que haut. Mesuré sur
+       390 × 844 : scène de 350 × 398, donc un globe de 280 px seulement. Et
+       surtout, libérer de la hauteur sous les boutons ne l'agrandissait pas
+       d'un pixel, puisque ce n'est pas la hauteur qui le bride. C'est ce qui
+       faisait paraître le globe et le portrait trop petits.
+
+       On part donc de la largeur, à 96 %, mais plafonné par la hauteur
+       disponible : sur un téléphone court, la largeur seule le ferait déborder
+       de sa bande et mordre sur le titre. */
+    const surTelephone = window.matchMedia("(max-width: 720px)").matches;
+    const wanted = surTelephone
+      ? Math.min(slot.width * 0.96, slot.height * 0.9)
+      : Math.min(slot.height, slot.width) * 0.8;
     camera.position.z = view.height / (wanted * HALF_FOV_TAN);
     camera.updateProjectionMatrix();
 
