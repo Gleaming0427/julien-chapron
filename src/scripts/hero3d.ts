@@ -818,12 +818,20 @@ export async function initHero3D(): Promise<void> {
      à chaque image aurait forcé un calcul de mise en page soixante fois par
      seconde, pour des valeurs constantes. */
   const ancre = stage.querySelector<HTMLElement>(".hero-ancre");
+  const carte = stage.querySelector<HTMLElement>(".hero-carte");
   let cadreVue = { dx: 0, dy: 0, w: 1, h: 1 };
+  /** Largeur de la carte et de la scène : sert à savoir de quel côté de la
+      balise la carte tient encore. Mesuré au redimensionnement seulement. */
+  let carteLargeur = 0;
+  let scenLargeur = 1;
 
   const resize = (): void => {
     const view = layer.getBoundingClientRect();
     const slot = stage.getBoundingClientRect();
     if (view.width < 1 || view.height < 1 || slot.height < 1) return;
+
+    carteLargeur = carte?.offsetWidth ?? 0;
+    scenLargeur = slot.width;
 
     cadreVue = {
       dx: view.left - slot.left,
@@ -1049,6 +1057,29 @@ export async function initHero3D(): Promise<void> {
       const y = cadreVue.dy + (-projection.y * 0.5 + 0.5) * cadreVue.h;
       ancre.style.setProperty("--ville-x", `${x.toFixed(1)}px`);
       ancre.style.setProperty("--ville-y", `${y.toFixed(1)}px`);
+
+      /* La carte passe à gauche dès qu'elle ne tient plus à droite. Sans ça
+         elle sortait de l'écran quand le globe amenait Toulouse vers le bord
+         — immédiat sur téléphone, où la scène est étroite. La marge de 10 px
+         évite que la bascule ne se déclenche pile sur le bord, où elle
+         ferait des allers-retours à chaque image. */
+      const tientADroite = x + 26 + carteLargeur < scenLargeur - 10;
+      const dejaAGauche = ancre.classList.contains("a-gauche");
+      if (dejaAGauche === tientADroite) {
+        ancre.classList.toggle("a-gauche", !tientADroite);
+      }
+
+      /* Et on la retient dans le cadre. La bascule seule DÉPLACE le
+         débordement : passée à gauche, la carte sortait de six pixels par
+         l'autre bord — mesuré sur téléphone, où elle fait presque la moitié
+         de la largeur d'écran. Ce décalage la ramène, quel que soit le côté. */
+      const bordGauche = tientADroite ? x + 26 : x - 26 - carteLargeur;
+      let decalage = 0;
+      if (bordGauche < 8) decalage = 8 - bordGauche;
+      else if (bordGauche + carteLargeur > scenLargeur - 8) {
+        decalage = scenLargeur - 8 - (bordGauche + carteLargeur);
+      }
+      ancre.style.setProperty("--carte-decalage", `${decalage.toFixed(1)}px`);
 
       /* Tout s'efface dès que la ville tourne vers l'arrière — annoncer
          « Toulouse » en désignant un point caché derrière le globe n'aurait
