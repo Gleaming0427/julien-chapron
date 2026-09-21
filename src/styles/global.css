@@ -68,13 +68,20 @@
      ne bouge pas — d'où une bande vide au bas de l'écran, sous les boutons du
      hero. C'est ce qui a été signalé sur Safari.
 
-     `dvh` vaut la hauteur COURANTE : le bloc épouse la fenêtre à tout instant,
-     donc ni débordement ni bande vide. Le prix est une remise en page pendant
-     que la barre s'escamote ; c'est le seul des trois qui utilise vraiment
-     tout l'écran, et c'est exactement le cas pour lequel l'unité existe. */
+     `dvh` vaut la hauteur COURANTE, et c'est là le piège. Il a été essayé, et
+     retiré : il épouse la fenêtre à tout instant, donc il la remesure PENDANT
+     que la barre s'escamote. Or cette hauteur commande celle du hero, donc
+     celle du document entier : à chaque image de l'escamotage, toute la page
+     se remet en page et ce qui est en dessous se décale. Au défilement, sur
+     Safari, cela se voit comme un tressautement continu — un défaut bien pire
+     que la bande qu'il corrigeait.
+
+     ON GARDE DONC `svh`, ET LA BANDE AVEC. Une hauteur stable vaut mieux
+     qu'une hauteur juste : la première ne se remarque pas, la seconde saute.
+     Si la bande doit disparaître un jour, ce ne sera pas en changeant d'unité
+     — ce sera en donnant au bas de la page une couleur qui l'absorbe. */
   --screen: calc(100vh - var(--header-h));
   --screen: calc(100svh - var(--header-h));
-  --screen: calc(100dvh - var(--header-h));
 }
 
 * {
@@ -1542,14 +1549,17 @@ button.chip {
      dizaines de pixels, qui prenait la couleur du rail — le gros carré noir en
      bas de page, mangeant les flèches et la trame de points.
 
-     `dvh` vaut la hauteur COURANTE : le panneau épouse la fenêtre à tout
-     instant, donc il n'y a plus ni bande découverte ni contenu sous la barre.
-     C'est précisément le cas pour lequel cette unité existe. Les deux lignes
-     au-dessus restent comme repli pour les navigateurs qui l'ignorent, dans
-     l'ordre du moins bon au meilleur. */
+     `dvh` vaut la hauteur COURANTE. Essayé ici aussi, et retiré pour la même
+     raison : le panneau se redimensionne à chaque image de l'escamotage, et
+     comme il est épinglé sous les yeux au moment précis où l'on défile, son
+     contenu tressaute. C'est le pire endroit de la page où mettre cette unité.
+
+     On reste donc sur `svh`. La bande découverte que cela laisse au bas du
+     panneau est déjà traitée autrement : le rail prend la couleur du panneau —
+     orange avant que le volet ne se ferme, sombre après — si bien qu'elle se
+     fond dedans au lieu de trancher. */
   height: 100vh;
   height: 100svh;
-  height: 100dvh;
   overflow: hidden;
 }
 
