@@ -57,12 +57,24 @@
      du nom. À 96 px il ne restait que trois pixels entre le bas de la pastille
      et le filet — assez pour ne pas se toucher, pas assez pour que ça respire. */
   --bandeau-h: clamp(112px, 13.5vh, 148px);
-  /* svh = the window height with the address bar VISIBLE, so the smallest
-     one. On iOS, 100vh equals the height with the bar hidden: any 100vh
-     block overflows under the toolbar and its bottom becomes invisible.
-     The vh line remains as a fallback for browsers without svh. */
+  /* TROIS UNITÉS, TROIS COMPORTEMENTS SUR iOS, et les trois lignes sont
+     empilées du moins bon au meilleur : la dernière que le navigateur comprend
+     l'emporte.
+
+     `vh` vaut toujours la GRANDE hauteur, barre d'outils rentrée : un bloc de
+     100vh déborde sous la barre quand elle est sortie, et son bas devient
+     invisible. `svh` vaut toujours la PETITE : plus rien ne passe sous la
+     barre, mais quand celle-ci se rentre la fenêtre grandit et le bloc, lui,
+     ne bouge pas — d'où une bande vide au bas de l'écran, sous les boutons du
+     hero. C'est ce qui a été signalé sur Safari.
+
+     `dvh` vaut la hauteur COURANTE : le bloc épouse la fenêtre à tout instant,
+     donc ni débordement ni bande vide. Le prix est une remise en page pendant
+     que la barre s'escamote ; c'est le seul des trois qui utilise vraiment
+     tout l'écran, et c'est exactement le cas pour lequel l'unité existe. */
   --screen: calc(100vh - var(--header-h));
   --screen: calc(100svh - var(--header-h));
+  --screen: calc(100dvh - var(--header-h));
 }
 
 * {

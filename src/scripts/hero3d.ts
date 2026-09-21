@@ -904,6 +904,30 @@ export async function initHero3D(): Promise<void> {
   );
   spin.add(seaCloud.points, landCloud.points);
 
+  /* LE VISAGE A DES POINTS PLUS GROS QUE LE GLOBE, et ce n'est pas un caprice :
+     les deux formes n'ont pas le même nombre de points.
+
+     Le globe en pose vingt-deux mille, le portrait quatre mille — cinq fois et
+     demie moins, sur une surface comparable. À taille de point égale, la
+     couverture tombe à 10 % de l'aire : les points ne se rejoignent jamais, et
+     le visage se lit comme un contour creux au lieu d'une masse éclairée. C'est
+     le « visage bizarre » signalé sur téléphone, et la mesure le confirme —
+     écart de 3,96 px pour des points de 1,30.
+
+     Le rapport des tailles suit celui des nombres : cinq fois et demie moins de
+     points appelle une aire par point cinq fois et demie plus grande, donc un
+     diamètre multiplié par sa racine, soit 2,35. Arrondi à deux, ce qui porte
+     la couverture à 43 % — franc, sans empâter.
+
+     La taille glisse de l'une à l'autre avec le dégagement, si bien que le
+     passage du visage au globe amincit le grain en même temps qu'il change la
+     forme : une seule transition, pas deux. */
+  const TAILLE_VISAGE = 2;
+  const matiereTerre = landCloud.points.material as THREE.PointsMaterial;
+  const matiereMer = seaCloud.points.material as THREE.PointsMaterial;
+  const grainTerre = 1.3 * grain;
+  const grainMer = 0.575 * grain;
+
   /* Toulouse reprend un point à elle : c'est l'ancre du trait pointillé qui
      part de la pastille « disponible · Toulouse ». Un halo plus large et très
      transparent l'entoure — seul, un point de 0,02 se perd dans la semaille
@@ -1189,6 +1213,13 @@ export async function initHero3D(): Promise<void> {
     }
 
     const degage = degagement(t);
+    /* Le grain suit le dégagement : gros pour le visage, fin pour le globe.
+       Écrit à chaque image plutôt qu'une fois, parce que la taille doit
+       repasser par le gros grain quand on remonte — le dégagement, lui, sait
+       revenir en arrière. */
+    const ampleur = TAILLE_VISAGE + (1 - TAILLE_VISAGE) * degage;
+    matiereTerre.size = grainTerre * ampleur;
+    matiereMer.size = grainMer * ampleur;
     /* LE SIGNAL PART AU DÉBUT DE LA TAILLE, et non à sa fin.
 
        La ligne du hero — la disponibilité qui cède la place au code, voir
