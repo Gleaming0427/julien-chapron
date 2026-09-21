@@ -271,7 +271,7 @@ async function echantillonnerPortrait(
        résolution de la trame — la seule façon correcte de la sous-échantillonner. */
     const demiCellule = Math.max(1, Math.round(pas / 2));
 
-    const places: { x: number; y: number; l: number }[] = [];
+    const places: { x: number; y: number; l: number; r: number; c: number }[] = [];
     for (let r = 0; ; r++) {
       const py = (r + 0.5) * hauteurRangee;
       if (py >= n) break;
@@ -301,16 +301,14 @@ async function echantillonnerPortrait(
           x: (px / n - 0.5) * ECHELLE_PORTRAIT,
           y: (0.5 - py / n) * ECHELLE_PORTRAIT,
           l: (somme / vus - mini) / ETENDUE,
+          // Rang du nœud dans la trame : c'est lui qui indexe la matrice de
+          // Bayer, donc ce qui rend le tramage ORDONNÉ plutôt qu'aléatoire.
+          r,
+          c: Math.round((px - (r % 2) * pas * 0.5 - pas * 0.5) / pas),
         });
       }
     }
     if (places.length < 200) return null;
-
-    let graine = 1;
-    const tirage = (): number => {
-      graine = (graine * 16807) % 2147483647;
-      return graine / 2147483647;
-    };
 
     /* ---------- 3. tri par luminance : ce qui dessine ----------
        Les nuages ont des tailles et des couleurs différentes — terres en blanc
@@ -338,10 +336,26 @@ async function echantillonnerPortrait(
        raide est le prix à payer, et il se paie sur les zones lisses, là où il
        ne se voit pas. */
     const AMPLITUDE_TRAME = 0.17;
-    places.sort(
-      (a, b) =>
-        b.l + (tirage() - 0.5) * AMPLITUDE_TRAME - (a.l + (tirage() - 0.5) * AMPLITUDE_TRAME),
-    );
+    /* TRAMAGE ORDONNÉ, et non plus aléatoire. C'est ce qui corrige les ombres
+       déchirées du portrait — les lunettes, la bouche, le creux du menton, qui
+       sortaient en bandes horizontales hachées sur l'écran d'un téléphone.
+
+       La cause : la clé de tri était secouée par un tirage au sort. Sur une
+       trame dont les rangées sont horizontales, ces bascules au hasard
+       s'alignent en stries — le hasard fait des paquets, et ici les paquets
+       suivent les rangées. Sur un aplat on ne voit rien ; sur le bord d'une
+       ombre, on voit le déchirement.
+
+       La matrice de Bayer remplace le hasard par un motif : le décalage d'un
+       nœud ne dépend que de sa position dans la trame, et les seize valeurs
+       sont disposées de sorte que deux nœuds voisins en reçoivent d'éloignées.
+       La frontière se résout alors en un damier fin au lieu de bandes. C'est le
+       tramage des graveurs, fait pour exactement ce cas : rendre un dégradé
+       avec deux encres, sans bruit. */
+    const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+    const trame = (q: { r: number; c: number }): number =>
+      (BAYER[(((q.r % 4) + 4) % 4) * 4 + (((q.c % 4) + 4) % 4)]! + 0.5) / 16 - 0.5;
+    places.sort((a, b) => b.l + trame(b) * AMPLITUDE_TRAME - (a.l + trame(a) * AMPLITUDE_TRAME));
 
     const sorties = new Float32Array(places.length * 2);
     for (let i = 0; i < places.length; i++) {

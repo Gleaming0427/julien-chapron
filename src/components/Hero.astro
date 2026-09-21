@@ -26,7 +26,12 @@ const portraitUrl = base === "/" ? "/julien-chapron.webp" : `${base}/julien-chap
       <div class="hero-title">
         <p class="hero-overline">Hello, je suis <span class="hero-overline-nom">Julien Chapron</span></p>
         <h1 class="hero-role">Développeur <em>full-stack</em></h1>
-        <p class="hero-sub">disponible en remote ou hybride à Toulouse</p>
+        {/* La ligne porte directement les phrases qui défilent : la mention de
+            disponibilité qui l'ouvrait a été retirée. Ce texte-ci n'est que le
+            premier de SOUS_TITRES (decodage.ts) — il est écrit ici pour que la
+            page ait quelque chose à montrer avant que le script ne prenne la
+            main, et les deux doivent rester d'accord. */}
+        <p class="hero-sub">Je conçois des API REST et GraphQL</p>
         <div class="hero-actions">
           <a class="axiom-btn" href={pdfUrl} download="CV_Julien_Chapron.pdf">
             <span class="axiom-btn-text-col">

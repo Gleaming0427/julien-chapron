@@ -3195,6 +3195,25 @@ html:not(.js) .exp-slides .experience:first-child {
     min-height: 40px;
   }
 
+  /* LE BAS DU HERO NE GARDE PLUS DE RÉSERVE.
+
+     Relevé sur un écran de 402 × 795 : 68 px de vide entre les boutons et le
+     bas de la fenêtre. Deux réserves s'additionnaient — 28 px de padding sous
+     .hero-top et 26 px de marge sous .hero-title — plus le jeu que la fenêtre
+     laisse elle-même.
+
+     Sur un grand écran elles servent : le hero y est suivi d'autre chose, et
+     ces respirations l'en détachent. Sur téléphone il n'est suivi de rien, la
+     fenêtre s'arrête juste après. La place ainsi rendue revient à la scène, qui
+     grandit d'autant (elle a `flex: 1 1 auto` et du mou sous son plafond). */
+  .hero-top {
+    padding-bottom: 0;
+  }
+
+  .hero-title {
+    margin-bottom: 0;
+  }
+
   /* LE CHAPEAU REPREND SA PLACE DANS LA HIÉRARCHIE.
 
      « Hello, je suis Julien Chapron » faisait 19 px sur téléphone, soit PLUS

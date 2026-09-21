@@ -249,7 +249,7 @@ export function initDecodage(): void {
 
    UNE LONGUEUR RESSERRÉE, sous 36 caractères. La ligne est figée à la largeur
    de la PLUS LONGUE d'entre elles, les autres venant se centrer dedans (voir
-   basculer) : une phrase qui dépasse élargit la boîte pour toutes. */
+   caler) : une phrase qui dépasse élargit la boîte pour toutes. */
 const SOUS_TITRES = [
   "Je conçois des API REST et GraphQL",
   "J'écris des services avec Node.js",
@@ -278,7 +278,6 @@ export function initSousTitre(): void {
   const TAILLE_GLYPHE = "0.75em";
 
   let animation = 0;
-  let bascule = false;
   let etat = 0;
 
   /** Scrambles the line into the given text; calls `fin` once settled. */
@@ -329,7 +328,14 @@ export function initSousTitre(): void {
   /** The availability line gives way to the code: a crossfade, not a
       scramble. The entrance animation has long finished by then — its fill
       would hold opacity 1 over the transition, so it is released first. */
-  const basculer = (): void => {
+  /* PLUS DE FONDU CROISÉ. La ligne s'ouvrait sur la disponibilité puis cédait
+     la place au code ; cette mention a été retirée, la ligne porte donc les
+     phrases dès le départ et il n'y a plus rien à remplacer.
+
+     Ce qui reste indispensable, c'est le GEL DES DIMENSIONS ci-dessous : sans
+     lui la ligne saute d'une phrase à l'autre. Il se fait sous le couvert de
+     l'opacité zéro, pour que le calage ne se voie jamais. */
+  const caler = (): void => {
     el.style.animation = "none";
     el.style.opacity = "0";
     window.setTimeout(() => {
@@ -372,19 +378,18 @@ export function initSousTitre(): void {
     }, FONDU);
   };
 
-  /* The cue comes from hero3d.ts: the globe is formed. Polling rather than
-     an event — the two modules do not know each other. */
-  const surveiller = (): void => {
-    if (document.documentElement.dataset.globe === "1") {
-      if (bascule) return;
-      bascule = true;
-      basculer();
-      return;
-    }
-    /* Sondage serré : à 400 ms, le signal pouvait être vu avec presque une
-       demi-seconde de retard — sur une transformation qui dure moins de deux
-       secondes, c'est un quart du geste, et la synchronisation se perdait. */
-    window.setTimeout(surveiller, 80);
-  };
-  surveiller();
+  /* LES POLICES D'ABORD. Le calage mesure la largeur des phrases : mesurée
+     avant que la police d'affichage ne soit chargée, elle vaut celle de la
+     police de repli, et la ligne se fige à une largeur qui n'est pas la sienne.
+     L'attente ne se voit pas — la ligne est déjà à l'écran avec sa première
+     phrase, écrite dans le HTML. */
+  if (document.fonts && document.fonts.status !== "loaded") {
+    void document.fonts.ready.then(caler);
+  } else {
+    caler();
+  }
+
+  /* Le guet du signal `html[data-globe]` a disparu avec le fondu croisé : il
+     ne servait qu'à savoir QUAND remplacer la disponibilité par le code. La
+     ligne n'a plus à attendre quoi que ce soit de la scène 3D. */
 }
