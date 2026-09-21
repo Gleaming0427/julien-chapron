@@ -602,3 +602,80 @@ if (burger && voile) {
    en dernier : il ne lit que la position du scroll et écrit la mise en scène,
    donc rien au-dessus n'a besoin qu'il arrive plus tôt. */
 onScroll();
+
+/* ---------- le halo qui gonfle les points du fond ----------
+
+   La couche orange et son masque circulaire vivent dans global.css
+   (.dark-zone::before) ; il ne reste ici qu'à dire OÙ est la main.
+
+   Les coordonnées sont écrites dans des variables CSS plutôt que dans un style
+   de position : c'est le masque qui les lit, et un masque se recalcule sans
+   toucher à la mise en page. Rien n'est déplacé, donc rien n'est remesuré.
+
+   L'écriture passe par requestAnimationFrame. Un pointermove peut tomber
+   plusieurs fois par image sur une souris rapide ; écrire à chaque événement
+   redemanderait autant de fois le même repeint pour un seul affichage. */
+const zoneSombre = document.querySelector<HTMLElement>(".dark-zone");
+
+if (zoneSombre && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  let haloX = 0;
+  let haloY = 0;
+  let haloVisible = false;
+  let haloEnAttente = false;
+
+  /* Le décalage d'alignement entre les deux trames. La trame du body compte
+     depuis le haut du DOCUMENT, celle du halo depuis le haut de la ZONE : sans
+     cette cale, les gros points orange tombent entre les petits gris au lieu de
+     se poser dessus, et la superposition se voit. Le pas vaut 24 px. */
+  const caler = (): void => {
+    const haut = zoneSombre.getBoundingClientRect().top + window.scrollY;
+    zoneSombre.style.setProperty("--halo-cale", `${-(((haut % 24) + 24) % 24)}px`);
+  };
+  caler();
+  window.addEventListener("resize", caler, { passive: true });
+
+  const ecrire = (): void => {
+    haloEnAttente = false;
+    zoneSombre.style.setProperty("--halo-x", `${haloX}px`);
+    zoneSombre.style.setProperty("--halo-y", `${haloY}px`);
+    zoneSombre.style.setProperty("--halo-op", haloVisible ? "1" : "0");
+  };
+
+  const suivre = (event: PointerEvent): void => {
+    const boite = zoneSombre.getBoundingClientRect();
+    haloX = event.clientX - boite.left;
+    haloY = event.clientY - boite.top;
+    haloVisible = true;
+    if (!haloEnAttente) {
+      haloEnAttente = true;
+      requestAnimationFrame(ecrire);
+    }
+  };
+
+  const eteindre = (): void => {
+    haloVisible = false;
+    if (!haloEnAttente) {
+      haloEnAttente = true;
+      requestAnimationFrame(ecrire);
+    }
+  };
+
+  /* Sur la zone et non sur la fenêtre : hors de la zone sombre il n'y a pas de
+     points à faire enfler, et l'écouteur ne coûte alors rien. Le halo écoute le
+     POINTEUR, donc la souris et le doigt du même coup — au toucher il suit le
+     glissement et s'éteint au relâché, ce qui est le seul équivalent honnête
+     d'un survol sur un écran tactile. */
+  zoneSombre.addEventListener("pointermove", suivre, { passive: true });
+  zoneSombre.addEventListener("pointerdown", suivre, { passive: true });
+  zoneSombre.addEventListener("pointerleave", eteindre, { passive: true });
+  zoneSombre.addEventListener("pointercancel", eteindre, { passive: true });
+  zoneSombre.addEventListener(
+    "pointerup",
+    (event) => {
+      // La souris garde son halo après un clic ; le doigt, qui n'a plus de
+      // position une fois levé, le perd.
+      if (event.pointerType !== "mouse") eteindre();
+    },
+    { passive: true },
+  );
+}
