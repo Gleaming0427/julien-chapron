@@ -196,7 +196,7 @@ async function echantillonnerPortrait(
     image.src = url;
     await image.decode();
 
-    const n = 200;
+    const n = 240;
     const toile = document.createElement("canvas");
     toile.width = n;
     toile.height = n;
@@ -205,42 +205,119 @@ async function echantillonnerPortrait(
     ctx.drawImage(image, 0, 0, n, n);
     const pixels = ctx.getImageData(0, 0, n, n).data;
 
-    const sorties = new Float32Array(combien * 2);
-    let ecrits = 0;
-    // Générateur déterministe : le portrait est le même à chaque visite.
+    /* ---------- 1. masque et luminance ----------
+       Un passage sur toute l'image plutôt qu'un tirage au hasard répété. Le
+       tirage aléatoire laissait des paquets et des trous : la couverture
+       n'était pas régulière, et c'est ce qui brouillait les traits. */
+    const lum = new Float32Array(n * n);
+    let mini = 1;
+    let maxi = 0;
+    let sujet = 0;
+    for (let i = 0; i < n * n; i++) {
+      const k = i * 4;
+      const r = pixels[k]!;
+      const v = pixels[k + 1]!;
+      const bl = pixels[k + 2]!;
+      // Le fond est un vert très saturé : il domine nettement les deux autres
+      // canaux, ce qui suffit à l'écarter sans toucher au sujet.
+      if (v > r * 1.25 && v > bl * 1.25) {
+        lum[i] = -1;
+        continue;
+      }
+      const l = (0.2126 * r + 0.7152 * v + 0.0722 * bl) / 255;
+      lum[i] = l;
+      if (l < mini) mini = l;
+      if (l > maxi) maxi = l;
+      sujet++;
+    }
+    if (sujet < n * n * 0.05) return null;
+
+    /* ---------- 2. courbe de contraste ----------
+       La luminance est d'abord ramenée à l'étendue RÉELLE du sujet : une
+       photo n'utilise jamais tout le noir au tout blanc, et sans ce recadrage
+       la moitié de l'échelle est perdue.
+
+       Le plancher tombe de 0,20 à 0,10 : à 0,20 les zones sombres recevaient
+       presque autant de points que les claires, les lunettes et la bouche ne
+       se creusaient pas, et le visage devenait une bouillie uniforme. Ce sont
+       ces creux-là qui font reconnaître quelqu'un.
+
+       L'exposant reste MODÉRÉ (1,15). Poussé à 1,9, la densité et le tri par
+       ton se cumulaient sur la même zone : le front, qui est la partie la
+       plus éclairée, recevait à la fois le plus de points ET tous les points
+       blancs, et virait au pavé saturé. Les deux mécanismes ont des rôles
+       distincts — la densité fait le modelé, le tri fait la valeur — et il ne
+       faut pas qu'ils tirent ensemble. */
+    const PLANCHER = 0.1;
+    const ETENDUE = Math.max(0.001, maxi - mini);
+    const poids = new Float32Array(n * n);
+    const cumul = new Float32Array(n * n);
+    let total = 0;
+    for (let i = 0; i < n * n; i++) {
+      if (lum[i]! >= 0) {
+        const norme = (lum[i]! - mini) / ETENDUE;
+        poids[i] = PLANCHER + (1 - PLANCHER) * Math.pow(norme, 1.15);
+      }
+      total += poids[i]!;
+      cumul[i] = total;
+    }
+    if (total <= 0) return null;
+
+    /* ---------- 3. tirage pondéré ----------
+       Chaque point est tiré dans la distribution complète, puis secoué à
+       l'intérieur de son pixel : la densité suit exactement la courbe et la
+       couverture reste régulière, sans les amas du tirage par rejet. */
     let graine = 1;
     const tirage = (): number => {
       graine = (graine * 16807) % 2147483647;
       return graine / 2147483647;
     };
 
-    let gardeFou = 0;
-    while (ecrits < combien && gardeFou < combien * 120) {
-      gardeFou++;
-      const px = Math.floor(tirage() * n);
-      const py = Math.floor(tirage() * n);
-      const k = (py * n + px) * 4;
-      const r = pixels[k]!;
-      const v = pixels[k + 1]!;
-      const bl = pixels[k + 2]!;
-
-      // Le fond est un vert très saturé : il domine nettement les deux autres
-      // canaux, ce qui suffit à l'écarter sans toucher au sujet.
-      if (v > r * 1.25 && v > bl * 1.25) continue;
-
-      const luminance = (0.2126 * r + 0.7152 * v + 0.0722 * bl) / 255;
-      /* Plancher de densité. Sans lui, la veste sombre et les cheveux
-         disparaissent complètement et il ne reste qu'un visage qui flotte
-         sans épaules — on perd la silhouette qui le rend lisible. */
-      if (tirage() > 0.2 + 0.8 * luminance) continue;
-
-      sorties[ecrits * 2] = (px / n - 0.5) * 1.7;
-      sorties[ecrits * 2 + 1] = (0.5 - py / n) * 1.7;
-      ecrits++;
+    const places: { x: number; y: number; l: number }[] = [];
+    for (let i = 0; i < combien; i++) {
+      const cible = tirage() * total;
+      // Recherche dichotomique dans le cumul.
+      let bas = 0;
+      let haut = n * n - 1;
+      while (bas < haut) {
+        const mid = (bas + haut) >> 1;
+        if (cumul[mid]! < cible) bas = mid + 1;
+        else haut = mid;
+      }
+      const px = bas % n;
+      const py = (bas / n) | 0;
+      places.push({
+        x: ((px + tirage()) / n - 0.5) * 1.7,
+        y: (0.5 - (py + tirage()) / n) * 1.7,
+        l: lum[bas]! < 0 ? 0 : lum[bas]!,
+      });
     }
 
-    // Trop peu de points retenus : l'image n'est pas celle qu'on croit.
-    return ecrits > combien * 0.6 ? sorties.subarray(0, ecrits * 2) : null;
+    /* ---------- 4. tri par luminance ----------
+       C'est ce qui donne au portrait ses DEUX tons. Les nuages ont des tailles
+       et des couleurs différentes — terres en blanc épais, mers en gris fin —
+       et ils puisaient jusqu'ici au hasard dans le même vivier, ce qui
+       gâchait cette matière. Rangées du plus clair au plus sombre, les places
+       les plus lumineuses reviennent au nuage blanc et les autres au gris.
+
+       Le tri est TRAMÉ, et c'est indispensable. Trié sur la seule luminance,
+       le partage est un seuil net : le front, uniformément la zone la plus
+       éclairée, passait en blanc à 100 % et se figeait en pavé plein, comme
+       une casquette. En secouant la clé de tri, quelques gris se mêlent aux
+       hautes lumières et quelques blancs aux demi-teintes : la frontière
+       devient un dégradé de trame, ce qu'on attend d'une image en points. */
+    const AMPLITUDE_TRAME = 0.45;
+    places.sort(
+      (a, b) =>
+        b.l + (tirage() - 0.5) * AMPLITUDE_TRAME - (a.l + (tirage() - 0.5) * AMPLITUDE_TRAME),
+    );
+
+    const sorties = new Float32Array(places.length * 2);
+    for (let i = 0; i < places.length; i++) {
+      sorties[i * 2] = places[i]!.x;
+      sorties[i * 2 + 1] = places[i]!.y;
+    }
+    return sorties;
   } catch {
     return null;
   }
@@ -607,8 +684,13 @@ export async function initHero3D(): Promise<void> {
     "/julien-chapron.webp";
   const portrait = await echantillonnerPortrait(chemin, land.length + sea.length);
 
-  const seaCloud = pointCloud(sea, 0x8b949e, 1.6, 0.6, 12.9898, portrait, 0);
-  const landCloud = pointCloud(land, 0xffffff, 2.6, 1, 63.7, portrait, sea.length);
+  /* L'ordre des rangs compte : le vivier est trié du plus clair au plus
+     sombre. Les TERRES — points blancs et épais — prennent donc la tête, et
+     les MERS — gris fins — la suite. C'est ce qui donne au portrait ses deux
+     valeurs : le visage éclairé en blanc franc, les cheveux et la veste en
+     gris discret. Inversé, on obtenait un négatif illisible. */
+  const landCloud = pointCloud(land, 0xffffff, 2.6, 1, 63.7, portrait, 0);
+  const seaCloud = pointCloud(sea, 0x8b949e, 1.6, 0.6, 12.9898, portrait, land.length);
   spin.add(seaCloud.points, landCloud.points);
 
   /* Toulouse reprend un point à elle : c'est l'ancre du trait pointillé qui
