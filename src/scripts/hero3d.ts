@@ -931,8 +931,24 @@ export async function initHero3D(): Promise<void> {
      À L'ŒIL partout. Les valeurs choisies redonnent exactement le rendu actuel
      d'un écran Retina, qui est celui sur lequel tout a été réglé. */
   const grain = Math.min(window.devicePixelRatio || 1, 2);
+  /* LA TAILLE SUIT L'ÉCHELLE DE LA SCÈNE, l'écart entre deux points aussi.
+     C'était le défaut : l'écart est exprimé en unités de scène, donc il rétrécit
+     avec elle, tandis que la taille était un nombre de pixels fixe. Sur un
+     écran étroit les points gardaient leur épaisseur dans une trame resserrée,
+     et le rapport point/écart passait de 0,33 au bureau à 0,40 sur un
+     téléphone de 393 px — soit moitié plus d'encre par maille. Le blanc du
+     visage s'y refermait en masse pleine, et le gris faisait pareil dans son
+     coin : les deux valeurs se rejoignaient et le portrait blanchissait.
+     UNITE_REF est l'échelle de la scène de bureau sur laquelle tout a été
+     réglé (404 px de haut, soit 170 px par unité). Ramené à ce rapport, le
+     dessin est le même partout, simplement plus petit sur un petit écran —
+     ce que le commentaire sur l'écart promettait déjà, et que la taille
+     démentait. Les bornes empêchent seulement les cas extrêmes : sous 0,7 un
+     point blanc commencerait à disparaître. */
+  const UNITE_REF = 170;
+  const echelle = Math.min(1.4, Math.max(0.7, uniteEnPx / UNITE_REF));
   const landCloud = pointCloud(
-    land, 0xffffff, 1.3 * grain, 1, 63.7,
+    land, 0xffffff, 1.3 * grain * echelle, 1, 63.7,
     portrait ? portrait.subarray(0, placesTerre * 2) : null,
     cadrage,
   );
@@ -942,7 +958,7 @@ export async function initHero3D(): Promise<void> {
      presque égale, les deux se lisaient comme une seule masse, sur le visage
      comme sur le globe. */
   const seaCloud = pointCloud(
-    sea, 0x8b949e, 0.575 * grain, 0.6, 12.9898,
+    sea, 0x8b949e, 0.575 * grain * echelle, 0.6, 12.9898,
     portrait ? portrait.subarray(placesTerre * 2) : null,
     cadrage,
   );
@@ -1125,6 +1141,15 @@ export async function initHero3D(): Promise<void> {
     renderer.setPixelRatio(dpr);
     renderer.setSize(view.width, view.height);
     camera.aspect = view.width / view.height;
+
+    /* La taille des points se recalcule avec la scène. Sans cela, elle
+       restait celle du premier rendu : tourner le téléphone ou changer la
+       fenêtre rétrécissait la trame sans toucher aux points, et le portrait
+       se refermait à nouveau — le même défaut, simplement différé. */
+    const uniteIci = Math.max(1, (Math.min(slot.width, slot.height) * 0.84) / 2);
+    const ech = Math.min(1.4, Math.max(0.7, uniteIci / 170));
+    (landCloud.points.material as THREE.PointsMaterial).size = 1.3 * Math.min(dpr, 2) * ech;
+    (seaCloud.points.material as THREE.PointsMaterial).size = 0.575 * Math.min(dpr, 2) * ech;
 
     /* Setback such that the sphere (diameter 2) occupies the height of its
        slot, while the canvas itself fills the whole screen. The globe occupies
