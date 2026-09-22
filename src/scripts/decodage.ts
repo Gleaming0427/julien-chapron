@@ -264,7 +264,7 @@ export function initDecodage(): void {
 const SOUS_TITRES = [
   "Je conçois des API REST et GraphQL",
   "Je fais évoluer du code existant",
-  "J'écris mes back-ends en Node.js",
+  "J'écris mes backends en Node.js",
   "Je construis des interfaces React",
   "Je travaille en TypeScript",
   "Je modélise les données en SQL",

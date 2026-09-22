@@ -98,7 +98,7 @@ export const experiences: Experience[] = [
     context: "Automobile, véhicule électrique, outils internes : documentation d'API et supervision de flotte · Full remote",
     bullets: [
       "Portail de documentation d'API suivi par 5 000 ingénieurs Renault.",
-      "Deux back-ends de flotte : configuration à distance et données remontées, maintenus seul pendant la migration vers GCP.",
+      "Deux backends de flotte : configuration à distance et données remontées, maintenus seul pendant la migration vers GCP.",
       "Docker / Kubernetes, intégration continue GitLab CI, tests Jest et Cypress.",
     ],
     stack: "React.js, Node.js, TypeScript, GraphQL, API REST, Jest, Cypress, Docker, Kubernetes, GCP, GitLab CI, Git, Linux",
@@ -150,8 +150,8 @@ export const experiences: Experience[] = [
     period: "2019 – 2021",
     context: "Conseil en transformation, applications de consultation et de diagnostic · Toulouse",
     bullets: [
-      "Applications de questionnaires et de tests de personnalité, du front-end au back-end.",
-      "Front-end Vue.js avec Vuex, back-end Laravel, bases MySQL conçues et intégrées.",
+      "Applications de questionnaires et de tests de personnalité, du front-end au backend.",
+      "Front-end Vue.js avec Vuex, backend Laravel, bases MySQL conçues et intégrées.",
       "Réponses transmises par WebSocket, sans rechargement de page.",
     ],
   },
@@ -168,7 +168,7 @@ export const experiences: Experience[] = [
 export const skills: SkillGroup[] = [
   { category: "Langages", skills: ["TypeScript", "JavaScript", "PHP", "SQL", "Python"] },
   { category: "Front-end", skills: ["React.js", "Vue.js (Vuex)", "HTML / CSS", "React Native", "Astro"] },
-  { category: "Back-end", skills: ["Node.js (Express)", "API REST", "GraphQL", "PostgreSQL", "Laravel", "MySQL"] },
+  { category: "Backend", skills: ["Node.js (Express)", "API REST", "GraphQL", "PostgreSQL", "Laravel", "MySQL"] },
   { category: "Cloud & infrastructure", skills: ["Docker", "Kubernetes", "GCP", "GitLab CI", "Git", "Linux"] },
   { category: "Tests", skills: ["Jest", "Cypress", "Vitest"] },
   { category: "Méthodes", skills: ["Agile / Scrum", "revues de code"] },
