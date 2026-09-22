@@ -3223,7 +3223,19 @@ html:not(.js) .exp-slides .experience:first-child {
      d'ici qu'elle reste correcte — le volet d'aperçu rend la page à une largeur
      qui n'est pas celle que j'émule. À contrôler sur un vrai téléphone. */
   .dark-zone {
-    padding-bottom: 18vh;
+    padding-bottom: 12vh;
+  }
+
+  /* .apres-hero est un div VIDE de 30vh — de l'espacement pur, 239 px sur un
+     écran de 795. Avec la rallonge ci-dessus, cela faisait 382 px de noir sans
+     rien dedans entre les boutons et l'orange.
+
+     Sur un grand écran cette respiration se justifie : le hero y est large, le
+     regard a de la place, et l'effet de déchirure a besoin de recul pour se
+     lire. Sur un téléphone on ne voit qu'une colonne, et ces deux tiers d'écran
+     vides se traversent à la molette sans que rien n'arrive. */
+  .apres-hero {
+    height: 12vh;
   }
 
   /* LE BAS DU HERO NE GARDE PLUS DE RÉSERVE.
