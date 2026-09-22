@@ -952,8 +952,31 @@ export async function initHero3D(): Promise<void> {
      qu'ailleurs sans raison. Le plancher, lui, ne mord à aucune taille
      réelle ; il n'est là que pour qu'une scène dégénérée ne fasse pas
      disparaître les points. */
-  const UNITE_REF = 170;
-  const echelle = Math.max(0.6, uniteEnPx / UNITE_REF);
+  /* L'ÉCHELLE DU GRAIN SE PREND SUR LA LARGEUR DE L'ÉCRAN, pas sur la taille
+     de la scène. Deux raisons, l'une mesurée, l'autre de bon sens.
+
+     Mesurée : la scène ne suit pas l'écran. Relevé en sonde, elle fait
+     808 x 379 au bureau mais 665 x 526 sur une tablette de 768 px — donc
+     PLUS GRANDE sur l'écran le plus petit, parce qu'elle s'y empile au lieu
+     de se poser à côté du titre. Indexé dessus, le grain grossissait sur
+     tablette. C'est ce qui rendait les trois tentatives précédentes
+     inopérantes ou contraires au but.
+
+     De bon sens : « plus l'écran est petit, plus le point est fin » se dit
+     sur l'écran, pas sur un cadre intermédiaire dont la taille dépend de la
+     mise en page.
+
+     Le grand écran ne bouge pas d'un pixel — c'est le rendu de référence.
+     En dessous de 1024 px la rampe descend jusqu'à la moitié, atteinte à la
+     largeur d'un téléphone. */
+  const LARGEUR_REF = 1024;
+  const LARGEUR_MIN = 380;
+  const echelleEcran = (): number => {
+    const w = document.documentElement.clientWidth || LARGEUR_REF;
+    const t = Math.min(1, Math.max(0, (LARGEUR_REF - w) / (LARGEUR_REF - LARGEUR_MIN)));
+    return 1 - 0.5 * t;
+  };
+  const echelle = echelleEcran();
   const landCloud = pointCloud(
     land, 0xffffff, 1.3 * grain * echelle, 1, 63.7,
     portrait ? portrait.subarray(0, placesTerre * 2) : null,
@@ -1178,8 +1201,7 @@ export async function initHero3D(): Promise<void> {
        nouveau — le même défaut, simplement différé.
        On écrit les deux GRAINS, pas les tailles : la boucle les relit à
        chaque image et écraserait tout le reste. */
-    const uniteIci = Math.max(1, (Math.min(slot.width, slot.height) * 0.84) / 2);
-    const ech = Math.max(0.6, uniteIci / UNITE_REF);
+    const ech = echelleEcran();
     grainTerre = 1.3 * Math.min(dpr, 2) * ech;
     grainMer = 0.575 * Math.min(dpr, 2) * ech;
 

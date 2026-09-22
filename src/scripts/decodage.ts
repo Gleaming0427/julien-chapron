@@ -230,8 +230,14 @@ export function initDecodage(): void {
 
 /* Les phrases qui défilent sous le nom. Quatre règles les gouvernent.
 
+   ON NE MODÉLISE PAS « EN SQL ». On modélise un domaine en schéma
+   relationnel ; SQL est la langue dans laquelle on écrit ensuite ce schéma
+   et ses requêtes. La formule confondait l'acte de conception et la
+   notation — elle passe chez un recruteur non technique et accroche l'œil
+   d'un lead, ce qui est la pire combinaison sur un CV lu par les deux.
+
    LA PRÉPOSITION SUIT LA NATURE DE L'OUTIL, et c'est ce qui manquait : on écrit
-   EN TypeScript ou EN SQL — ce sont des langues, on écrit dedans — mais AVEC
+   EN TypeScript — c'est une langue, on écrit dedans — mais AVEC
    React, Node ou Cypress, qui sont des outils dont on se sert. « Des interfaces
    en React » n'est pas du français de métier, et un recruteur technique
    l'entend au premier coup d'œil. Quand la technologie nomme la chose elle-même
@@ -267,7 +273,7 @@ const SOUS_TITRES = [
   "J'écris mes backends en Node.js",
   "Je construis des interfaces React",
   "Je travaille en TypeScript",
-  "Je modélise les données en SQL",
+  "Je modélise des bases relationnelles",
   "Je déploie avec Docker et Kubernetes",
   "Je teste avec Jest et Cypress",
   "Je développe en React Native",
