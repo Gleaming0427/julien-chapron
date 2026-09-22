@@ -945,10 +945,22 @@ export async function initHero3D(): Promise<void> {
      ce que le commentaire sur l'écart promettait déjà, et que la taille
      démentait. Les bornes empêchent seulement les cas extrêmes : sous 0,7 un
      point blanc commencerait à disparaître. */
-  const UNITE_REF = 170;
-  const echelle = Math.min(1.4, Math.max(0.7, uniteEnPx / UNITE_REF));
+  /* PLAFONNER, PAS METTRE À L'ÉCHELLE. Une échelle proportionnelle grossit
+     les points dès que la scène grandit : mesuré, la tablette a une scène
+     PLUS GRANDE que le bureau (unité 221 contre 170), et le point blanc y
+     passait de 2,60 à 3,38 px — exactement l'inverse de ce qu'on cherche.
+     La règle tient en une phrase : un point ne dépasse jamais une part
+     donnée de l'écart qui le sépare de son voisin, et ne grandit jamais
+     au-delà de sa taille de référence. Rien ne grossit, donc ; seule une
+     trame resserrée fait maigrir le grain. */
+  const ecartCss = LAT_STEP * DEG * uniteEnPx;
+  /** Part de l'écart qu'un point peut couvrir au plus. Le globe à un tiers,
+      le visage à la moitié — c'est la valeur que la tablette rend déjà bien
+      aujourd'hui, et le gris de la veste s'y lit sans se souder. */
+  const plafondGlobe = Math.min(1.3, 0.33 * ecartCss);
+  const plafondVisage = Math.min(2.6, 0.5 * ecartCss);
   const landCloud = pointCloud(
-    land, 0xffffff, 1.3 * grain * echelle, 1, 63.7,
+    land, 0xffffff, plafondGlobe * grain, 1, 63.7,
     portrait ? portrait.subarray(0, placesTerre * 2) : null,
     cadrage,
   );
@@ -958,7 +970,7 @@ export async function initHero3D(): Promise<void> {
      presque égale, les deux se lisaient comme une seule masse, sur le visage
      comme sur le globe. */
   const seaCloud = pointCloud(
-    sea, 0x8b949e, 0.575 * grain * echelle, 0.6, 12.9898,
+    sea, 0x8b949e, (0.575 / 1.3) * plafondGlobe * grain, 0.6, 12.9898,
     portrait ? portrait.subarray(placesTerre * 2) : null,
     cadrage,
   );
@@ -982,7 +994,22 @@ export async function initHero3D(): Promise<void> {
      La taille glisse de l'une à l'autre avec le dégagement, si bien que le
      passage du visage au globe amincit le grain en même temps qu'il change la
      forme : une seule transition, pas deux. */
-  const TAILLE_VISAGE = 2;
+  /* LE VISAGE DESSINE SES POINTS PLUS GROS QUE LE GLOBE — deux fois, sur
+     grand écran. C'est ce qui lui donne sa matière pleine, et c'est voulu.
+
+     Mais ce facteur était une constante, et c'est lui qui refermait le
+     portrait sur petit écran. Mesuré : le point blanc fait 2,60 px CSS pour
+     un écart de 4,00 au bureau, soit 65 % de l'écart ; à 393 px l'écart tombe
+     à 3,29 et le même point en couvre 79 %. L'anticrénelage soude le reste.
+     La veste, elle, tient : son gris fait 1,15 px, soit 35 % de l'écart, et
+     on voit bien ses points sur la photo du téléphone pendant que le visage
+     est une plaque. Deux valeurs, deux sorts, une seule cause.
+
+     Le facteur descend donc avec la scène, jusqu'à 1,35 : le point blanc
+     revient à 1,44 px sur un écran de 393, soit 44 % de l'écart — le
+     territoire où le gris se lit déjà sans se souder. Le grand écran, lui,
+     ne bouge pas d'un pixel. */
+  let TAILLE_VISAGE = plafondVisage / plafondGlobe;
   const matiereTerre = landCloud.points.material as THREE.PointsMaterial;
   const matiereMer = seaCloud.points.material as THREE.PointsMaterial;
   /* LA BOUCLE RÉÉCRIT material.size À CHAQUE IMAGE à partir de ces deux
@@ -990,8 +1017,8 @@ export async function initHero3D(): Promise<void> {
      création des nuages, au redimensionnement — est donc effacée à l'image
      suivante : c'est ici, et nulle part ailleurs, que le grain se règle.
      `let` et non `const` : le redimensionnement les recalcule. */
-  let grainTerre = 1.3 * grain * echelle;
-  let grainMer = 0.575 * grain * echelle;
+  let grainTerre = plafondGlobe * grain;
+  let grainMer = (0.575 / 1.3) * plafondGlobe * grain;
 
   /* Toulouse reprend un point à elle : c'est l'ancre du trait pointillé qui
      part de la pastille « disponible · Toulouse ». Un halo plus large et très
@@ -1154,9 +1181,11 @@ export async function initHero3D(): Promise<void> {
        On écrit les deux GRAINS, pas les tailles : la boucle les relit à
        chaque image et écraserait tout le reste. */
     const uniteIci = Math.max(1, (Math.min(slot.width, slot.height) * 0.84) / 2);
-    const ech = Math.min(1.4, Math.max(0.7, uniteIci / UNITE_REF));
-    grainTerre = 1.3 * Math.min(dpr, 2) * ech;
-    grainMer = 0.575 * Math.min(dpr, 2) * ech;
+    const ecartIci = LAT_STEP * DEG * uniteIci;
+    const globeIci = Math.min(1.3, 0.33 * ecartIci);
+    grainTerre = globeIci * Math.min(dpr, 2);
+    grainMer = (0.575 / 1.3) * globeIci * Math.min(dpr, 2);
+    TAILLE_VISAGE = Math.min(2.6, 0.5 * ecartIci) / globeIci;
 
     /* Setback such that the sphere (diameter 2) occupies the height of its
        slot, while the canvas itself fills the whole screen. The globe occupies
