@@ -171,7 +171,16 @@ const iconesProjet: Record<IconeProjet, string> = {
                     qui parcourt les titres. Le titre est ici sans changer la mise
                     en page, qui présente déjà ces informations plus bas. */}
                 <h3 class="visually-hidden">{exp.title} — {exp.company}, {exp.period}</h3>
-                <p class="exp-eyebrow"><span class="exp-mark" aria-hidden="true"></span>{exp.metric}</p>
+                <p class="exp-eyebrow">
+                  <span class="exp-mark" aria-hidden="true"></span>{exp.metric}
+                  {/* Le repère du téléphone : il remplace les flèches et les
+                      puces, illisibles là-bas. Écrit en dur par fiche, donc
+                      rien à synchroniser — et masqué sur grand écran, où la
+                      barre de navigation fait déjà le travail. */}
+                  <span class="exp-compteur" aria-hidden="true">
+                    0{i + 1} / 0{experiences.length}
+                  </span>
+                </p>
 
                 <div class="exp-stat">
                   <span class="exp-stat-num">{exp.stat}</span>

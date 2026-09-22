@@ -2070,6 +2070,12 @@ html:not(.js) .exp-slides .experience:first-child {
   color: var(--text-dim);
 }
 
+/* Le compteur ne sert que sur téléphone : ailleurs la barre de navigation
+   sous la fiche dit déjà où l'on est. */
+.exp-compteur {
+  display: none;
+}
+
 .exp-mark {
   width: 4px;
   height: 4px;
@@ -4165,5 +4171,41 @@ html:not(.js) .exp-slides .experience:first-child {
 @media (max-width: 720px) and (max-height: 540px) {
   .section-exp .spec-layout {
     padding-block: 10px 8px;
+  }
+}
+
+/* ---------- carrousel d'expérience sur téléphone ----------
+   Les commandes y étaient inutilisables, et mesurées comme telles sur un
+   écran de 393 x 745 : la barre se posait à 688 px pour un panneau de 745,
+   soit 17 px de dégagement sous elle — juste là où l'iPhone dessine sa
+   barre d'accueil. Les flèches faisaient 38 px de côté et les puces 12,
+   contre 44 au minimum : on ne les voyait pas, et on ne les touchait pas
+   davantage.
+
+   Elles ne manquent pas, parce qu'elles ne servaient à rien ici : sur
+   téléphone ce sont LE DÉFILEMENT qui fait avancer les fiches, pas les
+   boutons. Ce qui manquait n'était pas une commande mais un repère — d'où
+   le compteur, posé en bout de la ligne d'œil-de-bœuf, en haut de la fiche,
+   là où il y a de la place et où rien ne dispute le bord de l'écran.
+
+   Au passage la fiche récupère les 38 px de la barre et sa marge. */
+@media (max-width: 720px) {
+  .exp-nav {
+    display: none;
+  }
+
+  .exp-eyebrow {
+    justify-content: space-between;
+  }
+
+  .exp-compteur {
+    display: inline;
+    /* Poussé à droite par space-between : la puce et la métrique tiennent
+       le bord gauche, le compteur l'autre. */
+    margin-left: auto;
+    padding-left: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--green);
+    white-space: nowrap;
   }
 }
