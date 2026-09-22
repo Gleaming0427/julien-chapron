@@ -3879,7 +3879,23 @@ html:not(.js) .exp-slides .experience:first-child {
   }
 
   .exp-part {
-    margin-top: 8px;
+    margin-top: 6px;
+  }
+
+  /* La fiche vient de gagner une ligne (l'autonomie sur la migration GCP,
+     qui valait la place). Sur un écran vraiment court, la marge sous les
+     puces du carrousel était retombée à 7 px : on la reprend sur les
+     interlignes, jamais sur le texte. */
+  .exp-label {
+    margin-bottom: 4px;
+  }
+
+  .experience-claim {
+    margin-bottom: 4px;
+  }
+
+  .experience-points {
+    gap: 3px;
   }
 }
 

@@ -70,7 +70,7 @@ export const identity = {
   availability: "Disponible immédiatement · Remote ou hybride Toulouse",
 };
 
-// « Principalement en équipe » repeats word for word the tagline of the journey block:
+// « Toujours en équipe » repeats word for word the tagline of the journey block:
 // the two phrasings must stay identical, otherwise the site contradicts itself
 // from one screen to the next.
 // Deliberately understated. « Sur ma dernière mission » rather than « chez
@@ -80,14 +80,14 @@ export const identity = {
 // which is an order of magnitude. Every sentence must be defensible
 // as is in an interview.
 export const profile =
-  "Sept ans à construire des applications web, principalement en équipe. Sur ma dernière mission, j'ai contribué à un portail de documentation suivi par 5 000 ingénieurs Renault, puis à des applications de supervision sur une flotte d'environ 200 000 véhicules électriques. À côté, j'aime publier mes propres projets, en lien avec ma veille technique.";
+  "Sept ans à construire des applications web, toujours en équipe. Sur ma dernière mission, j'ai contribué à un portail de documentation d'API suivi par 5 000 ingénieurs Renault, puis à des applications de supervision sur une flotte d'environ 200 000 véhicules électriques. Mon métier, c'est surtout d'entrer dans du code existant et de le faire évoluer sans rien casser. À côté, je publie mes propres projets, en lien avec ma veille technique.";
 
 export const experiences: Experience[] = [
   {
-    // Reads on from the figure printed just above it, not as a line of its
-    // own: « +100 000 véhicules » / « en supervision ». The two other claims
-    // are whole sentences because nothing sits above them to continue.
-    claim: "supervisés.",
+    // A standing phrase and not a fragment continuing the figure above it.
+    // « supervisés. » read well in place, but alone — in the outline, in a
+    // search result, read aloud — it said nothing at all.
+    claim: "Supervision de flotte et documentation d'API.",
     metric: "5 000 utilisateurs",
     stat: "200 000",
     statUnit: "véhicules",
@@ -97,9 +97,9 @@ export const experiences: Experience[] = [
     period: "2022 – 2026",
     context: "Automobile, véhicule électrique, outils internes : documentation d'API et supervision de flotte · Full remote",
     bullets: [
-      "Portail de documentation suivi par 5 000 ingénieurs Renault.",
-      "Deux back-ends de flotte : configuration à distance et traitement des données remontées.",
-      "Déploiements Docker / Kubernetes, intégration continue GitLab CI, tests Jest et Cypress.",
+      "Portail de documentation d'API suivi par 5 000 ingénieurs Renault.",
+      "Deux back-ends de flotte : configuration à distance et données remontées, maintenus seul pendant la migration vers GCP.",
+      "Docker / Kubernetes, intégration continue GitLab CI, tests Jest et Cypress.",
     ],
     stack: "React.js, Node.js, TypeScript, GraphQL, API REST, Jest, Cypress, Docker, Kubernetes, GCP, GitLab CI, Git, Linux",
   },
@@ -115,7 +115,7 @@ export const experiences: Experience[] = [
     // The figure kept is the number of federated centres (4), and not the
     // size of the catalogue: it has grown since 2022, claiming it
     // today would mean taking credit for what happened afterwards.
-    claim: "Rendre trouvables les données de l'atmosphère.",
+    claim: "Chercher dans les données de l'atmosphère.",
     metric: "recherche publique",
     stat: "4",
     statUnit: "centres fédérés",
@@ -137,9 +137,10 @@ export const experiences: Experience[] = [
     // management plan, Réseau Express Vélo of Toulouse Métropole, Airbus
     // and Ariane Group assignments). The applications were the tooling for
     // that business — that is what the card now says.
-    // « En temps réel » is justified here: the sentence names the observable
-    // effect, the answers arriving over WebSocket without a page reload.
-    claim: "Outiller la consultation.",
+    // Not « en temps réel », which names nothing one can check. The sentence
+    // states what is actually observed: the answers arrive over WebSocket,
+    // the page does not reload.
+    claim: "Questionnaires et diagnostics, du front au back.",
     metric: "front et back",
     stat: "3",
     statUnit: "ans",
@@ -151,7 +152,7 @@ export const experiences: Experience[] = [
     bullets: [
       "Applications de questionnaires et de tests de personnalité, du front-end au back-end.",
       "Front-end Vue.js avec Vuex, back-end Laravel, bases MySQL conçues et intégrées.",
-      "Réponses en temps réel grâce au WebSocket.",
+      "Réponses transmises par WebSocket, sans rechargement de page.",
     ],
   },
 ];
@@ -180,7 +181,7 @@ export const personalProjects: PersonalProject[] = [
     kind: "open source",
     icon: "serveur",
     description:
-      "Toolkit d'API gateway serverless : limitation de débit token-bucket, validation de jetons JWT et erreurs typées, sans dépendance à un fournisseur cloud.",
+      "Briques d'API gateway sans serveur : limitation de débit token-bucket, validation de jetons JWT, erreurs typées. Aucune dépendance à un fournisseur cloud.",
     stack: "TypeScript, Node.js (ESM), Zod, jose, SST, AWS Lambda, DynamoDB, GitHub Actions",
     links: [
       { label: "@armored1486/api-gateway-core · MIT", href: "https://www.npmjs.com/package/@armored1486/api-gateway-core" },
@@ -193,7 +194,7 @@ export const personalProjects: PersonalProject[] = [
     kind: "open source",
     icon: "chapeau",
     description:
-      "Trouve les CVE qui comptent vraiment dans votre code : recoupées contre OSV/GHSA, analysées par reachability, avec correctifs exacts.",
+      "Tri des vulnérabilités d'un dépôt : recoupement avec OSV et GHSA, analyse d'atteignabilité dans le code appelé, et le correctif exact à appliquer.",
     stack: "Python, Mistral AI",
     links: [{ label: "github.com/Gleaming0427/cve-triage", href: "https://github.com/Gleaming0427/cve-triage" }],
     page: "/cve-triage/",
@@ -204,7 +205,7 @@ export const personalProjects: PersonalProject[] = [
     kind: "projet personnel",
     icon: "telephone",
     description:
-      "Double interface parent / enfant : architecture multi-rôles, authentification par code et PIN, synchronisation temps réel et règles de sécurité Firestore.",
+      "Double interface parent / enfant : architecture multi-rôles, authentification par code et PIN, synchronisation entre les deux vues et règles de sécurité Firestore.",
     stack: "React Native (Expo Router), TypeScript, Zustand, Firebase, NativeWind",
     links: [
       { label: "Google Play", href: "https://play.google.com/store/apps/details?id=com.pimspocket.app" },
