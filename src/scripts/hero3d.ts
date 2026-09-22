@@ -985,8 +985,13 @@ export async function initHero3D(): Promise<void> {
   const TAILLE_VISAGE = 2;
   const matiereTerre = landCloud.points.material as THREE.PointsMaterial;
   const matiereMer = seaCloud.points.material as THREE.PointsMaterial;
-  const grainTerre = 1.3 * grain;
-  const grainMer = 0.575 * grain;
+  /* LA BOUCLE RÉÉCRIT material.size À CHAQUE IMAGE à partir de ces deux
+     valeurs (voir ampleur, plus bas). Toute taille posée ailleurs — à la
+     création des nuages, au redimensionnement — est donc effacée à l'image
+     suivante : c'est ici, et nulle part ailleurs, que le grain se règle.
+     `let` et non `const` : le redimensionnement les recalcule. */
+  let grainTerre = 1.3 * grain * echelle;
+  let grainMer = 0.575 * grain * echelle;
 
   /* Toulouse reprend un point à elle : c'est l'ancre du trait pointillé qui
      part de la pastille « disponible · Toulouse ». Un halo plus large et très
@@ -1142,14 +1147,16 @@ export async function initHero3D(): Promise<void> {
     renderer.setSize(view.width, view.height);
     camera.aspect = view.width / view.height;
 
-    /* La taille des points se recalcule avec la scène. Sans cela, elle
-       restait celle du premier rendu : tourner le téléphone ou changer la
-       fenêtre rétrécissait la trame sans toucher aux points, et le portrait
-       se refermait à nouveau — le même défaut, simplement différé. */
+    /* Le grain se recalcule avec la scène. Sans cela, il restait celui du
+       premier rendu : tourner le téléphone ou changer la fenêtre rétrécissait
+       la trame sans toucher aux points, et le portrait se refermait à
+       nouveau — le même défaut, simplement différé.
+       On écrit les deux GRAINS, pas les tailles : la boucle les relit à
+       chaque image et écraserait tout le reste. */
     const uniteIci = Math.max(1, (Math.min(slot.width, slot.height) * 0.84) / 2);
-    const ech = Math.min(1.4, Math.max(0.7, uniteIci / 170));
-    (landCloud.points.material as THREE.PointsMaterial).size = 1.3 * Math.min(dpr, 2) * ech;
-    (seaCloud.points.material as THREE.PointsMaterial).size = 0.575 * Math.min(dpr, 2) * ech;
+    const ech = Math.min(1.4, Math.max(0.7, uniteIci / UNITE_REF));
+    grainTerre = 1.3 * Math.min(dpr, 2) * ech;
+    grainMer = 0.575 * Math.min(dpr, 2) * ech;
 
     /* Setback such that the sphere (diameter 2) occupies the height of its
        slot, while the canvas itself fills the whole screen. The globe occupies
