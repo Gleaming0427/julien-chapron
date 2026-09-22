@@ -3205,6 +3205,27 @@ html:not(.js) .exp-slides .experience:first-child {
     min-height: 40px;
   }
 
+  /* LA RALLONGE SOMBRE SOUS LE HERO EST TAILLÉE POUR UN BANDEAU QUI N'EXISTE
+     PLUS.
+
+     .dark-zone porte 35vh de padding bas, et son commentaire dit pourquoi :
+     « 15 + 35 = 50vh, la demi-hauteur nécessaire AVEC UN BLOC DE 30VH ». Or le
+     bandeau ne fait plus 30vh mais environ 14 : le calcul n'a pas suivi la
+     réduction, et la rallonge est restée dimensionnée pour l'ancienne mise en
+     page.
+
+     Relevé sur 402 × 795 : 553 px — 0,68 écran — entre le bas des boutons et
+     l'orange du bloc 1, dont 278 px de noir strictement vide après l'effet de
+     tache. À 18vh il en reste 143, et la traversée tombe à 0,52 écran.
+
+     Réduction volontairement PRUDENTE, et pas jusqu'au strict nécessaire : la
+     déchirure est ancrée au pied de cette zone, et je ne peux pas vérifier
+     d'ici qu'elle reste correcte — le volet d'aperçu rend la page à une largeur
+     qui n'est pas celle que j'émule. À contrôler sur un vrai téléphone. */
+  .dark-zone {
+    padding-bottom: 18vh;
+  }
+
   /* LE BAS DU HERO NE GARDE PLUS DE RÉSERVE.
 
      Relevé sur un écran de 402 × 795 : 68 px de vide entre les boutons et le
