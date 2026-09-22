@@ -24,8 +24,15 @@ const portraitUrl = base === "/" ? "/julien-chapron.webp" : `${base}/julien-chap
   <div class="hero-top">
     <div class="hero-col">
       <div class="hero-title">
-        <p class="hero-overline">Hello, je suis <span class="hero-overline-nom">Julien Chapron</span></p>
-        <h1 class="hero-role">Développeur <em>full-stack</em></h1>
+        {/* Le nom porte le <h1>, et non le rôle : la page parle d'une
+            personne, et c'est le nom qu'on tape dans un moteur. L'apparence
+            ne change pas, tout le style est sur les classes.
+            « Hello, je suis » est parti avec : une interjection anglaise en
+            ouverture d'un CV français, juste au-dessus du titre, sonne
+            portfolio d'étudiant. Le nom seul suffit — et à sept ans
+            d'expérience, se présenter est le travail du titre en dessous. */}
+        <h1 class="hero-overline"><span class="hero-overline-nom">{identity.name}</span></h1>
+        <p class="hero-role">Développeur <em>full-stack</em></p>
         {/* La ligne porte directement les phrases qui défilent : la mention de
             disponibilité qui l'ouvrait a été retirée. Ce texte-ci n'est que le
             premier de SOUS_TITRES (decodage.ts) — il est écrit ici pour que la

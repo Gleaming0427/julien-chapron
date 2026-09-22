@@ -249,17 +249,29 @@ export function initDecodage(): void {
 
    UNE LONGUEUR RESSERRÉE, sous 36 caractères. La ligne est figée à la largeur
    de la PLUS LONGUE d'entre elles, les autres venant se centrer dedans (voir
-   caler) : une phrase qui dépasse élargit la boîte pour toutes. */
+   caler) : une phrase qui dépasse élargit la boîte pour toutes.
+
+   DU FRANÇAIS DE MÉTIER, PAS DU FRANGLAIS. « Je type mon code en TypeScript »
+   sonnait faux et l'était : typer un code n'existe pas en français, et taper
+   son code veut dire le saisir au clavier. Une ligne qui rate le vocabulaire
+   du métier dit au lecteur qu'on l'imite plutôt qu'on l'exerce — juste sous
+   le nom, en première page, c'est cher payé.
+
+   LE NIVEAU, PAS SEULEMENT L'OUTIL. Une suite de « j'utilise X » se lit comme
+   un inventaire de débutant. « Je fais évoluer du code existant » dit le
+   métier tel qu'il se pratique à sept ans d'expérience, et c'est la phrase
+   du bloc profil, mot pour mot. */
 const SOUS_TITRES = [
   "Je conçois des API REST et GraphQL",
-  "J'écris des services avec Node.js",
-  "Je développe des interfaces React",
-  "Je type mon code en TypeScript",
+  "Je fais évoluer du code existant",
+  "J'écris mes back-ends en Node.js",
+  "Je construis des interfaces React",
+  "Je travaille en TypeScript",
   "Je modélise les données en SQL",
   "Je déploie avec Docker et Kubernetes",
   "Je teste avec Jest et Cypress",
-  "Je code le mobile avec React Native",
-  "Je publie mes paquets sur npm",
+  "Je développe en React Native",
+  "Je publie en open source",
 ];
 /** How long each phrase holds before the next scramble. */
 const TENUE_SOUS_TITRE = 6000;
