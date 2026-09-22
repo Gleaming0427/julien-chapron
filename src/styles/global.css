@@ -25,8 +25,21 @@
   /* Fluid type scale, taken from the reference: every size
      is a multiple of 1vw/0.9. Clamped at both extremes — without that the text
      would drop to 4px on a phone and balloon on a very large screen. */
-  --fs-micro: clamp(10px, 0.83vw, 14px);
-  --fs-small: clamp(12.5px, 0.9vw, 17px);
+  /* LES PLANCHERS REMONTENT. Relevé sur la page entière : 39 éléments de texte
+     sous 14 px sur un écran de 402, et 29 à 13 px sur un 1440. Ce n'était pas
+     un oubli ici ou là, c'étaient ces deux planchers-ci — `--fs-small` tombait
+     à 12,5 et `--fs-micro` à 10.
+
+     14 px est le plancher usuel du texte courant ; en dessous, la lecture coûte
+     un effort qui n'apporte rien. 12 px reste admis pour ce qui n'est pas du
+     texte à lire mais un repère — une étiquette, un séparateur — et c'est à
+     cela que `--fs-micro` est réservé.
+
+     La pente de `--fs-small` passe de 0,9 à 1,0vw pour que le plancher ne la
+     rattrape pas : à 0,9 elle serait restée collée à 14 jusqu'à 1550 px de
+     large, et la marche d'avec `--fs-body` aurait disparu. */
+  --fs-micro: clamp(12px, 0.83vw, 14px);
+  --fs-small: clamp(14px, 1vw, 17px);
   --fs-body: clamp(14.5px, 1.111vw, 20px);
   --fs-text: clamp(15.5px, 1.222vw, 22px);
   --fs-lead: clamp(17px, 1.667vw, 28px);
@@ -855,7 +868,9 @@ html.menu-ouvert .menu-voile {
 
 #scroll-progress .pct {
   font-family: var(--font-mono);
-  font-size: 10px;
+  /* 12 px et non 10 : c'est un repère, pas du texte à lire, mais dix pixels le
+     rendaient illisible plutôt que discret. */
+  font-size: 12px;
   letter-spacing: 0.08em;
   /* Tabular figures: without them the counter jitters at every unit. */
   font-variant-numeric: tabular-nums;
@@ -3707,7 +3722,13 @@ html:not(.js) .exp-slides .experience:first-child {
    At the end of the file on purpose: at equal specificity, order decides. */
 @media (max-width: 720px) {
   :root {
-    --fs-small: 13px;
+    /* --fs-small passe de 13 à 14. Il avait été oublié quand les trois autres
+       ont été relevés ici, et il porte plus de monde qu'on ne croit : les
+       mesures des projets, leurs notes et leurs liens, le nom sur la pastille
+       du hero. Relevé sur toute la page : trente-sept éléments à 13 px, dont
+       une bonne moitié n'est pas de l'étiquette mais du texte à lire.
+       Ce qui doit rester petit a --fs-micro, à 12, et c'est sa raison d'être. */
+    --fs-small: 14px;
     --fs-body: 16px;
     --fs-text: 17px;
     --fs-lead: 18px;
@@ -3806,7 +3827,11 @@ html:not(.js) .exp-slides .experience:first-child {
     gap: 0;
     padding: 1px 0;
     border: 0;
-    font-size: 11px;
+    /* 13 px et non 11. Le commentaire ci-dessus disait déjà que 10 px « ne se
+       lit de toute façon pas sur un téléphone » — 11 non plus. Ces trois
+       lignes portent le poste, la mission et la période : ce sont les faits
+       que quelqu'un vient vérifier, pas de la décoration. */
+    font-size: 13px;
     line-height: 1.5;
   }
 
