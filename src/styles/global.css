@@ -3342,6 +3342,53 @@ html:not(.js) .exp-slides .experience:first-child {
   }
 }
 
+/* ---------- bloc 2 sur tablette : le titre passe au-dessus ----------
+
+   Deux colonnes tiennent tant qu'elles sont larges. Relevé sur 820 × 1180 :
+   354 px pour le titre, 369 pour la fiche — or cette fiche porte un grand
+   chiffre, trois paragraphes et un tableau de trois lignes. À 369 px elle se
+   comprime, pendant qu'il reste 260 px de vide AU-DESSUS et 260 EN DESSOUS.
+   Trop étroit horizontalement, trop vide verticalement : c'est exactement le
+   cas où il faut empiler.
+
+   Empilée, la fiche récupère toute la largeur utile — plus du double — et la
+   hauteur libre est justement ce qu'il faut pour loger le titre par-dessus.
+   L'ordre vient du DOM, où .spec-intro précède .exp-carousel : une seule
+   colonne suffit à le mettre au-dessus, sans rien réordonner.
+
+   LES DEUX CONDITIONS COMPTENT, et la hauteur autant que la largeur. Une
+   tablette en paysage fait 1024 × 768 : même largeur contrainte, mais 768 px de
+   haut seulement, où le titre empilé par-dessus la fiche ne passe pas. On
+   empile donc à partir de 900 px de haut, ce qui prend les tablettes en
+   portrait — 768 × 1024, 820 × 1180, 834 × 1194 — et laisse le paysage en deux
+   colonnes, où c'est la bonne réponse.
+
+   La borne haute à 1080 px : au-delà, deux colonnes de plus de 420 px chacune
+   tiennent avec leurs gouttières, et la mise en page large reprend son sens. */
+@media (min-width: 721px) and (max-width: 1080px) and (min-height: 900px) {
+  .section-exp .spec-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: center;
+    align-items: start;
+    gap: clamp(20px, 3vh, 36px);
+  }
+
+  /* Le titre s'aligne sur la fiche au lieu de se centrer sur sa propre
+     largeur : empilés, deux blocs qui ne partagent pas leur bord gauche se
+     lisent comme un défaut d'alignement. Même parti que sur téléphone. */
+  .spec-intro {
+    justify-self: stretch;
+    width: auto;
+  }
+
+  /* La coupe à 9em servait une colonne étroite. Sur toute la largeur, le titre
+     tiendrait sur une seule ligne et perdrait sa scansion en trois temps. */
+  .spec-intro .spec-headline {
+    max-width: 16em;
+  }
+}
+
 /* ---------- phone ---------- */
 
 @media (max-width: 720px) {

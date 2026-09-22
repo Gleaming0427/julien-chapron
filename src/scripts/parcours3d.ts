@@ -609,19 +609,28 @@ function construireVoiture(count: number): [number, number, number][] {
 }
 
 export function initParcours3D(): void {
-  /* Sous 720 px, la scène ne se monte pas du tout.
+  /* NI SUR TÉLÉPHONE NI SUR TABLETTE : la scène ne se monte pas du tout.
 
-     La mise en page y est empilée : la fiche fait 350 × 530 et se pose à
-     188 px du haut, si bien qu'elle recouvre 58 % du canvas — et le nuage
-     étant centré, il tombe exactement dessous. Mesuré : on ne voit pas un
-     point, à aucun moment de la séquence. On payait donc un contexte WebGL et
-     un rendu à chaque image, sur l'appareil qui le supporte le moins bien,
-     pour quelque chose d'invisible.
+     Sur téléphone, la raison est mesurée : la mise en page y est empilée, la
+     fiche fait 350 × 530 et se pose à 188 px du haut, si bien qu'elle recouvre
+     58 % du canvas — et le nuage étant centré, il tombe exactement dessous. On
+     ne voit pas un point, à aucun moment de la séquence. On payait un contexte
+     WebGL et un rendu à chaque image, sur l'appareil qui le supporte le moins
+     bien, pour quelque chose d'invisible.
 
-     Le volet sombre ne dépend plus de ce module (ui.ts écrit --volet-entree,
-     et le fond prend le maximum des deux) : le bloc garde donc son fond, sa
-     transition et son carrousel. Seul le décor disparaît. */
-  if (window.matchMedia("(max-width: 720px)").matches) return;
+     Sur tablette, la même chose vient d'arriver : le bloc s'y empile désormais
+     aussi, titre au-dessus et fiche sur toute la largeur (voir la requête
+     tablette dans global.css). Une fiche large de 756 px sur un canvas de 805
+     ne laisse plus rien dépasser du nuage.
+
+     La condition retenue couvre les deux orientations : la largeur seule
+     laisserait passer une tablette en paysage, qui fait 1024 px de large. Le
+     pointeur grossier attrape tout ce qui se touche, quelle que soit la taille.
+
+     Le volet sombre ne dépend pas de ce module (ui.ts écrit --volet-entree, et
+     le fond prend le maximum des deux) : le bloc garde son fond, sa transition
+     et son carrousel. Seul le décor disparaît. */
+  if (window.matchMedia("(max-width: 1080px), (pointer: coarse)").matches) return;
 
   const section = document.querySelector<HTMLElement>(".section-exp");
   const intro = document.querySelector<HTMLElement>(".spec-intro");
