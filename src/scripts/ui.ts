@@ -124,9 +124,10 @@ requestAnimationFrame(loop);
       module.initSousTitre();
     })
     .catch(() => {});
-  import("./parcours3d")
-    .then((module) => module.initParcours3D())
-    .catch(() => {});
+  /* The journey's 3D point cloud is OFF. The block keeps its background,
+     transition and carousel — the site already handled the no-scene case
+     (it was the phone behaviour); only the decoration is gone. The module
+     stays in the tree, one import away from coming back. */
 }
 
 const progress = document.getElementById("scroll-progress") as HTMLDivElement;
