@@ -277,6 +277,43 @@ body {
   gap: 14px;
 }
 
+/* The language switch, beside the logos: FR / EN, the selected locale
+   carries the orange, the other one is the link. */
+.bandeau-droite {
+  display: flex;
+  align-items: center;
+  gap: 34px;
+}
+
+.bandeau-langues {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.bandeau-langue {
+  font-family: var(--font-mono);
+  font-size: clamp(9.5px, 0.7vw, 12px);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.bandeau-langue:hover {
+  color: var(--orange);
+}
+
+.bandeau-langue.is-active {
+  color: var(--orange);
+}
+
+.bandeau-langue-sep {
+  color: var(--text-dim);
+  opacity: 0.5;
+}
+
 .bandeau-reseaux a {
   display: grid;
   place-items: center;
@@ -1186,10 +1223,11 @@ html.menu-ouvert .menu-voile {
 
 .hero-overline {
   margin: 0 0 10px;
-  font-family: var(--font-mono);
-  /* A step above the body size it had: it introduces the name, it must be
-     noticed, without shouting over the title. */
-  font-size: clamp(19px, 1.55vw, 26px);
+  /* The same family as the rotating line below: the greeting leads the
+     title, so it carries the sans, and a step above its old size. */
+  font-family: var(--font-sans);
+  font-size: clamp(24px, 2.5vw, 38px);
+  font-weight: 400;
   color: var(--text-dim);
 }
 
@@ -1212,12 +1250,15 @@ html.menu-ouvert .menu-voile {
 }
 
 .hero-role em {
-  font-style: italic;
+  /* Upright: the italic read as a second font next to the plain part. */
+  font-style: normal;
 }
 
 .hero-sub {
   margin: 10px 0 0;
-  font-size: clamp(19px, 2.2vw, 32px);
+  /* Smaller: the rotating line accompanies, the greeting and the title
+     lead. */
+  font-size: clamp(15px, 1.7vw, 23px);
   /* Archivo light: the text looked bold at the default weight. */
   font-weight: 300;
   color: var(--text-dim);

@@ -1,0 +1,10 @@
+---
+import PageAccueil from "../../components/PageAccueil.astro";
+
+export function getStaticPaths() {
+  return [{ params: { locale: "en" } }];
+}
+---
+
+<!-- The non-default locale: prefixed, /en/. -->
+<PageAccueil locale="en" />

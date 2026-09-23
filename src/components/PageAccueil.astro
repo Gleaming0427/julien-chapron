@@ -1,0 +1,384 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import Layout from "../layouts/Layout.astro";
+import Hero from "./Hero.astro";
+import Marquee from "./Marquee.astro";
+import Section from "./Section.astro";
+import type { IconeProjet, Locale } from "../data/cv";
+import { cv } from "../data/cv";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const donnees = cv[locale];
+const { identity, profile, experiences, skills, personalProjects, ui } = donnees;
+const urlLocale = (path: string) => getRelativeLocaleUrl(locale, path);
+
+// Full-width scrolling bands, in the style of award-winning editorial sites.
+const marqueeSkills = [
+  "TypeScript", "React.js", "Node.js", "GraphQL", "API REST", "Docker",
+  "Kubernetes", "GCP", "AWS Lambda", "DynamoDB", "Astro", "React Native",
+  "PostgreSQL", "Firebase", "GitLab CI", "GitHub Actions",
+];
+
+// Project step icons, drawn as strokes, placed in the head box.
+const iconesProjet: Record<IconeProjet, string> = {
+  serveur:
+    '<rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>',
+  chapeau:
+    '<path d="M4.5 11.5c.5-2.9 3.6-5 7.5-5s7 2.1 7.5 5"/><circle cx="8.5" cy="15.5" r="2.4"/><circle cx="15.5" cy="15.5" r="2.4"/><path d="M10.9 15.5h2.2"/><path d="M6.1 15.5H3.5"/><path d="M17.9 15.5h2.6"/>',
+  telephone:
+    '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>',
+  ia: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>',
+};
+
+---
+
+<Layout
+  title={ui.metaTitre}
+  description={ui.metaDescription}
+>
+  <!-- Dark part: the hero fills the first screen, the terminal the
+       second. The tear window is anchored on its last screen: the dark
+       content scrolls behind while the sheet rises. -->
+  <div class="dark-zone">
+    <!-- The stats band leads, between the navbar and the hero: it is the
+         first thing the page says. -->
+    <div class="bandeau-block">
+      <div class="bandeau-stat" aria-hidden="true">
+        <span class="bandeau-stat-inner">
+          <span>{ui.bandeauStats[0]}</span>
+          <span class="sep">·</span>
+          <span>{ui.bandeauStats[1]}</span>
+          <span class="sep">·</span>
+          <span>{ui.bandeauStats[2]}</span>
+        </span>
+      </div>
+      <Marquee items={marqueeSkills} />
+      <!-- The band's bottom line: the domain on the left, the social logos
+           on the right — the navbar's two ends. -->
+      <div class="bandeau-ligne">
+        <a class="bandeau-domaine" href={urlLocale("/")}>julien-chapron.com</a>
+        <div class="bandeau-droite">
+          <div class="bandeau-langues">
+            {(["en", "fr"] as const).map((l, i) => (
+              <>
+                {i > 0 && <span class="bandeau-langue-sep" aria-hidden="true">/</span>}
+                {l === locale ? (
+                  <span class="bandeau-langue is-active" aria-current="true">{l.toUpperCase()}</span>
+                ) : (
+                  <a class="bandeau-langue" href={getRelativeLocaleUrl(l, "")} hreflang={l}>{l.toUpperCase()}</a>
+                )}
+              </>
+            ))}
+          </div>
+          <div class="bandeau-reseaux">
+          <a href={identity.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
+          </a>
+          <a href={identity.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg>
+          </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <Hero />
+
+    <!-- The dark runway between the hero and the tear: the band used to sit
+         there; now it leads the page, so this empty stretch keeps the
+         sheet's rise where it was — the effect happens lower, not right
+         under the hero. -->
+    <div class="apres-hero" aria-hidden="true"></div>
+
+    <!-- The white sheet rises from the bottom: a simple rectangle in
+         scaleY from its bottom edge. The container wrapping it carries the
+         filter: the noise shreds the rectangle's top edge, and since that
+         edge crosses a fixed noise field, the tear reshapes itself at
+         every height. The negative inset leaves room for the distortion
+         (scale 220, so 110 px of travel) without cropping it. -->
+    <div class="tear" aria-hidden="true">
+      <div class="tear-filter">
+        <div class="tear-sheet">
+          <!-- Phone only: the thin filtered strip that carries the torn
+               edge (see the phone block in global.css). A real element, not
+               a pseudo-element — SVG url() filters do not apply on
+               ::before/::after. -->
+          <div class="tear-frange"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- A one-pixel box, clipped, rather than width="0" height="0": Safari has
+       a long history of ignoring filters referenced from a zero-sized SVG,
+       and there the sheet comes up with a clean straight edge. The defs are
+       never painted, so the box costs nothing. -->
+  <svg
+    width="1"
+    height="1"
+    aria-hidden="true"
+    style="position:absolute;top:0;left:0;width:1px;height:1px;clip-path:inset(50%);pointer-events:none"
+  >
+    <defs>
+      <filter id="ink-edge" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.015 0.02" numOctaves="3" seed="7" result="noise"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="220" xChannelSelector="R" yChannelSelector="G" result="displaced"></feDisplacementMap>
+        <feGaussianBlur in="displaced" stdDeviation="1.8" result="presmooth"></feGaussianBlur>
+        <feComponentTransfer in="presmooth" result="cut">
+          <feFuncA type="discrete" tableValues="0 0 0 0 0 1 1 1 1 1"></feFuncA>
+        </feComponentTransfer>
+        <feGaussianBlur in="cut" stdDeviation="0.4"></feGaussianBlur>
+      </filter>
+      <!-- The same edge, scaled for a phone. The parameters above are
+           absolute pixels tuned on a wide screen: 220 px of displacement is
+           15 % of 1440 px, and the noise pattern 4.6 %. Carried over to a
+           393 px window they become 56 % and 17 % — the edge is then two or
+           three lobes the size of a hand, so one corner of the sheet wins the
+           race and the orange shows up in the top right before the rest.
+           Brought back to the same proportions: 60 px of displacement,
+           pattern of 18 px. Two octaves rather than three, and one blur pass
+           dropped — over a surface that Safari has to rasterise again on
+           every frame, what is no longer visible at this size is not worth
+           paying for. -->
+      <filter id="ink-edge-fin" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.045 0.06" numOctaves="2" seed="7" result="noise"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="74" xChannelSelector="R" yChannelSelector="G" result="displaced"></feDisplacementMap>
+        <feGaussianBlur in="displaced" stdDeviation="1.2" result="presmooth"></feGaussianBlur>
+        <feComponentTransfer in="presmooth" result="cut">
+          <feFuncA type="discrete" tableValues="0 0 0 0 0 1 1 1 1 1"></feFuncA>
+        </feComponentTransfer>
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="light-zone">
+    <!-- The carousel: cat profil is the first screen, pinned in the centre,
+         then the wheel scrolls blocks 2-5 horizontally. -->
+    <div class="carousel-rail">
+      <div class="carousel-sticky">
+        <div class="carousel-track">
+          <div class="carousel-item carousel-item-first">
+  <Section command={ui.commandeProfil}>
+    <p>{profile}</p>
+  </Section>
+          </div>
+          <div class="carousel-item carousel-item-dark">
+  <Section command={ui.commandeExperience} class="section-exp">
+    <div class="spec-layout">
+    <div class="spec-intro">
+      <p class="spec-eyebrow">{ui.parcoursEyebrow}</p>
+      <h2 class="spec-headline">{ui.parcoursTitre} <span>{ui.parcoursTitreFin}</span></h2>
+      <p class="spec-lead">{ui.parcoursLead}</p>
+    </div>
+    <div class="exp-carousel">
+      <div class="exp-slides">
+        {
+          experiences.map((exp, i) => (
+            <article class:list={["experience", i === 0 && "is-active"]} data-slide={i}>
+              <span class="experience-watermark" aria-hidden="true">{`0${i + 1}`}</span>
+              <div class="experience-body">
+                {/* Les trois postes n'apparaissaient nulle part dans le plan du
+                    document : trois expériences, invisibles à un lecteur d'écran
+                    qui parcourt les titres. Le titre est ici sans changer la mise
+                    en page, qui présente déjà ces informations plus bas. */}
+                <h3 class="visually-hidden">{exp.title} — {exp.company}, {exp.period}</h3>
+                <p class="exp-eyebrow">
+                  <span class="exp-mark" aria-hidden="true"></span>{exp.metric}
+                  {/* Le repère du téléphone : il remplace les flèches et les
+                      puces, illisibles là-bas. Écrit en dur par fiche, donc
+                      rien à synchroniser — et masqué sur grand écran, où la
+                      barre de navigation fait déjà le travail. */}
+                  <span class="exp-compteur" aria-hidden="true">
+                    0{i + 1} / 0{experiences.length}
+                  </span>
+                </p>
+
+                <div class="exp-stat">
+                  <span class="exp-stat-num">{exp.stat}</span>
+                  <span class="exp-stat-unit">{exp.statUnit}</span>
+                </div>
+                <p class="experience-claim">{exp.claim}</p>
+
+                <div class="exp-part">
+                  <p class="exp-label">{ui.labelContexte}</p>
+                  <p class="experience-summary">{exp.summary}</p>
+                </div>
+
+                <div class="exp-part">
+                  <p class="exp-label">{ui.labelLivre}</p>
+                  <ul class="experience-points">
+                    {exp.bullets.map((point) => <li>{point}</li>)}
+                  </ul>
+                </div>
+
+                <dl class="exp-spec">
+                  <div class="exp-spec-row"><dt>{ui.labelPoste}</dt><dd>{exp.title}</dd></div>
+                  <div class="exp-spec-row"><dt>{ui.labelMission}</dt><dd>{exp.company}</dd></div>
+                  <div class="exp-spec-row"><dt>{ui.labelPeriode}</dt><dd>{exp.period}</dd></div>
+                </dl>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+      <!-- The dots carry the position, centred between the two arrows: one
+           dot per card, and the travelled line fills behind the current one.
+           Each dot is a tab, so the group announces where you are to a
+           screen reader. -->
+      <div class="exp-nav">
+        <button type="button" class="exp-fleche" data-pas="-1" aria-label={ui.flechePrec}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 12H3" /><path d="m8.8 6.8-5.2 5.2 5.2 5.2" /></svg>
+        </button>
+
+        <div class="exp-dots" role="tablist" aria-label={ui.choisirExperience}>
+          {
+            experiences.map((exp, i) => (
+              <button
+                type="button"
+                class:list={["exp-dot", i === 0 && "is-active"]}
+                role="tab"
+                aria-selected={i === 0 ? "true" : "false"}
+                tabindex={i === 0 ? 0 : -1}
+              >
+                <span class="visually-hidden">{exp.company}</span>
+              </button>
+            ))
+          }
+        </div>
+
+        <button type="button" class="exp-fleche" data-pas="1" aria-label={ui.flecheSuiv}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.6 12H21" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
+        </button>
+      </div>
+    </div>
+    </div>
+  </Section>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- From here on, no more pinned carousel: these are normal
+         sections, reached by simply scrolling the page. -->
+  <Section command={ui.commandeCompetences} class="section-skills section-apres">
+    <p class="spec-eyebrow">{ui.competencesEyebrow}</p>
+    <h2 class="spec-headline">{ui.competencesTitre} <span>{ui.competencesTitreFin}</span></h2>
+    <p class="spec-lead">
+      {ui.competencesLead}
+    </p>
+    <div class="skill-sheet">
+      {
+        skills.map((group, i) => (
+          <div class="skill-row" style={`--d:${i}`}>
+            <h3 class="skill-cat">{group.category}</h3>
+            <ul class="skill-items">
+              {group.skills.map((skill) => <li>{skill}</li>)}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </Section>
+
+  <Section command={ui.commandeProjets} class="section-apres section-projets">
+    <p class="spec-eyebrow">{ui.projetsEyebrow}</p>
+    <h2 class="spec-headline">{ui.projetsTitre} <span>{ui.projetsTitreFin}</span></h2>
+    <p class="spec-lead">
+      {ui.projetsLead}
+    </p>
+    <!-- The four projects as steps, Axiom power path style: a grid
+         bordered by a hairline rule, each step in a column — number and icon
+         at the top, title and description in the middle, note at the foot. -->
+    <div class="projet-grille">
+      {personalProjects.map((project, i) => (
+        <article class="projet-etape">
+          <div class="projet-tete">
+            <span class="projet-icone" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={iconesProjet[project.icon]}></svg>
+            </span>
+            <span class="projet-mesure">{ui.projetPrefixe}0{i + 1}</span>
+          </div>
+          <div class="projet-corps">
+            <h3 class="projet-titre">{project.name}</h3>
+            <p class="projet-texte">{project.description}</p>
+          </div>
+          <footer class="projet-pied">
+            <p class="projet-note">{project.tagline}</p>
+            {project.page && (
+              <a class="projet-lien" href={urlLocale(project.page)}>{ui.voirProjet}</a>
+            )}
+          </footer>
+        </article>
+      ))}
+    </div>
+  </Section>
+
+    </div>
+
+  <!-- Footer in the Axiom style: the orange sheet returns, dark ink,
+       without the big statement. -->
+  <footer class="site-footer">
+    <div class="footer-contenu">
+      <div class="footer-haut">
+        <div class="footer-propos">
+          <h2>{ui.footerTitre}</h2>
+          <p>{ui.footerTexte}</p>
+          <a class="axiom-btn axiom-btn-dark footer-cta" href={`mailto:${identity.email}`}>
+            <span class="axiom-btn-text-col">
+              <span class="axiom-btn-text-row">{ui.boutonContact}</span>
+              <span class="axiom-btn-text-row" aria-hidden="true">{ui.boutonContact}</span>
+            </span>
+            <span class="axiom-btn-arrow-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h17.4" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
+            </span>
+          </a>
+        </div>
+        <div class="footer-droite">
+          <dl class="footer-stats">
+            <div class="footer-stat">
+              <dt>{ui.footerStatExp}</dt>
+              <dd>{ui.footerStatExpValeur}</dd>
+            </div>
+            <div class="footer-stat">
+              <dt>{ui.footerStatApps}</dt>
+              <dd>+15</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+
+      <div class="footer-separateur" aria-hidden="true"></div>
+
+      <div class="footer-corps">
+        <div class="footer-col">
+          <p class="footer-titre">{ui.footerContact}</p>
+          <ul class="footer-liste">
+            <li><a href={identity.phoneHref}>{identity.phone}</a></li>
+            <li><a href={`mailto:${identity.email}`}>{identity.email}</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <p class="footer-titre">{ui.footerAilleurs}</p>
+          <ul class="footer-liste">
+            <li>
+              <a class="footer-lien" href={identity.github} target="_blank" rel="noopener noreferrer">GitHub</a>
+            </li>
+            <li>
+              <a class="footer-lien" href={identity.npm} target="_blank" rel="noopener noreferrer">npm</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bas">
+        <p>© 2026 {identity.name}</p>
+        <p>{identity.role} · Toulouse</p>
+      </div>
+    </div>
+  </footer>
+</Layout>

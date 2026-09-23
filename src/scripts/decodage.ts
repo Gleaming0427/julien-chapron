@@ -5,6 +5,7 @@
 // in a loop on a small SAMPLE of labels: while one reads the
 // table, a few skills scramble from time to time in
 // Japanese before returning to French.
+import { cv } from "../data/cv";
 
 /** Glyph reservoir: KANA, not kanji. The ideograms this list used to hold
     are common to Japanese and Chinese, and therefore read as Chinese. The
@@ -267,18 +268,8 @@ export function initDecodage(): void {
    un inventaire de débutant. « Je fais évoluer du code existant » dit le
    métier tel qu'il se pratique à sept ans d'expérience, et c'est la phrase
    du bloc profil, mot pour mot. */
-const SOUS_TITRES = [
-  "Je conçois des API REST et GraphQL",
-  "Je fais évoluer du code existant",
-  "J'écris mes backends en Node.js",
-  "Je construis des interfaces React",
-  "Je travaille en TypeScript",
-  "Je modélise des bases relationnelles",
-  "Je déploie avec Docker et Kubernetes",
-  "Je teste avec Jest et Cypress",
-  "Je développe en React Native",
-  "Je publie en open source",
-];
+const SOUS_TITRES =
+  cv[(document.documentElement.lang || "fr") as "fr" | "en"].ui.sousTitres;
 /** How long each phrase holds before the next scramble. */
 const TENUE_SOUS_TITRE = 6000;
 /** Duration of the crossfade between the availability line and the code. */

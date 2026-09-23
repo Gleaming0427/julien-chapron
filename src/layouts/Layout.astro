@@ -1,6 +1,8 @@
 ---
+import { getRelativeLocaleUrl } from "astro:i18n";
 import "../styles/global.css";
-import { identity } from "../data/cv";
+import type { Locale } from "../data/cv";
+import { cv } from "../data/cv";
 
 interface Props {
   title: string;
@@ -8,6 +10,9 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
+
+const locale = (Astro.currentLocale ?? "fr") as Locale;
+const { identity } = cv[locale];
 
 const base = import.meta.env.BASE_URL;
 // Builds an internal URL prefixed with the base (e.g. '/julien-chapron/projets').
@@ -27,7 +32,9 @@ const ficheAuteur = {
   name: identity.name,
   jobTitle: identity.role,
   description:
-    "Développeur full-stack TypeScript, React et Node.js, sept ans en production.",
+    locale === "fr"
+      ? "Développeur full-stack TypeScript, React et Node.js, sept ans en production."
+      : "Full-stack TypeScript, React and Node.js developer, seven years in production.",
   url: new URL(url("/"), Astro.site).href,
   image: partage,
   email: `mailto:${identity.email}`,
@@ -53,7 +60,7 @@ const ficheAuteur = {
 ---
 
 <!doctype html>
-<html lang="fr">
+<html lang={locale}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -67,7 +74,7 @@ const ficheAuteur = {
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:locale" content={locale === "fr" ? "fr_FR" : "en_US"} />
     <!-- Sans image de partage, un lien envoyé sur LinkedIn, WhatsApp ou Slack
          s'affiche en carte vide. Le site n'ayant aucune image, il a fallu en
          fabriquer une : 1200 x 630, aux couleurs de la page. -->
@@ -95,7 +102,7 @@ const ficheAuteur = {
     <!-- Lien d'évitement. La page fait dix écrans : sans lui, atteindre le
          contenu au clavier passait par toute l'en-tête à chaque visite.
          Invisible tant qu'il n'a pas le focus. -->
-    <a class="saut-contenu" href={url("/") + "#main"}>Aller au contenu</a>
+    <a class="saut-contenu" href={getRelativeLocaleUrl(locale, "/") + "#main"}>{locale === "fr" ? "Aller au contenu" : "Skip to content"}</a>
 
     <!-- Rappel d'orientation : affiché uniquement sur écran tactile tenu à
          l'horizontale. Le site est construit sur des blocs d'un écran de
@@ -110,8 +117,8 @@ const ficheAuteur = {
         <path d="M50 34a18 18 0 0 1-10 16" />
         <path d="M44 46l-4 4 4 4" />
       </svg>
-      <p class="rotation-titre">Tourne ton appareil</p>
-      <p class="rotation-texte">Ce site se lit à la verticale.</p>
+      <p class="rotation-titre">{locale === "fr" ? "Tourne ton appareil" : "Rotate your device"}</p>
+      <p class="rotation-texte">{locale === "fr" ? "Ce site se lit à la verticale." : "This site reads in portrait."}</p>
     </div>
 
     <div id="scroll-progress" aria-hidden="true">

@@ -11,6 +11,13 @@ export default defineConfig({
   site: 'https://julien-chapron.com',
   base: '/',
   output: 'static',
+  i18n: {
+    defaultLocale: 'fr',
+    locales: ['fr', 'en'],
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
   integrations: [sitemap()],
   build: {
     inlineStylesheets: 'always',

@@ -1,5 +1,9 @@
 ---
-import { identity } from "../data/cv";
+import type { Locale } from "../data/cv";
+import { cv } from "../data/cv";
+
+const locale = (Astro.currentLocale ?? "fr") as Locale;
+const { identity, ui } = cv[locale];
 
 const base = import.meta.env.BASE_URL;
 const pdfUrl = base === "/" ? "/CV_Julien_Chapron.pdf" : `${base}/CV_Julien_Chapron.pdf`;
@@ -25,25 +29,22 @@ const portraitUrl = base === "/" ? "/julien-chapron.webp" : `${base}/julien-chap
     <div class="hero-col">
       <div class="hero-title">
         {/* Le nom porte le <h1>, et non le rôle : la page parle d'une
-            personne, et c'est le nom qu'on tape dans un moteur. L'apparence
-            ne change pas, tout le style est sur les classes.
-            « Hello, je suis » est parti avec : une interjection anglaise en
-            ouverture d'un CV français, juste au-dessus du titre, sonne
-            portfolio d'étudiant. Le nom seul suffit — et à sept ans
-            d'expérience, se présenter est le travail du titre en dessous. */}
-        <h1 class="hero-overline"><span class="hero-overline-nom">{identity.name}</span></h1>
-        <p class="hero-role">Développeur <em>full-stack</em></p>
+            personne, et c'est le nom qu'on tape dans un moteur. The greeting
+            comes back: it reads like an introduction, and the name keeps its
+            orange. */}
+        <h1 class="hero-overline">{ui.heroOverlinePre}<span class="hero-overline-nom">{identity.name}</span></h1>
+        <p class="hero-role">{ui.rolePre}<em>{ui.roleEm}</em>{ui.roleFin}</p>
         {/* La ligne porte directement les phrases qui défilent : la mention de
             disponibilité qui l'ouvrait a été retirée. Ce texte-ci n'est que le
-            premier de SOUS_TITRES (decodage.ts) — il est écrit ici pour que la
+            premier de ui.sousTitres — il est écrit ici pour que la
             page ait quelque chose à montrer avant que le script ne prenne la
-            main, et les deux doivent rester d'accord. */}
-        <p class="hero-sub">Je conçois des API REST et GraphQL</p>
+            main, et les deux viennent de la même source. */}
+        <p class="hero-sub">{ui.sousTitres[0]}</p>
         <div class="hero-actions">
           <a class="axiom-btn" href={pdfUrl} download="CV_Julien_Chapron.pdf">
             <span class="axiom-btn-text-col">
-              <span class="axiom-btn-text-row">Télécharger mon CV</span>
-              <span class="axiom-btn-text-row" aria-hidden="true">Télécharger mon CV</span>
+              <span class="axiom-btn-text-row">{ui.boutonCV}</span>
+              <span class="axiom-btn-text-row" aria-hidden="true">{ui.boutonCV}</span>
             </span>
             <span class="axiom-btn-arrow-box">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h17.4" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
@@ -51,8 +52,8 @@ const portraitUrl = base === "/" ? "/julien-chapron.webp" : `${base}/julien-chap
           </a>
           <a class="axiom-btn axiom-btn-ghost" href={`mailto:${identity.email}`}>
             <span class="axiom-btn-text-col">
-              <span class="axiom-btn-text-row">Contactez-moi</span>
-              <span class="axiom-btn-text-row" aria-hidden="true">Contactez-moi</span>
+              <span class="axiom-btn-text-row">{ui.boutonContact}</span>
+              <span class="axiom-btn-text-row" aria-hidden="true">{ui.boutonContact}</span>
             </span>
             <span class="axiom-btn-arrow-box">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h17.4" /><path d="m15.2 6.8 5.2 5.2-5.2 5.2" /></svg>
@@ -88,7 +89,7 @@ const portraitUrl = base === "/" ? "/julien-chapron.webp" : `${base}/julien-chap
             <!-- Plus de pastille pulsante ici : la balise sur Toulouse est le
                  seul point de la scène, et un second à dix pixels de la photo
                  lui disputait le regard. Le mot « maintenant » suffit. -->
-            <span class="hero-carte-dispo">disponible maintenant</span>
+            <span class="hero-carte-dispo">{ui.carteDispo}</span>
           </span>
         </div>
       </div>
