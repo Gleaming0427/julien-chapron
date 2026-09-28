@@ -275,6 +275,7 @@ const fr: Donnees = {
     },
     {
       name: "cve-triage",
+      page: "/cve-triage/",
       tagline: "détection de vulnérabilités",
       kind: "open source",
       icon: "chapeau",
@@ -486,6 +487,7 @@ const en: Donnees = {
     },
     {
       name: "cve-triage",
+      page: "/cve-triage/",
       tagline: "vulnerability detection",
       kind: "open source",
       icon: "chapeau",
