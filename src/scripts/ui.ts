@@ -245,40 +245,28 @@ function applyCarousel(): void {
 // continuously in both directions.
 const numSections = Array.from(document.querySelectorAll<HTMLElement>(".section"));
 
-/* The projects arrive from the side, one card out of two from the left, the
-   other from the right, staggered. Everything else is in the CSS: this only
-   says when. An observer rather than the scroll loop, because the whole
-   thing is a transition the compositor plays on its own — nothing to drive
-   frame by frame, which is what keeps it smooth on a phone.
-   The class is taken away when the frame leaves, so the arrival plays again
-   coming back up, like the skills block. A third of the frame in sight is
-   enough: waiting for half of it, the first cards were already well into
-   the screen when they set off. */
+/* Reveal the featured project when it comes into view. */
 {
   const grille = document.querySelector<HTMLElement>(".projet-grille");
   if (grille) {
     // The hidden state is armed here, not in the stylesheet: if this module
-    // never gets this far, the cards stay visible instead of disappearing
+    // never gets this far, the project stays visible instead of disappearing
     // from the page.
     grille.classList.add("anime");
     // Commit that hidden state before arming the transition, otherwise the
-    // four cards fade OUT on load, in full view, before anything can bring
-    // them back. Reading a layout property is what forces the flush.
+    // project fades out on load, in full view, before anything can bring it
+    // back. Reading a layout property forces the flush.
     void grille.offsetWidth;
     grille.classList.add("pret");
     new IntersectionObserver(
       (entrees) => {
         const part = entrees[0]?.intersectionRatio ?? 0;
-        // Two thresholds rather than one. With a single one, the cards left
-        // again as soon as the frame dropped below it — that is, while 150 px
-        // of it were still on screen on the way down, so they slid away under
-        // the reader's eyes. It arms at a third in sight and only disarms
-        // once the frame is completely gone, ready to play again on the way
-        // back up.
-        if (part >= 0.3) grille.classList.add("entree");
+        // The feature is taller than the old card grid on narrow screens;
+        // reveal it when 15% is visible and hide it only once fully gone.
+        if (part >= 0.15) grille.classList.add("entree");
         else if (part <= 0.01) grille.classList.remove("entree");
       },
-      { threshold: [0, 0.3] },
+      { threshold: [0, 0.15] },
     ).observe(grille);
   }
 }

@@ -2316,95 +2316,37 @@ html:not(.js) .exp-slides .experience:first-child {
   margin-bottom: clamp(16px, 3vh, 34px);
 }
 
-/* The four projects as steps, Axiom "power path" style: a grid
-   bordered by a light hairline, each step in a column — number and icon at the
-   head, title and description in the middle, note and links at the foot. */
+/* The single featured project has room to explain the QA workflow. */
 .projet-grille {
-  display: grid;
-  /* minmax(0, 1fr) and not 1fr: a 1fr track keeps an automatic minimum of
-     min-content, and the longest note, set on a single line, claimed a
-     396 px column against 318 for its neighbours. The floor is released:
-     the four columns are strictly equal. */
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  /* Every row is as tall as the tallest one: the four cards are all the
-     same size, in both directions, whatever their content — at 2×2 the two
-     rows match, stacked on a phone the four cards match. */
-  grid-auto-rows: 1fr;
-  border: 1px solid rgba(243, 241, 236, 0.12);
+  border: 1px solid rgba(243, 241, 236, 0.16);
   border-radius: var(--radius);
-  /* The cards slide in from beside themselves: the travel is clipped by the
-     frame instead of poking out past it. Nothing here is sticky, so the
-     scroll container this creates costs nothing. */
   overflow: hidden;
 }
 
 .projet-etape {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: clamp(18px, 2.5vh, 28px);
-  padding: clamp(20px, 2.5vw, 32px);
-  border-right: 1px solid rgba(243, 241, 236, 0.12);
-  /* Repère pour la zone cliquable des cartes qui ont une page : le lien du
-     pied s'étend sur toute la carte (voir .projet-lien::after). */
-  position: relative;
+  display: grid;
+  gap: clamp(24px, 3.5vw, 42px);
+  padding: clamp(24px, 4vw, 52px);
   transition: background 0.3s ease;
-  /* Entrance: one card out of two comes from the left, the other from the
-     right, and they arrive one after another. The travel is short on
-     purpose — at a full cell width the cards would cross over their
-     neighbours before settling, which reads as a glitch and not as an
-     arrival. Only the transform and the opacity move, so the browser can
-     leave the whole thing to the compositor: no layout, no repaint, which
-     is what keeps it smooth on a phone.
-     --entree is the direction; :nth-child(even) flips it. */
 }
 
-.projet-etape:nth-child(even) {
-  --entree: 40px;
-}
-
-/* The hidden state is armed BY THE SCRIPT, never by the stylesheet alone.
-   Written straight onto .projet-etape, the four cards stayed invisible for
-   good wherever the observer did not report — no JS, a module that threw
-   before this one, a browser holding its rendering steps. The page would
-   then simply be missing its projects. Here the worst case is an arrival
-   that does not play. */
+/* The script arms the entrance animation only when it can observe the card. */
 .projet-grille.anime .projet-etape {
   opacity: 0;
-  transform: translate3d(var(--entree, -40px), 0, 0);
+  transform: translate3d(0, 32px, 0);
 }
 
-/* The transition is armed a frame AFTER the hidden state, by a second class,
-   so that going into hiding is not itself animated: declared from the
-   start, it faded the four cards out on load, in full view, before the
-   arrival could play them back in. */
 .projet-grille.pret .projet-etape {
   transition:
     opacity 0.62s cubic-bezier(0.22, 0.61, 0.36, 1),
     transform 0.62s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-/* ui.ts sets the class when the frame enters the screen and takes it away
-   when it leaves: the arrival plays again on the way back up, like the rest
-   of the site. */
 .projet-grille.anime.entree .projet-etape {
   opacity: 1;
   transform: none;
 }
 
-.projet-grille.anime.entree .projet-etape:nth-child(2) {
-  transition-delay: 0.09s;
-}
-
-.projet-grille.anime.entree .projet-etape:nth-child(3) {
-  transition-delay: 0.18s;
-}
-
-.projet-grille.anime.entree .projet-etape:nth-child(4) {
-  transition-delay: 0.27s;
-}
-
-/* With "reduce motion" only the fade is kept. */
 @media (prefers-reduced-motion: reduce) {
   .projet-grille.anime .projet-etape {
     transform: none;
@@ -2415,16 +2357,11 @@ html:not(.js) .exp-slides .experience:first-child {
   }
 }
 
-.projet-etape:nth-child(4n) {
-  border-right: 0;
-}
-
-/* The head: the icon in its box and the step number, spaced mono,
-   like Axiom's "stage-01". */
 .projet-tete {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .projet-icone {
@@ -2433,11 +2370,10 @@ html:not(.js) .exp-slides .experience:first-child {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(243, 241, 236, 0.12);
+  border: 1px solid rgba(243, 241, 236, 0.16);
   border-radius: var(--radius);
-  /* The orange of the glyphs of the skills block: the thin strokes go gray
-     on black, lightened the eye finds the orange of the site again. */
   color: #ff7133;
+  flex: none;
 }
 
 .projet-icone svg {
@@ -2449,117 +2385,119 @@ html:not(.js) .exp-slides .experience:first-child {
 .projet-mesure {
   font-family: var(--font-mono);
   font-size: var(--fs-small);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-dim);
+  text-align: right;
 }
 
 .projet-corps {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  max-width: 930px;
 }
 
 .projet-titre {
-  margin: 0;
-  /* Axiom's h3 (1.5em), one notch above the reading size. */
-  font-size: clamp(19px, 1.6vw, 26px);
+  margin: 0 0 14px;
+  font-size: clamp(32px, 4vw, 54px);
   font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
   color: var(--text);
 }
 
 .projet-texte {
   margin: 0;
-  font-size: var(--fs-body);
-  line-height: 1.5;
+  font-size: clamp(17px, 1.5vw, 21px);
+  line-height: 1.55;
   color: var(--text-dim);
+}
+
+.projet-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 clamp(24px, 4vw, 52px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--border);
+}
+
+.projet-details li {
+  min-width: 0;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.projet-details h4 {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-size: clamp(17px, 1.3vw, 20px);
+  font-weight: 600;
+}
+
+.projet-details p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--fs-body);
+  line-height: 1.55;
 }
 
 .projet-pied {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 14px 24px;
 }
 
 .projet-note {
+  grid-column: 1 / -1;
   margin: 0;
-  font-family: var(--font-mono);
-  font-size: var(--fs-small);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
   color: var(--text-dim);
-  /* May wrap onto a second line. Kept on one line, the longest note —
-     "application mobile d'argent de poche" — either lost its end to an
-     ellipsis or forced its column 78 px wider than its neighbours. With
-     the columns strictly equal and the rows equal by construction, the
-     wrap costs nothing: the feet still line up at the bottom. */
-  white-space: normal;
+  font-size: var(--fs-small);
+  line-height: 1.5;
 }
 
-/* La carte était un cul-de-sac : le pied annonçait des liens depuis
-   l'origine sans jamais en porter. Seuls les projets qui ont une page de
-   détail en affichent un, les autres gardent leur pied d'une seule ligne. */
-.projet-lien {
-  /* A plain link, no button chrome: the card itself is the target. The
-     global link underline on hover is the only affordance, and it is
-     enough — the extra border it used to double with is gone. */
-  align-self: flex-start;
+.projet-stack {
+  margin: 0;
+  color: #ff9b70;
   font-family: var(--font-mono);
   font-size: var(--fs-small);
-  letter-spacing: 0.06em;
+  line-height: 1.5;
+}
+
+.projet-lien {
+  justify-self: end;
   color: var(--text);
-  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  white-space: nowrap;
 }
 
-/* Toute la carte est cliquable, pas seulement les deux mots du pied : le lien
-   s'étire sur la carte entière. Un seul lien dans le balisage, donc un seul
-   point d'entrée au clavier et un intitulé qui reste « Voir le projet » —
-   ce qu'un <a> enveloppant la carte ne permet pas sans noyer le lecteur
-   d'écran sous tout le texte de la carte. */
-.projet-lien::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-}
-
-/* Le survol répond sur toute la carte, sinon rien ne dit qu'elle est
-   cliquable tant que la souris n'a pas atteint le pied. */
-.projet-etape:has(.projet-lien):hover {
-  background: rgba(243, 241, 236, 0.03);
-}
-
-@media (max-width: 1080px) {
-  .projet-grille {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .projet-etape:nth-child(2n) {
-    border-right: 0;
-  }
-
-  .projet-etape:nth-child(-n + 2) {
-    border-bottom: 1px solid rgba(243, 241, 236, 0.12);
-  }
+.projet-lien:hover,
+.projet-lien:focus-visible {
+  color: #ff9b70;
 }
 
 @media (max-width: 720px) {
-  /* One column: the cards stack, each full-width. The min-content floor is
-     already released at the base, so nothing can widen the column past the
-     screen (see further down: the body no longer clips on iOS). */
-  .projet-grille {
+  .projet-details {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .projet-etape {
-    border-right: 0;
-    border-bottom: 1px solid rgba(243, 241, 236, 0.12);
+  .projet-details li {
+    padding: 18px 0;
   }
 
-  .projet-etape:last-child {
-    border-bottom: 0;
+  .projet-pied {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .projet-note {
+    grid-column: auto;
+  }
+
+  .projet-lien {
+    justify-self: start;
   }
 }
 

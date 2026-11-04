@@ -38,14 +38,12 @@ export type IconeProjet = "serveur" | "chapeau" | "telephone" | "ia";
 export interface PersonalProject {
   name: string;
   tagline: string;
-  kind: string;
   description: string;
+  details: { title: string; text: string }[];
+  status: string;
   stack: string;
   links: Link[];
   icon: IconeProjet;
-  /** Page de détail interne, quand le projet en a une. Les cartes de
-      l'accueil sont sinon des culs-de-sac : rien n'y est cliquable. */
-  page?: string;
 }
 
 export interface SkillGroup {
@@ -93,7 +91,6 @@ export interface Textes {
   projetsTitreFin: string;
   projetsLead: string;
   voirProjet: string;
-  projetPrefixe: string;
   footerTitre: string;
   footerTexte: string;
   footerStatExp: string;
@@ -147,7 +144,7 @@ const fr: Donnees = {
     location: "Lacroix-Falgarde (31), Toulouse",
     phone: "07 67 75 77 80",
     phoneHref: "tel:+33767757780",
-    email: "voyage7981@proton.me",
+    email: "julienchapron.perso@gmail.com",
     github: "https://github.com/Gleaming0427",
     githubLabel: "github.com/Gleaming0427",
     npm: "https://www.npmjs.com/~armored1486",
@@ -242,10 +239,8 @@ const fr: Donnees = {
     },
   ],
 
-  // What is really used, not what a CV usually says. Every entry is backed by a
-  // mission or a project above; the cloud tooling that only appears in personal
-  // projects (SST, AWS Lambda, DynamoDB, Firebase…) stays on those project
-  // cards, where it is honest. Ordered by real usage, most hours first —
+  // What is really used, not what a CV usually says. Ordered by real usage,
+  // most hours first —
   // the old list read like a keyword dump.
   // Vitest and PostgreSQL are the exceptions: listed past the first two of
   // their row, the layout already shows them dimmed — known, but not where
@@ -261,51 +256,20 @@ const fr: Donnees = {
 
   personalProjects: [
     {
-      name: "api-gateway-core",
-      tagline: "librairie publiée sur npm",
-      kind: "open source",
-      icon: "serveur",
-      description:
-        "Toolkit d'API gateway serverless : limitation de débit token-bucket, validation de jetons JWT et erreurs typées, sans dépendance à un fournisseur cloud.",
-      stack: "TypeScript, Node.js (ESM), Zod, jose, SST, AWS Lambda, DynamoDB, GitHub Actions",
-      links: [
-        { label: "@armored1486/api-gateway-core · MIT", href: "https://www.npmjs.com/package/@armored1486/api-gateway-core" },
-        { label: "github.com/Gleaming0427/api-gateway", href: "https://github.com/Gleaming0427/api-gateway" },
-      ],
-    },
-    {
-      name: "cve-triage",
-      page: "/cve-triage/",
-      tagline: "détection de vulnérabilités",
-      kind: "open source",
-      icon: "chapeau",
-      description:
-        "Trouve les CVE qui comptent vraiment dans votre code : recoupées contre OSV/GHSA, analysées par reachability, avec correctifs exacts.",
-      stack: "Python, Mistral AI",
-      links: [{ label: "github.com/Gleaming0427/cve-triage", href: "https://github.com/Gleaming0427/cve-triage" }],
-    },
-    {
-      name: "Pims Pocket",
-      tagline: "application mobile d'argent de poche",
-      kind: "projet personnel",
-      icon: "telephone",
-      description:
-        "Double interface parent / enfant : architecture multi-rôles, authentification par code et PIN, synchronisation temps réel et règles de sécurité Firestore.",
-      stack: "React Native (Expo Router), TypeScript, Zustand, Firebase, NativeWind",
-      links: [
-        { label: "Google Play", href: "https://play.google.com/store/apps/details?id=com.pimspocket.app" },
-        { label: "github.com/Gleaming0427/pims-pocket", href: "https://github.com/Gleaming0427/pims-pocket" },
-      ],
-    },
-    {
-      name: "Lecture de plateau de jeu par vision IA",
-      tagline: "preuve de concept",
-      kind: "preuve de concept",
+      name: "Agent QA Kit",
+      tagline: "Projet open source · 2026",
       icon: "ia",
       description:
-        "Application full-stack lisant un plateau de jeu à partir d'une photo : numéro, couleur et jetons de chaque carte, extraits par un modèle de vision.",
-      stack: "TypeScript, Node.js / Express, React / Vite, GPT-4o Vision",
-      links: [],
+        "Un kit de QA pour vérifier qu'une fonctionnalité développée avec une IA répond réellement à la demande. Il part des critères d'acceptation du ticket, crée des tests avant le code et contrôle le résultat dans un vrai navigateur.",
+      details: [
+        { title: "Tester avant de coder", text: "Un agent traduit chaque critère en tests Vitest et Playwright. Les nouveaux tests doivent d'abord échouer pour la bonne raison, avant que la fonctionnalité soit développée." },
+        { title: "Faire valider les attentes", text: "Une personne relit les tests et leurs échecs, puis les approuve. Le ticket, les tests et les premiers rapports sont figés pour détecter toute modification ultérieure." },
+        { title: "Vérifier indépendamment", text: "Un agent sans droit d'écriture exécute les tests. Un script confronte son verdict aux rapports, rejette les tests absents ou ignorés et relance la suite complète, y compris les parcours desktop et mobile." },
+        { title: "Mesurer la fiabilité", text: "Un corpus de 16 tickets permet d'évaluer les bugs injectés détectés, les tests cachés, la fiabilité des agents et le coût des exécutions." },
+      ],
+      status: "Démo et contrôles CI testés ; workflow complet encore à valider sur de vrais tickets.",
+      stack: "TypeScript · Vitest · Playwright · GitHub Actions",
+      links: [{ label: "Code source sur GitHub", href: "https://github.com/Gleaming0427/agent-qa-kit" }],
     },
   ],
 
@@ -367,10 +331,9 @@ const fr: Donnees = {
     competencesLead: "Sur chaque ligne, les deux premières sont celles où j'ai le plus d'expérience.",
     projetsEyebrow: "projets",
     projetsTitre: "Projets personnels.",
-    projetsTitreFin: "Trois publiés, un prototype.",
-    projetsLead: "Une librairie sur npm, un outil d'analyse de vulnérabilités en open source, une application sur le Play Store.",
-    voirProjet: "Voir le projet",
-    projetPrefixe: "projet-",
+    projetsTitreFin: "Un projet IA en détail.",
+    projetsLead: "Comment vérifier le comportement réel d'une application quand son code est écrit par des agents IA ?",
+    voirProjet: "Voir le code sur GitHub",
     footerTitre: "Disponible pour votre équipe.",
     footerTexte: "Dites-moi ce que vous construisez, on regarde ensemble ce que j'y apporte.",
     footerStatExp: "expérience",
@@ -398,7 +361,7 @@ const en: Donnees = {
     location: "Lacroix-Falgarde (31), Toulouse",
     phone: "07 67 75 77 80",
     phoneHref: "tel:+33767757780",
-    email: "voyage7981@proton.me",
+    email: "julienchapron.perso@gmail.com",
     github: "https://github.com/Gleaming0427",
     githubLabel: "github.com/Gleaming0427",
     npm: "https://www.npmjs.com/~armored1486",
@@ -473,51 +436,20 @@ const en: Donnees = {
 
   personalProjects: [
     {
-      name: "api-gateway-core",
-      tagline: "library published on npm",
-      kind: "open source",
-      icon: "serveur",
-      description:
-        "Serverless API-gateway toolkit: token-bucket rate limiting, JWT validation and typed errors, with no cloud-provider dependency.",
-      stack: "TypeScript, Node.js (ESM), Zod, jose, SST, AWS Lambda, DynamoDB, GitHub Actions",
-      links: [
-        { label: "@armored1486/api-gateway-core · MIT", href: "https://www.npmjs.com/package/@armored1486/api-gateway-core" },
-        { label: "github.com/Gleaming0427/api-gateway", href: "https://github.com/Gleaming0427/api-gateway" },
-      ],
-    },
-    {
-      name: "cve-triage",
-      page: "/cve-triage/",
-      tagline: "vulnerability detection",
-      kind: "open source",
-      icon: "chapeau",
-      description:
-        "Finds the CVEs that actually matter in your code: cross-referenced against OSV/GHSA, analysed by reachability, with exact fixes.",
-      stack: "Python, Mistral AI",
-      links: [{ label: "github.com/Gleaming0427/cve-triage", href: "https://github.com/Gleaming0427/cve-triage" }],
-    },
-    {
-      name: "Pims Pocket",
-      tagline: "mobile pocket-money app",
-      kind: "personal project",
-      icon: "telephone",
-      description:
-        "Dual parent / child interface: multi-role architecture, code and PIN sign-in, real-time sync and Firestore security rules.",
-      stack: "React Native (Expo Router), TypeScript, Zustand, Firebase, NativeWind",
-      links: [
-        { label: "Google Play", href: "https://play.google.com/store/apps/details?id=com.pimspocket.app" },
-        { label: "github.com/Gleaming0427/pims-pocket", href: "https://github.com/Gleaming0427/pims-pocket" },
-      ],
-    },
-    {
-      name: "Reading a game board with AI vision",
-      tagline: "proof of concept",
-      kind: "proof of concept",
+      name: "Agent QA Kit",
+      tagline: "Open-source project · 2026",
       icon: "ia",
       description:
-        "Full-stack app reading a game board from a photo: number, colour and tokens of each card, extracted by a vision model.",
-      stack: "TypeScript, Node.js / Express, React / Vite, GPT-4o Vision",
-      links: [],
+        "A QA kit that checks whether a feature built with AI actually meets the user's request. It derives tests from the ticket's acceptance criteria before code exists, then checks the result in a real browser.",
+      details: [
+        { title: "Test before coding", text: "An agent turns each criterion into Vitest and Playwright tests. New tests must first fail for the right reason, before the feature is implemented." },
+        { title: "Review the expectations", text: "A person reviews the tests and their initial failures, then approves them. The ticket, tests and first reports are frozen so later changes can be detected." },
+        { title: "Verify independently", text: "A read-only agent runs the tests. A script checks its verdict against the reports, rejects missing or skipped tests, and reruns the full suite, including desktop and mobile journeys." },
+        { title: "Measure reliability", text: "A corpus of 16 tickets measures detection of injected bugs, hidden tests, agent reliability and execution cost." },
+      ],
+      status: "Demo and deterministic CI checks tested; the full workflow has yet to be validated on real tickets.",
+      stack: "TypeScript · Vitest · Playwright · GitHub Actions",
+      links: [{ label: "Source code on GitHub", href: "https://github.com/Gleaming0427/agent-qa-kit" }],
     },
   ],
 
@@ -579,10 +511,9 @@ const en: Donnees = {
     competencesLead: "On each row, the first two are where I have the most experience.",
     projetsEyebrow: "projects",
     projetsTitre: "Personal projects.",
-    projetsTitreFin: "Three shipped, one prototype.",
-    projetsLead: "A library on npm, an open-source vulnerability-analysis tool, an app on the Play Store.",
-    voirProjet: "View the project",
-    projetPrefixe: "project-",
+    projetsTitreFin: "One AI project in depth.",
+    projetsLead: "How can you verify what an app really does when AI agents write its code?",
+    voirProjet: "View the code on GitHub",
     footerTitre: "Available for your team.",
     footerTexte: "Tell me what you are building, and let's look together at what I can bring.",
     footerStatExp: "experience",

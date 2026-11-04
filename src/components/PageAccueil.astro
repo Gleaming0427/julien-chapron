@@ -291,27 +291,34 @@ const iconesProjet: Record<IconeProjet, string> = {
     <p class="spec-lead">
       {ui.projetsLead}
     </p>
-    <!-- The four projects as steps, Axiom power path style: a grid
-         bordered by a hairline rule, each step in a column — number and icon
-         at the top, title and description in the middle, note at the foot. -->
+    <!-- One featured project, with its workflow and current limits visible. -->
     <div class="projet-grille">
-      {personalProjects.map((project, i) => (
+      {personalProjects.map((project) => (
         <article class="projet-etape">
           <div class="projet-tete">
             <span class="projet-icone" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={iconesProjet[project.icon]}></svg>
             </span>
-            <span class="projet-mesure">{ui.projetPrefixe}0{i + 1}</span>
+            <span class="projet-mesure">{project.tagline}</span>
           </div>
           <div class="projet-corps">
             <h3 class="projet-titre">{project.name}</h3>
             <p class="projet-texte">{project.description}</p>
           </div>
+          <ul class="projet-details">
+            {project.details.map((detail) => (
+              <li>
+                <h4>{detail.title}</h4>
+                <p>{detail.text}</p>
+              </li>
+            ))}
+          </ul>
           <footer class="projet-pied">
-            <p class="projet-note">{project.tagline}</p>
-            {project.page && (
-              <a class="projet-lien" href={urlLocale(project.page)}>{ui.voirProjet}</a>
-            )}
+            <p class="projet-note">{project.status}</p>
+            <p class="projet-stack">{project.stack}</p>
+            {project.links.map((link) => (
+              <a class="projet-lien" href={link.href} target="_blank" rel="noopener noreferrer">{ui.voirProjet} ↗</a>
+            ))}
           </footer>
         </article>
       ))}

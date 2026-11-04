@@ -127,7 +127,7 @@ function run(command: string): void {
     case "contact":
       printText("📍 Lacroix-Falgarde (31), Toulouse");
       printLink("☎ ", "07 67 75 77 80", "tel:+33767757780");
-      printLink("✉ ", "voyage7981@proton.me", "mailto:voyage7981@proton.me");
+      printLink("✉ ", "julienchapron.perso@gmail.com", "mailto:julienchapron.perso@gmail.com");
       printLink("⌥ ", "github.com/Gleaming0427", "https://github.com/Gleaming0427");
       printLink("⌘ ", "npmjs.com/~armored1486", "https://www.npmjs.com/~armored1486");
       break;
