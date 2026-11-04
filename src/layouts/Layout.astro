@@ -1,5 +1,4 @@
 ---
-import { getRelativeLocaleUrl } from "astro:i18n";
 import "../styles/global.css";
 import type { Locale } from "../data/cv";
 import { cv } from "../data/cv";
@@ -102,7 +101,7 @@ const ficheAuteur = {
     <!-- Lien d'évitement. La page fait dix écrans : sans lui, atteindre le
          contenu au clavier passait par toute l'en-tête à chaque visite.
          Invisible tant qu'il n'a pas le focus. -->
-    <a class="saut-contenu" href={getRelativeLocaleUrl(locale, "/") + "#main"}>{locale === "fr" ? "Aller au contenu" : "Skip to content"}</a>
+    <a class="saut-contenu" href="#main">{locale === "fr" ? "Aller au contenu" : "Skip to content"}</a>
 
     <!-- Rappel d'orientation : affiché uniquement sur écran tactile tenu à
          l'horizontale. Le site est construit sur des blocs d'un écran de

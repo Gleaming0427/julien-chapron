@@ -292,7 +292,7 @@ const iconesProjet: Record<IconeProjet, string> = {
       {ui.projetsLead}
     </p>
     <!-- One featured project, with its workflow and current limits visible. -->
-    <div class="projet-grille">
+    <div class="projet-grille" id="projets">
       {personalProjects.map((project) => (
         <article class="projet-etape">
           <div class="projet-tete">
@@ -316,9 +316,11 @@ const iconesProjet: Record<IconeProjet, string> = {
           <footer class="projet-pied">
             <p class="projet-note">{project.status}</p>
             <p class="projet-stack">{project.stack}</p>
-            {project.links.map((link) => (
-              <a class="projet-lien" href={link.href} target="_blank" rel="noopener noreferrer">{ui.voirProjet} ↗</a>
-            ))}
+            <div class="projet-liens">
+              {project.links.map((link) => (
+                <a class="projet-lien" href={link.href.startsWith("/") ? urlLocale(link.href) : link.href} target={link.href.startsWith("/") ? undefined : "_blank"} rel={link.href.startsWith("/") ? undefined : "noopener noreferrer"}>{link.label}</a>
+              ))}
+            </div>
           </footer>
         </article>
       ))}

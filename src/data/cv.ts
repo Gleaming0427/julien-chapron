@@ -181,7 +181,7 @@ const fr: Donnees = {
       context: "Automobile, véhicule électrique, outils internes : documentation d'API et supervision de flotte · Full remote",
       bullets: [
         "Portail de documentation suivi par 5 000 ingénieurs Renault.",
-        "Deux back-ends de flotte : configuration à distance et traitement des données remontées.",
+        "Contribution au front-end et au back-end de deux applications de supervision de flotte : configuration à distance et traitement des données remontées (React, Node.js, GCP).",
         "Déploiements Docker / Kubernetes, intégration continue GitLab CI, tests Jest et Cypress.",
       ],
       stack: "React.js, Node.js, TypeScript, GraphQL, API REST, Jest, Cypress, Docker, Kubernetes, GCP, GitLab CI, Git, Linux",
@@ -205,7 +205,7 @@ const fr: Donnees = {
       summary: "Le catalogue du pôle AERIS, qui rassemble les données atmosphériques de quatre centres : satellite, sol, aéroporté et campagnes de mesure.",
       title: "Développeur Front-End",
       company: "CNRS, pôle de données AERIS",
-      period: "2022",
+      period: "2021 – 2022",
       context: "Recherche publique, données atmosphériques · Toulouse",
       bullets: [
         "Évolutions de l'interface de recherche : facettes par paramètre, instrument, plateforme et emprise géographique.",
@@ -260,27 +260,26 @@ const fr: Donnees = {
       tagline: "Projet open source · 2026",
       icon: "ia",
       description:
-        "Un kit de QA pour vérifier qu'une fonctionnalité développée avec une IA répond réellement à la demande. Il part des critères d'acceptation du ticket, crée des tests avant le code et contrôle le résultat dans un vrai navigateur.",
+        "Une étape QA indépendante pour prouver qu'une fonctionnalité développée par une IA fonctionne à l'écran. Les tests sont écrits avant le code, validés par une personne, puis rejoués par un agent sans droit d'écriture.",
       details: [
         { title: "Tester avant de coder", text: "Un agent traduit chaque critère en tests Vitest et Playwright. Les nouveaux tests doivent d'abord échouer pour la bonne raison, avant que la fonctionnalité soit développée." },
         { title: "Faire valider les attentes", text: "Une personne relit les tests et leurs échecs, puis les approuve. Le ticket, les tests et les premiers rapports sont figés pour détecter toute modification ultérieure." },
         { title: "Vérifier indépendamment", text: "Un agent sans droit d'écriture exécute les tests. Un script confronte son verdict aux rapports, rejette les tests absents ou ignorés et relance la suite complète, y compris les parcours desktop et mobile." },
-        { title: "Mesurer la fiabilité", text: "Un corpus de 16 tickets permet d'évaluer les bugs injectés détectés, les tests cachés, la fiabilité des agents et le coût des exécutions." },
+        { title: "Mesurer la fiabilité", text: "16 tickets, des bugs injectés et des tests cachés servent à mesurer les agents. La campagne propre détecte 86 bugs sur 87 en 48 essais." },
       ],
-      status: "Démo et contrôles CI testés ; workflow complet encore à valider sur de vrais tickets.",
-      stack: "TypeScript · Vitest · Playwright · GitHub Actions",
-      links: [{ label: "Code source sur GitHub", href: "https://github.com/Gleaming0427/agent-qa-kit" }],
+      status: "Expérimental : évalué sur une boutique de démonstration, pas encore sur des tickets de projets réels.",
+      stack: "Claude Code · TypeScript · Playwright · Vitest · GitHub Actions",
+      links: [
+        { label: "Découvrir le projet", href: "/agent-qa-kit/" },
+        { label: "Code source ↗", href: "https://github.com/Gleaming0427/agent-qa-kit" },
+      ],
     },
   ],
 
   education: [
     {
-      title: "AWS Certified Solutions Architect Associate (SAA-C03)",
-      detail: "en préparation, examen prévu au troisième trimestre 2026",
-    },
-    {
       title: "Titre professionnel Développeur Logiciel",
-      detail: "Wild Code School, Toulouse, 2017 – 2018",
+      detail: "Wild Code School, Toulouse, 2018 – 2019",
     },
   ],
 
@@ -386,7 +385,7 @@ const en: Donnees = {
       context: "Automotive, electric vehicles, internal tools: API documentation and fleet supervision · Fully remote",
       bullets: [
         "Documentation portal followed by 5,000 Renault engineers.",
-        "Two fleet back-ends: remote configuration and processing of the data sent back.",
+        "Contributed to the front end and back end of two fleet supervision applications: remote configuration and processing of returned data (React, Node.js, GCP).",
         "Docker / Kubernetes deployments, GitLab CI continuous integration, Jest and Cypress tests.",
       ],
       stack: "React.js, Node.js, TypeScript, GraphQL, API REST, Jest, Cypress, Docker, Kubernetes, GCP, GitLab CI, Git, Linux",
@@ -399,7 +398,7 @@ const en: Donnees = {
       summary: "The AERIS data-pole catalogue, bringing together atmospheric data from four centres: satellite, ground, airborne and measurement campaigns.",
       title: "Front-End Developer",
       company: "CNRS, AERIS data pole",
-      period: "2022",
+      period: "2021 – 2022",
       context: "Public research, atmospheric data · Toulouse",
       bullets: [
         "Search interface evolutions: facets by parameter, instrument, platform and geographic coverage.",
@@ -440,27 +439,26 @@ const en: Donnees = {
       tagline: "Open-source project · 2026",
       icon: "ia",
       description:
-        "A QA kit that checks whether a feature built with AI actually meets the user's request. It derives tests from the ticket's acceptance criteria before code exists, then checks the result in a real browser.",
+        "An independent QA stage that proves an AI-built feature works on screen. Tests are written before the code, approved by a person, then rerun by an agent with no write access.",
       details: [
         { title: "Test before coding", text: "An agent turns each criterion into Vitest and Playwright tests. New tests must first fail for the right reason, before the feature is implemented." },
         { title: "Review the expectations", text: "A person reviews the tests and their initial failures, then approves them. The ticket, tests and first reports are frozen so later changes can be detected." },
         { title: "Verify independently", text: "A read-only agent runs the tests. A script checks its verdict against the reports, rejects missing or skipped tests, and reruns the full suite, including desktop and mobile journeys." },
-        { title: "Measure reliability", text: "A corpus of 16 tickets measures detection of injected bugs, hidden tests, agent reliability and execution cost." },
+        { title: "Measure reliability", text: "16 tickets, injected bugs and hidden tests measure the agents. The clean campaign detects 86 of 87 bugs across 48 trials." },
       ],
-      status: "Demo and deterministic CI checks tested; the full workflow has yet to be validated on real tickets.",
-      stack: "TypeScript · Vitest · Playwright · GitHub Actions",
-      links: [{ label: "Source code on GitHub", href: "https://github.com/Gleaming0427/agent-qa-kit" }],
+      status: "Experimental: evaluated on a demo shop, not yet on real project tickets.",
+      stack: "Claude Code · TypeScript · Playwright · Vitest · GitHub Actions",
+      links: [
+        { label: "Explore the project", href: "/agent-qa-kit/" },
+        { label: "Source code ↗", href: "https://github.com/Gleaming0427/agent-qa-kit" },
+      ],
     },
   ],
 
   education: [
     {
-      title: "AWS Certified Solutions Architect Associate (SAA-C03)",
-      detail: "in preparation, exam planned for Q3 2026",
-    },
-    {
       title: "Professional certificate, Software Developer",
-      detail: "Wild Code School, Toulouse, 2017 – 2018",
+      detail: "Wild Code School, Toulouse, 2018 – 2019",
     },
   ],
 

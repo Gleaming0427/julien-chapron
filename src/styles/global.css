@@ -2474,6 +2474,18 @@ html:not(.js) .exp-slides .experience:first-child {
   white-space: nowrap;
 }
 
+.projet-liens {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px 28px;
+}
+
+.projet-liens .projet-lien:first-child {
+  color: #ff9b70;
+  text-decoration-thickness: 2px;
+}
+
 .projet-lien:hover,
 .projet-lien:focus-visible {
   color: #ff9b70;
@@ -2498,6 +2510,10 @@ html:not(.js) .exp-slides .experience:first-child {
 
   .projet-lien {
     justify-self: start;
+  }
+
+  .projet-liens {
+    justify-content: flex-start;
   }
 }
 
