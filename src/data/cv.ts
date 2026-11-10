@@ -32,18 +32,31 @@ export interface Link {
   href: string;
 }
 
-/** Step icon for the projects block, one per project. */
-export type IconeProjet = "serveur" | "chapeau" | "telephone" | "ia";
+/** One figure of the projects dial: `value` out of `total`, drawn as one
+    tick per unit — each tick is one trial, or one injected bug. */
+export interface MesureProjet {
+  label: string;
+  value: number;
+  total: number;
+}
 
 export interface PersonalProject {
   name: string;
   tagline: string;
   description: string;
+  /** The HUD block beside the title. Each line only restates what the card
+      already says elsewhere (status, description): nothing new is claimed
+      there. The first line, the type, is the tagline. */
+  hud: { k: string; v: string }[];
+  /** The dial's figures. They come word for word from the detail « Ce que
+      les mesures montrent »: the two must change together. */
+  measures: MesureProjet[];
+  /** The cost line under the dial's rows, from the same detail. */
+  cost: { label: string; value: string };
   details: { title: string; text: string }[];
   status: string;
   stack: string;
   links: Link[];
-  icon: IconeProjet;
 }
 
 export interface SkillGroup {
@@ -91,6 +104,19 @@ export interface Textes {
   projetsTitreFin: string;
   projetsLead: string;
   voirProjet: string;
+  /** The projects card's HUD: the left half of its two-part tags, the
+      clock's city, the type key, the dial's tag, the autoplay toggle. */
+  projetTag: string;
+  horlogeVille: string;
+  hudType: string;
+  mesuresTag: string;
+  mesuresTagFin: string;
+  mesure: string;
+  choisirMesure: string;
+  surMot: string;
+  dossierTag: string;
+  dossierTagFin: string;
+  autoLecture: string;
   footerTitre: string;
   footerTexte: string;
   footerStatExp: string;
@@ -258,9 +284,18 @@ const fr: Donnees = {
     {
       name: "Agent QA Kit",
       tagline: "Projet open source · 2026",
-      icon: "ia",
       description:
         "Prouver que le code écrit par une IA fonctionne pour l'utilisateur, avant de l'accepter. Une étape QA indépendante, intégrée au cycle de développement, où ce sont les rapports de tests qui tranchent, pas l'avis de l'agent.",
+      hud: [
+        { k: "Statut", v: "Expérimental" },
+        { k: "Verdict", v: "Rapports de tests" },
+        { k: "Pilotage", v: "Julien Chapron" },
+      ],
+      measures: [
+        { label: "Essais réussis", value: 45, total: 48 },
+        { label: "Bugs injectés détectés", value: 86, total: 87 },
+      ],
+      cost: { label: "Coût par essai", value: "≈ 0,11 $" },
       details: [
         { title: "Le problème", text: "Des agents IA écrivent le code, d'autres le relisent, mais personne ne prouve que l'application marche encore à l'écran. Dans un diff, un bouton qui disparaît sur mobile a l'air normal, et des tests écrits après coup confirment le bug." },
         { title: "Des tests gelés avant le code", text: "Un agent rédacteur transforme chaque critère d'acceptation en tests unitaires et navigateur, qui doivent d'abord échouer pour la bonne raison. Une personne les valide une fois ; ils sont ensuite gelés et leurs empreintes vérifiées à chaque étape." },
@@ -332,6 +367,17 @@ const fr: Donnees = {
     projetsTitreFin: "Un projet IA en détail.",
     projetsLead: "Comment vérifier le comportement réel d'une application quand son code est écrit par des agents IA ?",
     voirProjet: "Voir le code sur GitHub",
+    projetTag: "projet",
+    horlogeVille: "Toulouse",
+    hudType: "Type",
+    mesuresTag: "mesures",
+    mesuresTagFin: "version de référence",
+    mesure: "mesure",
+    choisirMesure: "Choisir une mesure",
+    surMot: "sur",
+    dossierTag: "dossier",
+    dossierTagFin: "A — F",
+    autoLecture: "lecture auto",
     footerTitre: "Disponible pour votre équipe.",
     footerTexte: "Dites-moi ce que vous construisez, on regarde ensemble ce que j'y apporte.",
     footerStatExp: "expérience",
@@ -436,9 +482,18 @@ const en: Donnees = {
     {
       name: "Agent QA Kit",
       tagline: "Open-source project · 2026",
-      icon: "ia",
       description:
         "Proving that AI-written code works for the user before accepting it. An independent QA stage built into the development cycle, where the test reports decide, not the agent's opinion.",
+      hud: [
+        { k: "Status", v: "Experimental" },
+        { k: "Verdict", v: "Test reports" },
+        { k: "Lead", v: "Julien Chapron" },
+      ],
+      measures: [
+        { label: "Trials passed", value: 45, total: 48 },
+        { label: "Injected bugs caught", value: 86, total: 87 },
+      ],
+      cost: { label: "Cost per trial", value: "≈ $0.11" },
       details: [
         { title: "The problem", text: "AI agents write the code and other AIs review it, but nobody proves the app still works on screen. In a diff, a button vanishing on mobile looks normal, and tests written afterwards confirm the bug as built." },
         { title: "Tests frozen before the code", text: "A writer agent turns each acceptance criterion into unit and browser tests, which must first fail for the right reason. A person approves them once; they are then frozen and their fingerprints checked at every step." },
@@ -510,6 +565,17 @@ const en: Donnees = {
     projetsTitreFin: "One AI project in depth.",
     projetsLead: "How can you verify what an app really does when AI agents write its code?",
     voirProjet: "View the code on GitHub",
+    projetTag: "project",
+    horlogeVille: "Toulouse",
+    hudType: "Type",
+    mesuresTag: "measures",
+    mesuresTagFin: "reference version",
+    mesure: "measure",
+    choisirMesure: "Choose a measure",
+    surMot: "of",
+    dossierTag: "case file",
+    dossierTagFin: "A — F",
+    autoLecture: "autoplay",
     footerTitre: "Available for your team.",
     footerTexte: "Tell me what you are building, and let's look together at what I can bring.",
     footerStatExp: "experience",
