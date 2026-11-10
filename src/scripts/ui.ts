@@ -245,31 +245,12 @@ function applyCarousel(): void {
 // continuously in both directions.
 const numSections = Array.from(document.querySelectorAll<HTMLElement>(".section"));
 
-/* Reveal the featured project when it comes into view. */
-{
-  const grille = document.querySelector<HTMLElement>(".projet-grille");
-  if (grille) {
-    // The hidden state is armed here, not in the stylesheet: if this module
-    // never gets this far, the project stays visible instead of disappearing
-    // from the page.
-    grille.classList.add("anime");
-    // Commit that hidden state before arming the transition, otherwise the
-    // project fades out on load, in full view, before anything can bring it
-    // back. Reading a layout property forces the flush.
-    void grille.offsetWidth;
-    grille.classList.add("pret");
-    new IntersectionObserver(
-      (entrees) => {
-        const part = entrees[0]?.intersectionRatio ?? 0;
-        // The feature is taller than the old card grid on narrow screens;
-        // reveal it when 15% is visible and hide it only once fully gone.
-        if (part >= 0.15) grille.classList.add("entree");
-        else if (part <= 0.01) grille.classList.remove("entree");
-      },
-      { threshold: [0, 0.15] },
-    ).observe(grille);
-  }
-}
+/* The featured project's control screen (clock, ticks, dial, case file):
+   loaded on demand. Its effects are armed by the module itself, so if it
+   never loads the card stays complete and still. */
+import("./projets")
+  .then((module) => module.initProjets())
+  .catch(() => {});
 
 // The white sheet rises over the last screen of the dark part.
 const darkZone = document.querySelector<HTMLElement>(".dark-zone");

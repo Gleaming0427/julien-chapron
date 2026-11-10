@@ -2316,188 +2316,879 @@ html:not(.js) .exp-slides .experience:first-child {
   margin-bottom: clamp(16px, 3vh, 34px);
 }
 
-/* The single featured project has room to explain the QA workflow. */
-.projet-grille {
-  border: 1px solid rgba(243, 241, 236, 0.16);
+/* ---------- projects: the Agent QA Kit card ----------
+   A control screen, in the register of zrk.technology: two-part tags, a HUD
+   bar with a clock, a code block, a dial whose ring is drawn one tick per
+   trial, a case file A–F that plays by itself. The palette, the type and the
+   hairlines stay the site's own.
+   Every effect is ARMED by projets.ts (.qa-anime). Without the script the
+   card is complete and still: every figure, every line, every tick lit. */
+.qa {
+  border: 1px solid var(--border);
   border-radius: var(--radius);
+  /* The dots of the section arrive behind the card near the footer: a
+     slightly veiled background keeps them, without letting them cross the
+     text at full strength. */
+  background: rgba(11, 12, 13, 0.72);
   overflow: hidden;
 }
 
-.projet-etape {
-  display: grid;
-  gap: clamp(24px, 3.5vw, 42px);
-  padding: clamp(24px, 4vw, 52px);
-  transition: background 0.3s ease;
-}
-
-/* The script arms the entrance animation only when it can observe the card. */
-.projet-grille.anime .projet-etape {
-  opacity: 0;
-  transform: translate3d(0, 32px, 0);
-}
-
-.projet-grille.pret .projet-etape {
-  transition:
-    opacity 0.62s cubic-bezier(0.22, 0.61, 0.36, 1),
-    transform 0.62s cubic-bezier(0.22, 0.61, 0.36, 1);
-}
-
-.projet-grille.anime.entree .projet-etape {
-  opacity: 1;
-  transform: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .projet-grille.anime .projet-etape {
-    transform: none;
-  }
-
-  .projet-grille.pret .projet-etape {
-    transition-duration: 0.01ms;
-  }
-}
-
-.projet-tete {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.projet-icone {
-  width: 3em;
-  height: 3em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(243, 241, 236, 0.16);
-  border-radius: var(--radius);
-  color: #ff7133;
-  flex: none;
-}
-
-.projet-icone svg {
-  width: 1.4em;
-  height: 1.4em;
-  display: block;
-}
-
-.projet-mesure {
-  font-family: var(--font-mono);
-  font-size: var(--fs-small);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  text-align: right;
-}
-
-.projet-corps {
-  max-width: 930px;
-}
-
-.projet-titre {
-  margin: 0 0 14px;
-  font-size: clamp(32px, 4vw, 54px);
-  font-weight: 600;
-  line-height: 1.08;
-  letter-spacing: -0.03em;
-  color: var(--text);
-}
-
-.projet-texte {
-  margin: 0;
-  font-size: clamp(17px, 1.5vw, 21px);
-  line-height: 1.55;
-  color: var(--text-dim);
-}
-
-.projet-details {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 clamp(24px, 4vw, 52px);
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.qa > * + * {
   border-top: 1px solid var(--border);
 }
 
-.projet-details li {
-  min-width: 0;
-  padding: 22px 0;
-  border-bottom: 1px solid var(--border);
+.qa-bloc,
+.qa-pied {
+  padding: clamp(22px, 3.4vw, 48px);
 }
 
-.projet-details h4 {
-  margin: 0 0 8px;
-  color: var(--text);
-  font-size: clamp(17px, 1.3vw, 20px);
-  font-weight: 600;
-}
-
-.projet-details p {
+/* Two-part tag: the category in a bracket, the name on a light plate. */
+.qa-tag {
+  display: inline-flex;
+  align-items: stretch;
+  max-width: 100%;
   margin: 0;
-  color: var(--text-dim);
-  font-size: var(--fs-body);
-  line-height: 1.55;
-}
-
-.projet-pied {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
-  gap: 14px 24px;
-}
-
-.projet-note {
-  grid-column: 1 / -1;
-  margin: 0;
-  color: var(--text-dim);
-  font-size: var(--fs-small);
-  line-height: 1.5;
-}
-
-.projet-stack {
-  margin: 0;
-  color: #ff9b70;
-  font-family: var(--font-mono);
-  font-size: var(--fs-small);
-  line-height: 1.5;
-}
-
-.projet-lien {
-  justify-self: end;
-  color: var(--text);
-  font-family: var(--font-mono);
-  font-size: var(--fs-small);
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  font-size: var(--fs-micro);
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
-.projet-lien:hover,
-.projet-lien:focus-visible {
+.qa-tag > span {
+  padding: 5px 9px 4px;
+}
+
+.qa-tag > span:first-child {
+  border-left: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  color: var(--text-dim);
+}
+
+.qa-tag > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: var(--text);
+  color: #0b0c0d;
+}
+
+/* ----- HUD bar ----- */
+.qa-hud {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: clamp(14px, 2vw, 28px);
+  padding: 14px clamp(16px, 2.2vw, 28px);
+}
+
+/* The scroll, as a row of hairlines: they light up in orange as the card
+   is crossed (projets.ts). */
+.qa-ticks {
+  display: flex;
+  justify-content: space-between;
+  height: 22px;
+}
+
+.qa-ticks i {
+  width: 1px;
+  background: rgba(243, 241, 236, 0.2);
+  transition: background 0.25s ease;
+}
+
+.qa-ticks i.on {
+  background: var(--orange);
+}
+
+.qa-auto {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px 5px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: none;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: var(--fs-micro);
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.qa-auto[hidden] {
+  display: none;
+}
+
+.qa-auto::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+.qa-auto[aria-pressed="true"] {
+  color: var(--text);
+  border-color: rgba(255, 77, 0, 0.5);
+}
+
+.qa-auto[aria-pressed="true"]::before {
+  background: var(--orange);
+  animation: qa-clignote 1.6s steps(2, jump-none) infinite;
+}
+
+.qa-auto:hover {
+  color: var(--text);
+}
+
+.qa-auto:focus-visible,
+.qa-ligne:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 4px;
+}
+
+@keyframes qa-clignote {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.qa-horloge {
+  margin: 0;
+  font-size: var(--fs-micro);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.qa-horloge span {
+  color: var(--text);
+}
+
+/* No script, no clock: "--:--:--" would read as broken. */
+.qa:not(.qa-anime) .qa-horloge {
+  visibility: hidden;
+}
+
+/* ----- title and code block ----- */
+.qa-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  align-items: end;
+  gap: clamp(24px, 4vw, 72px);
+}
+
+.qa-titre {
+  margin: 0;
+  font-size: clamp(44px, 6.4vw, 104px);
+  font-weight: 600;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  color: var(--text);
+}
+
+.qa-description {
+  max-width: 44ch;
+  margin: clamp(16px, 2.2vw, 28px) 0 0;
+  font-size: clamp(17px, 1.5vw, 22px);
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+/* The project's sheet, written as a comment: « // … }; ». */
+.qa-code {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-small);
+  line-height: 1.8;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.qa-code::before {
+  content: "//";
+  display: block;
+  color: var(--orange);
+}
+
+.qa-code::after {
+  content: "};";
+  display: block;
+}
+
+.qa-code li {
+  white-space: nowrap;
+}
+
+.qa-code-v {
+  color: var(--text);
+}
+
+/* Typed in, line after line, when the block comes into view: a clip that
+   opens in as many steps as the line has characters. */
+.qa-anime .qa-code li {
+  clip-path: inset(0 100% 0 0);
+}
+
+.qa-anime .qa-intro.en-vue .qa-code li {
+  animation: qa-frappe calc(var(--n) * 24ms) steps(var(--n)) forwards;
+  animation-delay: calc(var(--l) * 360ms + 200ms);
+}
+
+@keyframes qa-frappe {
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* ----- the measurements ----- */
+.qa-mesures-grille {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  align-items: center;
+  gap: clamp(28px, 5vw, 88px);
+  margin-top: clamp(20px, 3vw, 36px);
+}
+
+.qa-cadran {
+  position: relative;
+  justify-self: center;
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 1;
+}
+
+.qa-cadran-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.qa-cadran-pointilles {
+  fill: none;
+  stroke: rgba(243, 241, 236, 0.3);
+  stroke-width: 1;
+  stroke-dasharray: 1 5;
+}
+
+.qa-cadran-interieur {
+  fill: none;
+  stroke: rgba(243, 241, 236, 0.08);
+  stroke-width: 1;
+}
+
+/* One ring per measure, stacked: only the active one shows. */
+.qa-anneau {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.qa-anneau.is-active {
+  opacity: 1;
+}
+
+.qa-anneau line {
+  stroke: rgba(243, 241, 236, 0.2);
+  stroke-width: 2.5;
+}
+
+.qa-anneau line.on {
+  stroke: var(--orange);
+}
+
+/* Armed: the lit ticks start grey, then light up one after the other each
+   time their ring is chosen (.remplit, set by projets.ts). */
+.qa-anime .qa-anneau line.on {
+  stroke: rgba(243, 241, 236, 0.2);
+  transition: stroke 0.2s ease;
+}
+
+.qa-anime .qa-anneau.remplit line.on {
+  stroke: var(--orange);
+  transition-delay: calc(var(--i) * 14ms);
+}
+
+/* The orange mark that circles the dial. */
+.qa-cadran-repere {
+  transform-origin: 200px 200px;
+  animation: qa-tour 24s linear infinite;
+}
+
+.qa-cadran-repere line {
+  stroke: var(--orange);
+  stroke-width: 2;
+}
+
+@keyframes qa-tour {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.qa-cadran-centre {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.qa-cadran-label {
+  margin-bottom: clamp(8px, 1.4vw, 18px);
+}
+
+.qa-cadran-valeur {
+  display: flex;
+  align-items: flex-end;
+  margin: 0;
+  font-size: clamp(72px, 9.5vw, 148px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.qa-cadran-total {
+  margin: 0 0 0.12em 0.1em;
+  font-size: 0.2em;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--text-dim);
+}
+
+/* The measure's name, under the figure: it stays inside the inner circle
+   (66 % of the dial) and wraps there rather than crossing the ring. */
+.qa-cadran-nom {
+  max-width: 54%;
+  margin: clamp(8px, 1.4vw, 16px) 0 0;
+  font-size: var(--fs-micro);
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: var(--text-dim);
+}
+
+/* The roll: one band of digits per position, pushed up like a counter. */
+.qa-odo {
+  display: inline-flex;
+}
+
+.qa-odo-col {
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+}
+
+.qa-odo-bande {
+  display: flex;
+  flex-direction: column;
+  transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--d, 0ms);
+}
+
+.qa-odo-bande.sans-transition {
+  transition: none;
+}
+
+.qa-odo-bande > span {
+  display: block;
+  height: 1em;
+  line-height: 1;
+}
+
+/* The sight: two orange hairlines follow the pointer over the dial, and the
+   corners give its position. */
+.qa-viseur {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.qa-cadran.vise .qa-viseur {
+  opacity: 1;
+}
+
+.qa-viseur-h,
+.qa-viseur-v {
+  position: absolute;
+  background: rgba(255, 77, 0, 0.55);
+}
+
+.qa-viseur-h {
+  left: 0;
+  right: 0;
+  top: var(--vy, 50%);
+  height: 1px;
+}
+
+.qa-viseur-v {
+  top: 0;
+  bottom: 0;
+  left: var(--vx, 50%);
+  width: 1px;
+}
+
+.qa-coord {
+  position: absolute;
+  bottom: 0;
+  font-size: var(--fs-micro);
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.qa-coord-x {
+  left: 0;
+}
+
+.qa-coord-y {
+  right: 0;
+}
+
+.qa:not(.qa-anime) .qa-coord {
+  display: none;
+}
+
+@media (hover: none) {
+  .qa-coord,
+  .qa-viseur {
+    display: none;
+  }
+}
+
+/* The rows: the figures themselves, readable on their own. */
+.qa-lignes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-bottom: 1px solid var(--border);
+}
+
+.qa-lignes > li {
+  border-top: 1px solid var(--border);
+}
+
+.qa-ligne {
+  position: relative;
+  display: grid;
+  grid-template-columns: 3.4em minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 14px 16px;
+  width: 100%;
+  padding: clamp(16px, 2vw, 24px) 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+
+button.qa-ligne {
+  cursor: pointer;
+}
+
+.qa-ligne-index {
+  font-size: var(--fs-micro);
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s ease;
+}
+
+.qa-ligne-label {
+  font-size: clamp(17px, 1.5vw, 24px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.qa-ligne-valeur {
+  font-size: clamp(26px, 2.8vw, 44px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.qa-ligne-valeur small {
+  font-size: 0.5em;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--text-dim);
+}
+
+/* One hairline per trial, per bug: the orange ones passed or were caught,
+   the grey ones did not. */
+.qa-barre {
+  grid-column: 2 / -1;
+  display: flex;
+  justify-content: space-between;
+  height: 20px;
+}
+
+.qa-barre i {
+  width: 1px;
+  background: rgba(243, 241, 236, 0.22);
+}
+
+.qa-barre i.on {
+  background: var(--orange);
+}
+
+.qa-anime .qa-barre i.on {
+  background: rgba(243, 241, 236, 0.22);
+  transition: background 0.2s ease;
+}
+
+.qa-anime .qa-mesures.en-vue .qa-barre i.on {
+  background: var(--orange);
+  transition-delay: calc(var(--i) * 9ms + 150ms);
+}
+
+.qa-ligne-progres {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--orange);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.qa-anime button.qa-ligne {
+  color: var(--text-dim);
+  transition: color 0.3s ease;
+}
+
+.qa-anime button.qa-ligne:hover,
+.qa-anime .qa-ligne.is-active {
+  color: var(--text);
+}
+
+.qa-anime .qa-ligne.is-active .qa-ligne-index {
+  color: var(--orange);
+}
+
+.qa-anime .qa-ligne.is-active .qa-ligne-progres {
+  animation: qa-progres var(--duree-mesure, 5s) linear forwards;
+}
+
+@keyframes qa-progres {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ----- the case file ----- */
+.qa-etapes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 clamp(20px, 3vw, 44px);
+  margin: clamp(20px, 3vw, 36px) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.qa-etape {
+  position: relative;
+  padding: 22px 0 clamp(24px, 3vw, 36px);
+  border-top: 1px solid var(--border);
+}
+
+.qa-etape-barre {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--orange);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.qa-etape-icone {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: #ff7133;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.qa-etape-icone svg {
+  width: 20px;
+  height: 20px;
+}
+
+.qa-etape-titre {
+  display: flex;
+  gap: 0.45em;
+  margin: 18px 0 10px;
+  font-size: clamp(17px, 1.3vw, 21px);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.qa-etape-lettre {
+  flex: none;
+  color: var(--orange);
+  transition: color 0.3s ease;
+}
+
+.qa-etape-texte {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: 1.55;
+  color: var(--text-dim);
+  transition: color 0.3s ease;
+}
+
+/* Played by the script: the active entry takes the orange, its bar runs,
+   then the next one takes over. The others stay readable, only quieter. */
+.qa-anime .qa-etape-icone,
+.qa-anime .qa-etape-lettre {
+  color: var(--text-dim);
+}
+
+.qa-anime .qa-etape.is-active .qa-etape-icone {
+  color: var(--orange);
+  border-color: rgba(255, 77, 0, 0.6);
+}
+
+.qa-anime .qa-etape.is-active .qa-etape-lettre {
+  color: var(--orange);
+}
+
+.qa-anime .qa-etape.is-active .qa-etape-texte {
+  color: rgba(243, 241, 236, 0.86);
+}
+
+.qa-anime .qa-etape.is-active .qa-etape-barre {
+  animation: qa-progres var(--duree-etape, 8s) linear forwards;
+}
+
+/* Autoplay off, or paused (pointer over the block, block off screen). */
+.qa.sans-auto .is-active > .qa-etape-barre,
+.qa.sans-auto .is-active > .qa-ligne-progres {
+  animation: none;
+  transform: scaleX(1);
+}
+
+.qa-mesures.en-pause .qa-ligne-progres,
+.qa-dossier.en-pause .qa-etape-barre {
+  animation-play-state: paused;
+}
+
+/* The scramble of a title as its entry becomes active: the real text keeps
+   its place (and stays read by assistive technologies), a veil plays the
+   glyphs over it. */
+.qa-brouille {
+  position: relative;
+  display: inline-block;
+}
+
+/* Held inside the title's own box: should the glyphs still run longer than
+   the letters, they are cut there instead of spilling over the text below. */
+.qa-brouille-voile {
+  position: absolute;
+  inset: 0;
+  display: none;
+  overflow: hidden;
+}
+
+.qa-brouille.brouille .qa-brouille-fond {
+  color: transparent;
+}
+
+.qa-brouille.brouille .qa-brouille-voile {
+  display: block;
+}
+
+.qa-brouille-voile b {
+  font-weight: inherit;
+  color: var(--orange);
+}
+
+/* ----- status, stack, link ----- */
+.qa-pied {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 18px 32px;
+}
+
+.qa-note {
+  grid-column: 1 / -1;
+  max-width: 80ch;
+  margin: 0;
+  font-size: var(--fs-small);
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+.qa-note::before {
+  content: "// ";
+  color: var(--orange);
+}
+
+.qa-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.qa-stack li {
+  padding: 6px 11px 5px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: var(--fs-small);
+  line-height: 1.2;
+  color: var(--text);
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.qa-stack li:hover {
+  border-color: rgba(255, 77, 0, 0.6);
   color: #ff9b70;
 }
 
+.qa-lien {
+  justify-self: end;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qa-cadran-repere,
+  .qa-auto[aria-pressed="true"]::before {
+    animation: none;
+  }
+
+  .qa-anime .qa-intro.en-vue .qa-code li {
+    animation-duration: 0.01ms;
+    animation-delay: 0ms;
+  }
+
+  .qa-anime .qa-anneau.remplit line.on,
+  .qa-anime .qa-mesures.en-vue .qa-barre i.on {
+    transition-delay: 0ms;
+  }
+}
+
+@media (max-width: 1080px) {
+  .qa-intro,
+  .qa-mesures-grille {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .qa-intro {
+    align-items: start;
+  }
+
+  .qa-cadran {
+    max-width: 400px;
+  }
+
+  .qa-etapes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 720px) {
-  .projet-details {
-    grid-template-columns: minmax(0, 1fr);
+  /* The tag takes the whole first row, so the name is never cut; the ticks
+     and the toggle share the second. */
+  .qa-hud {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 12px;
   }
 
-  .projet-details li {
-    padding: 18px 0;
-  }
-
-  .projet-pied {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .projet-note {
-    grid-column: auto;
-  }
-
-  .projet-lien {
+  .qa-hud > .qa-tag {
+    grid-column: 1 / -1;
     justify-self: start;
+  }
+
+  .qa-horloge {
+    display: none;
+  }
+
+  .qa-code li {
+    white-space: normal;
+  }
+
+  .qa-cadran {
+    max-width: 340px;
+  }
+
+  .qa-ligne {
+    grid-template-columns: 2.8em minmax(0, 1fr) auto;
+  }
+
+  /* On a phone the case file is read, not played: one column, every
+     entry lit, no bar. */
+  .qa-etapes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .qa-anime .qa-etape .qa-etape-icone {
+    color: #ff7133;
+  }
+
+  .qa-anime .qa-etape .qa-etape-lettre {
+    color: var(--orange);
+  }
+
+  .qa-anime .qa-etape.is-active .qa-etape-icone {
+    border-color: var(--border);
+  }
+
+  .qa-anime .qa-etape.is-active .qa-etape-texte {
+    color: var(--text-dim);
+  }
+
+  .qa-etape-barre {
+    display: none;
+  }
+
+  .qa-pied {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .qa-lien {
+    justify-self: start;
+  }
+}
+
+@media (pointer: coarse) {
+  .qa-auto {
+    min-height: 44px;
+  }
+}
+
+@media print {
+  .qa-hud,
+  .qa-cadran {
+    display: none;
   }
 }
 

@@ -4,7 +4,7 @@ import Layout from "../layouts/Layout.astro";
 import Hero from "./Hero.astro";
 import Marquee from "./Marquee.astro";
 import Section from "./Section.astro";
-import type { IconeProjet, Locale } from "../data/cv";
+import type { Locale } from "../data/cv";
 import { cv } from "../data/cv";
 
 interface Props {
@@ -24,16 +24,43 @@ const marqueeSkills = [
   "PostgreSQL", "Firebase", "GitLab CI", "GitHub Actions",
 ];
 
-// Project step icons, drawn as strokes, placed in the head box.
-const iconesProjet: Record<IconeProjet, string> = {
-  serveur:
-    '<rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>',
-  chapeau:
-    '<path d="M4.5 11.5c.5-2.9 3.6-5 7.5-5s7 2.1 7.5 5"/><circle cx="8.5" cy="15.5" r="2.4"/><circle cx="15.5" cy="15.5" r="2.4"/><path d="M10.9 15.5h2.2"/><path d="M6.1 15.5H3.5"/><path d="M17.9 15.5h2.6"/>',
-  telephone:
-    '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>',
-  ia: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>',
-};
+// The projects card, Agent QA Kit. Its six details read as a case file,
+// A to F, each with its own stroke icon — in the details' order.
+const iconesDossier = [
+  // A. The problem: a warning sign.
+  '<path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4.5"/><path d="M12 17.2h.01"/>',
+  // B. Tests frozen before the code: a snowflake.
+  '<path d="M12 2v20"/><path d="m4.2 7 15.6 10"/><path d="m19.8 7-15.6 10"/><path d="m9 3.5 3 2 3-2"/><path d="m9 20.5 3-2 3 2"/>',
+  // C. Independent verification: a shield with a tick.
+  '<path d="M12 2.8 4.5 5.6v6.1c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V5.6z"/><path d="m8.6 12 2.4 2.4 4.4-4.6"/>',
+  // D. Measuring the agents: a gauge.
+  '<path d="M3.5 17a8.5 8.5 0 1 1 17 0"/><path d="m12 17 4.2-5.2"/><path d="M2.5 20.5h19"/>',
+  // E. What the measurements show: bars.
+  '<path d="M6 20V11"/><path d="M12 20V5"/><path d="M18 20v-6"/><path d="M3 20.5h18"/>',
+  // F. Knowing when to drop it: an undo arrow.
+  '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+];
+const lettres = ["A", "B", "C", "D", "E", "F"];
+
+// The dial is drawn on a 400 × 400 square: one radial tick per unit — one
+// per trial, one per injected bug — so the ring IS the figure, not a gauge
+// drawn to look like it.
+const CENTRE = 200;
+const anneau = (total: number) =>
+  Array.from({ length: total }, (_, i) => {
+    const a = -Math.PI / 2 + (i * 2 * Math.PI) / total;
+    const point = (r: number) => [
+      +(CENTRE + r * Math.cos(a)).toFixed(2),
+      +(CENTRE + r * Math.sin(a)).toFixed(2),
+    ];
+    const [x1, y1] = point(148);
+    const [x2, y2] = point(172);
+    return { x1, y1, x2, y2 };
+  });
+
+// The HUD bar's ticks, lit by the scroll as one crosses the card.
+const ticksHud = Array.from({ length: 96 });
+const deuxChiffres = (n: number) => String(n).padStart(2, "0");
 
 ---
 
@@ -291,38 +318,169 @@ const iconesProjet: Record<IconeProjet, string> = {
     <p class="spec-lead">
       {ui.projetsLead}
     </p>
-    <!-- One featured project, with its workflow and current limits visible. -->
-    <div class="projet-grille">
-      {personalProjects.map((project) => (
-        <article class="projet-etape">
-          <div class="projet-tete">
-            <span class="projet-icone" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={iconesProjet[project.icon]}></svg>
-            </span>
-            <span class="projet-mesure">{project.tagline}</span>
+    <!-- The featured project, laid out as a control screen: a HUD bar, the
+         title and its code block, the dial of the measurements, the case
+         file A–F, then the status and the link. Every figure and every line
+         comes from cv.ts; the effects (clock, ticks, roll, scramble, sight)
+         are added by projets.ts, and the card reads the same without them. -->
+    {personalProjects.map((project) => {
+      const premiere = project.measures[0]!;
+      return (
+      <article class="qa" data-qa>
+        <header class="qa-hud">
+          <p class="qa-tag"><span>{ui.projetTag}</span><span>{project.name}</span></p>
+          <div class="qa-ticks" aria-hidden="true">
+            {ticksHud.map(() => <i></i>)}
           </div>
-          <div class="projet-corps">
-            <h3 class="projet-titre">{project.name}</h3>
-            <p class="projet-texte">{project.description}</p>
+          <button type="button" class="qa-auto" aria-pressed="true" hidden>
+            {ui.autoLecture}
+          </button>
+          <p class="qa-horloge" aria-hidden="true">
+            {ui.horlogeVille}, <span data-horloge>--:--:--</span>
+          </p>
+        </header>
+
+        <div class="qa-intro qa-bloc">
+          <div class="qa-intro-texte">
+            <h3 class="qa-titre">
+              <span class="qa-brouille">
+                <span class="qa-brouille-fond">{project.name}</span>
+                <span class="qa-brouille-voile" aria-hidden="true"></span>
+              </span>
+            </h3>
+            <p class="qa-description">{project.description}</p>
           </div>
-          <ul class="projet-details">
-            {project.details.map((detail) => (
-              <li>
-                <h4>{detail.title}</h4>
-                <p>{detail.text}</p>
+          <ul class="qa-code">
+            {[{ k: ui.hudType, v: project.tagline }, ...project.hud].map((ligne, i) => (
+              <li style={`--n:${ligne.k.length + ligne.v.length + 3};--l:${i}`}>
+                <span class="qa-code-k">{ligne.k}{locale === "fr" ? " :" : ":"}</span> <span class="qa-code-v">{ligne.v}</span>
               </li>
             ))}
           </ul>
-          <footer class="projet-pied">
-            <p class="projet-note">{project.status}</p>
-            <p class="projet-stack">{project.stack}</p>
-            {project.links.map((link) => (
-              <a class="projet-lien" href={link.href} target="_blank" rel="noopener noreferrer">{ui.voirProjet} ↗</a>
+        </div>
+
+        <section class="qa-mesures qa-bloc" aria-label={`${ui.mesuresTag}, ${ui.mesuresTagFin}`}>
+          <p class="qa-tag"><span>{ui.mesuresTag}</span><span>{ui.mesuresTagFin}</span></p>
+          <div class="qa-mesures-grille">
+            {/* The dial repeats the rows beside it, so it is hidden from
+                assistive technologies: the rows carry the figures. */}
+            <div class="qa-cadran" aria-hidden="true">
+              <svg class="qa-cadran-svg" viewBox="0 0 400 400">
+                <circle class="qa-cadran-pointilles" cx="200" cy="200" r="194" />
+                <circle class="qa-cadran-interieur" cx="200" cy="200" r="132" />
+                {project.measures.map((m, k) => (
+                  <g class:list={["qa-anneau", k === 0 && "is-active"]} data-anneau={k}>
+                    {anneau(m.total).map((t, i) => (
+                      <line
+                        x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
+                        class:list={[i < m.value && "on"]}
+                        style={`--i:${i}`}
+                      />
+                    ))}
+                  </g>
+                ))}
+                <g class="qa-cadran-repere">
+                  <line x1="200" y1="0" x2="200" y2="14" />
+                </g>
+              </svg>
+              <div class="qa-viseur">
+                <span class="qa-viseur-h"></span>
+                <span class="qa-viseur-v"></span>
+              </div>
+              <div class="qa-cadran-centre">
+                <p class="qa-tag qa-cadran-label">
+                  <span>{ui.mesure}</span>
+                  <span><span data-cadran-index>01</span> / {deuxChiffres(project.measures.length)}</span>
+                </p>
+                <p class="qa-cadran-valeur">
+                  <span class="qa-odo" data-odo>{premiere.value}</span><span class="qa-cadran-total" data-cadran-total>/{premiere.total}</span>
+                </p>
+                <p class="qa-cadran-nom" data-cadran-label>{premiere.label}</p>
+              </div>
+              <span class="qa-coord qa-coord-x">X: <span data-coord-x>000</span></span>
+              <span class="qa-coord qa-coord-y">Y: <span data-coord-y>000</span></span>
+            </div>
+
+            <ul class="qa-lignes">
+              {project.measures.map((m, k) => (
+                <li>
+                  <button
+                    type="button"
+                    class:list={["qa-ligne", k === 0 && "is-active"]}
+                    aria-pressed={k === 0 ? "true" : "false"}
+                    data-mesure={k}
+                    data-valeur={m.value}
+                    data-total={m.total}
+                    data-label={m.label}
+                  >
+                    <span class="qa-ligne-progres" aria-hidden="true"></span>
+                    <span class="qa-ligne-index" aria-hidden="true">{`00${k + 1}`}</span>
+                    <span class="qa-ligne-label">{m.label}</span>
+                    <span class="qa-ligne-valeur">
+                      <span aria-hidden="true">{m.value}<small>/{m.total}</small></span>
+                      <span class="visually-hidden">{m.value} {ui.surMot} {m.total}</span>
+                    </span>
+                    <span class="qa-barre" aria-hidden="true">
+                      {Array.from({ length: m.total }, (_, i) => (
+                        <i class:list={[i < m.value && "on"]} style={`--i:${i}`}></i>
+                      ))}
+                    </span>
+                  </button>
+                </li>
+              ))}
+              <li>
+                <div class="qa-ligne qa-ligne-fixe">
+                  <span class="qa-ligne-index" aria-hidden="true">{`00${project.measures.length + 1}`}</span>
+                  <span class="qa-ligne-label">{project.cost.label}</span>
+                  <span class="qa-ligne-valeur">{project.cost.value}</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="qa-dossier qa-bloc" aria-label={ui.dossierTag}>
+          <p class="qa-tag"><span>{ui.dossierTag}</span><span>{ui.dossierTagFin}</span></p>
+          <ol class="qa-etapes">
+            {project.details.map((detail, i) => (
+              <li class:list={["qa-etape", i === 0 && "is-active"]} data-etape={i}>
+                <span class="qa-etape-barre" aria-hidden="true"></span>
+                <span class="qa-etape-icone" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" set:html={iconesDossier[i % iconesDossier.length]}></svg>
+                </span>
+                <h4 class="qa-etape-titre">
+                  <span class="qa-etape-lettre" aria-hidden="true">{lettres[i] ?? i + 1}.</span>
+                  <span class="qa-brouille">
+                    <span class="qa-brouille-fond">{detail.title}</span>
+                    <span class="qa-brouille-voile" aria-hidden="true"></span>
+                  </span>
+                </h4>
+                <p class="qa-etape-texte">{detail.text}</p>
+              </li>
             ))}
-          </footer>
-        </article>
-      ))}
-    </div>
+          </ol>
+        </section>
+
+        <footer class="qa-pied">
+          <p class="qa-note">{project.status}</p>
+          <ul class="qa-stack">
+            {project.stack.split(" · ").map((techno) => <li>{techno}</li>)}
+          </ul>
+          {project.links.map((link) => (
+            <a class="axiom-btn qa-lien" href={link.href} target="_blank" rel="noopener noreferrer">
+              <span class="axiom-btn-text-col">
+                <span class="axiom-btn-text-row">{ui.voirProjet}</span>
+                <span class="axiom-btn-text-row" aria-hidden="true">{ui.voirProjet}</span>
+              </span>
+              <span class="axiom-btn-arrow-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7" /><path d="M8 7h9v9" /></svg>
+              </span>
+            </a>
+          ))}
+        </footer>
+      </article>
+      );
+    })}
   </Section>
 
     </div>
