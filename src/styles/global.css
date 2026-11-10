@@ -2317,10 +2317,11 @@ html:not(.js) .exp-slides .experience:first-child {
 }
 
 /* ---------- projects: the Agent QA Kit card ----------
-   A control screen, in the register of zrk.technology: two-part tags, a HUD
-   bar with a clock, a code block, a dial whose ring is drawn one tick per
-   trial, a case file A–F that plays by itself. The palette, the type and the
-   hairlines stay the site's own.
+   A control screen, in the register of zrk.technology — a HUD bar with a
+   clock, a dial whose ring is drawn one tick per trial, a case file A–F that
+   plays by itself — but written with what the site already has: the
+   experience cards' eyebrow, figure and Poste / Mission / Période table, the
+   skills table's labels, the former project card's title and stack line.
    Every effect is ARMED by projets.ts (.qa-anime). Without the script the
    card is complete and still: every figure, every line, every tick lit. */
 .qa {
@@ -2342,34 +2343,31 @@ html:not(.js) .exp-slides .experience:first-child {
   padding: clamp(22px, 3.4vw, 48px);
 }
 
-/* Two-part tag: the category in a bracket, the name on a light plate. */
-.qa-tag {
-  display: inline-flex;
-  align-items: stretch;
-  max-width: 100%;
+/* Block labels: the experience cards' eyebrow (.exp-eyebrow, .exp-mark).
+   Copied rather than reused: those classes carry the phone budget of the
+   pinned experience panel, which has nothing to do here. */
+.qa-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
-  font-size: var(--fs-micro);
-  line-height: 1;
-  letter-spacing: 0.12em;
+  line-height: 1.55;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
   text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.qa-tag > span {
-  padding: 5px 9px 4px;
-}
-
-.qa-tag > span:first-child {
-  border-left: 1px solid currentColor;
-  border-bottom: 1px solid currentColor;
+  letter-spacing: 0.12em;
   color: var(--text-dim);
 }
 
-.qa-tag > span:last-child {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  background: var(--text);
-  color: #0b0c0d;
+/* Held on the first line's middle (half of its 1.55 line height): when the
+   label wraps, on a phone, the mark stays with its first word. */
+.qa-mark {
+  flex: none;
+  align-self: flex-start;
+  width: 4px;
+  height: 4px;
+  margin-top: calc(0.775em - 2px);
+  background: var(--green);
 }
 
 /* ----- HUD bar ----- */
@@ -2483,69 +2481,56 @@ html:not(.js) .exp-slides .experience:first-child {
   gap: clamp(24px, 4vw, 72px);
 }
 
+/* The former project card's title (.projet-titre): it stays below the
+   section's own headline. */
 .qa-titre {
   margin: 0;
-  font-size: clamp(44px, 6.4vw, 104px);
+  font-size: clamp(32px, 4vw, 54px);
   font-weight: 600;
-  line-height: 0.92;
-  letter-spacing: -0.04em;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
   color: var(--text);
 }
 
+/* The site's running text: the lead's light weight, one step above it. */
 .qa-description {
-  max-width: 44ch;
-  margin: clamp(16px, 2.2vw, 28px) 0 0;
-  font-size: clamp(17px, 1.5vw, 22px);
-  line-height: 1.5;
+  max-width: 52ch;
+  margin: 14px 0 0;
+  font-size: var(--fs-text);
+  font-weight: 300;
+  line-height: 1.55;
   color: var(--text-dim);
 }
 
-/* The project's sheet, written as a comment: « // … }; ». */
-.qa-code {
+/* The project's sheet: the experience cards' Poste / Mission / Période
+   table (.exp-spec), same hairlines, same type. */
+.qa-spec {
   margin: 0;
-  padding: 0;
-  list-style: none;
-  font-size: var(--fs-small);
-  line-height: 1.8;
-  letter-spacing: 0.06em;
+}
+
+.qa-spec-row {
+  display: flex;
+  gap: 24px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--fs-micro);
+}
+
+.qa-spec-row:first-child {
+  border-top: 1px solid var(--border);
+}
+
+.qa-spec dt {
+  flex: 0 0 8rem;
+  font-family: var(--font-mono);
   text-transform: uppercase;
+  letter-spacing: 0.1em;
   color: var(--text-dim);
 }
 
-.qa-code::before {
-  content: "//";
-  display: block;
-  color: var(--orange);
-}
-
-.qa-code::after {
-  content: "};";
-  display: block;
-}
-
-.qa-code li {
-  white-space: nowrap;
-}
-
-.qa-code-v {
+.qa-spec dd {
+  margin: 0;
   color: var(--text);
-}
-
-/* Typed in, line after line, when the block comes into view: a clip that
-   opens in as many steps as the line has characters. */
-.qa-anime .qa-code li {
-  clip-path: inset(0 100% 0 0);
-}
-
-.qa-anime .qa-intro.en-vue .qa-code li {
-  animation: qa-frappe calc(var(--n) * 24ms) steps(var(--n)) forwards;
-  animation-delay: calc(var(--l) * 360ms + 200ms);
-}
-
-@keyframes qa-frappe {
-  to {
-    clip-path: inset(0 0 0 0);
-  }
 }
 
 /* ----- the measurements ----- */
@@ -2561,7 +2546,7 @@ html:not(.js) .exp-slides .experience:first-child {
   position: relative;
   justify-self: center;
   width: 100%;
-  max-width: 480px;
+  max-width: 380px;
   aspect-ratio: 1;
 }
 
@@ -2646,25 +2631,35 @@ html:not(.js) .exp-slides .experience:first-child {
 }
 
 .qa-cadran-label {
-  margin-bottom: clamp(8px, 1.4vw, 18px);
+  margin: 0 0 clamp(10px, 1.4vw, 16px);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
 }
 
+.qa-cadran-label span {
+  color: var(--text);
+}
+
+/* The experience cards' figure (.exp-stat-num) and its unit. */
 .qa-cadran-valeur {
   display: flex;
   align-items: flex-end;
   margin: 0;
-  font-size: clamp(72px, 9.5vw, 148px);
-  font-weight: 600;
+  font-size: clamp(40px, 4.4vw, 72px);
+  font-weight: 300;
   line-height: 1;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.03em;
   color: var(--text);
   font-variant-numeric: tabular-nums;
 }
 
 .qa-cadran-total {
-  margin: 0 0 0.12em 0.1em;
-  font-size: 0.2em;
-  font-weight: 500;
+  margin: 0 0 0.3em 0.15em;
+  font-size: var(--fs-lead);
+  font-weight: 200;
   letter-spacing: 0;
   color: var(--text-dim);
 }
@@ -2791,7 +2786,7 @@ html:not(.js) .exp-slides .experience:first-child {
   align-items: baseline;
   gap: 14px 16px;
   width: 100%;
-  padding: clamp(16px, 2vw, 24px) 0;
+  padding: clamp(14px, 2.2vh, 28px) 0;
   border: 0;
   background: none;
   color: var(--text);
@@ -2811,25 +2806,26 @@ button.qa-ligne {
   transition: color 0.3s ease;
 }
 
+/* The skills table's category label (.skill-cat). */
 .qa-ligne-label {
-  font-size: clamp(17px, 1.5vw, 24px);
-  font-weight: 500;
-  letter-spacing: -0.01em;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
 }
 
 .qa-ligne-valeur {
-  font-size: clamp(26px, 2.8vw, 44px);
-  font-weight: 600;
+  font-size: var(--fs-lead);
+  font-weight: 400;
   line-height: 1;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.01em;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
 .qa-ligne-valeur small {
-  font-size: 0.5em;
-  font-weight: 500;
-  letter-spacing: 0;
+  font-size: 0.7em;
   color: var(--text-dim);
 }
 
@@ -2926,8 +2922,8 @@ button.qa-ligne {
 .qa-etape-icone {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border: 1px solid var(--border);
   border-radius: 6px;
   color: #ff7133;
@@ -2935,15 +2931,15 @@ button.qa-ligne {
 }
 
 .qa-etape-icone svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
 .qa-etape-titre {
   display: flex;
   gap: 0.45em;
-  margin: 18px 0 10px;
-  font-size: clamp(17px, 1.3vw, 21px);
+  margin: 16px 0 8px;
+  font-size: clamp(17px, 1.3vw, 20px);
   font-weight: 600;
   line-height: 1.25;
   color: var(--text);
@@ -2958,6 +2954,7 @@ button.qa-ligne {
 .qa-etape-texte {
   margin: 0;
   font-size: var(--fs-body);
+  font-weight: 300;
   line-height: 1.55;
   color: var(--text-dim);
   transition: color 0.3s ease;
@@ -3046,33 +3043,13 @@ button.qa-ligne {
   color: var(--text-dim);
 }
 
-.qa-note::before {
-  content: "// ";
-  color: var(--orange);
-}
-
+/* The former card's stack line (.projet-stack). */
 .qa-stack {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
   margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.qa-stack li {
-  padding: 6px 11px 5px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  font-size: var(--fs-small);
-  line-height: 1.2;
-  color: var(--text);
-  transition: border-color 0.2s ease, color 0.2s ease;
-}
-
-.qa-stack li:hover {
-  border-color: rgba(255, 77, 0, 0.6);
   color: #ff9b70;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  line-height: 1.5;
 }
 
 .qa-lien {
@@ -3083,11 +3060,6 @@ button.qa-ligne {
   .qa-cadran-repere,
   .qa-auto[aria-pressed="true"]::before {
     animation: none;
-  }
-
-  .qa-anime .qa-intro.en-vue .qa-code li {
-    animation-duration: 0.01ms;
-    animation-delay: 0ms;
   }
 
   .qa-anime .qa-anneau.remplit line.on,
@@ -3107,7 +3079,7 @@ button.qa-ligne {
   }
 
   .qa-cadran {
-    max-width: 400px;
+    max-width: 340px;
   }
 
   .qa-etapes {
@@ -3123,7 +3095,7 @@ button.qa-ligne {
     row-gap: 12px;
   }
 
-  .qa-hud > .qa-tag {
+  .qa-hud > .qa-eyebrow {
     grid-column: 1 / -1;
     justify-self: start;
   }
@@ -3132,12 +3104,8 @@ button.qa-ligne {
     display: none;
   }
 
-  .qa-code li {
-    white-space: normal;
-  }
-
   .qa-cadran {
-    max-width: 340px;
+    max-width: 320px;
   }
 
   .qa-ligne {

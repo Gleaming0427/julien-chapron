@@ -328,7 +328,7 @@ const deuxChiffres = (n: number) => String(n).padStart(2, "0");
       return (
       <article class="qa" data-qa>
         <header class="qa-hud">
-          <p class="qa-tag"><span>{ui.projetTag}</span><span>{project.name}</span></p>
+          <p class="qa-eyebrow"><span class="qa-mark" aria-hidden="true"></span>{project.tagline}</p>
           <div class="qa-ticks" aria-hidden="true">
             {ticksHud.map(() => <i></i>)}
           </div>
@@ -350,17 +350,15 @@ const deuxChiffres = (n: number) => String(n).padStart(2, "0");
             </h3>
             <p class="qa-description">{project.description}</p>
           </div>
-          <ul class="qa-code">
-            {[{ k: ui.hudType, v: project.tagline }, ...project.hud].map((ligne, i) => (
-              <li style={`--n:${ligne.k.length + ligne.v.length + 3};--l:${i}`}>
-                <span class="qa-code-k">{ligne.k}{locale === "fr" ? " :" : ":"}</span> <span class="qa-code-v">{ligne.v}</span>
-              </li>
+          <dl class="qa-spec">
+            {project.hud.map((ligne) => (
+              <div class="qa-spec-row"><dt>{ligne.k}</dt><dd>{ligne.v}</dd></div>
             ))}
-          </ul>
+          </dl>
         </div>
 
         <section class="qa-mesures qa-bloc" aria-label={`${ui.mesuresTag}, ${ui.mesuresTagFin}`}>
-          <p class="qa-tag"><span>{ui.mesuresTag}</span><span>{ui.mesuresTagFin}</span></p>
+          <p class="qa-eyebrow"><span class="qa-mark" aria-hidden="true"></span>{ui.mesuresTag} · {ui.mesuresTagFin}</p>
           <div class="qa-mesures-grille">
             {/* The dial repeats the rows beside it, so it is hidden from
                 assistive technologies: the rows carry the figures. */}
@@ -388,9 +386,8 @@ const deuxChiffres = (n: number) => String(n).padStart(2, "0");
                 <span class="qa-viseur-v"></span>
               </div>
               <div class="qa-cadran-centre">
-                <p class="qa-tag qa-cadran-label">
-                  <span>{ui.mesure}</span>
-                  <span><span data-cadran-index>01</span> / {deuxChiffres(project.measures.length)}</span>
+                <p class="qa-cadran-label">
+                  {ui.mesure} <span data-cadran-index>01</span> / {deuxChiffres(project.measures.length)}
                 </p>
                 <p class="qa-cadran-valeur">
                   <span class="qa-odo" data-odo>{premiere.value}</span><span class="qa-cadran-total" data-cadran-total>/{premiere.total}</span>
@@ -440,7 +437,7 @@ const deuxChiffres = (n: number) => String(n).padStart(2, "0");
         </section>
 
         <section class="qa-dossier qa-bloc" aria-label={ui.dossierTag}>
-          <p class="qa-tag"><span>{ui.dossierTag}</span><span>{ui.dossierTagFin}</span></p>
+          <p class="qa-eyebrow"><span class="qa-mark" aria-hidden="true"></span>{ui.dossierTag} · {ui.dossierTagFin}</p>
           <ol class="qa-etapes">
             {project.details.map((detail, i) => (
               <li class:list={["qa-etape", i === 0 && "is-active"]} data-etape={i}>
@@ -463,9 +460,7 @@ const deuxChiffres = (n: number) => String(n).padStart(2, "0");
 
         <footer class="qa-pied">
           <p class="qa-note">{project.status}</p>
-          <ul class="qa-stack">
-            {project.stack.split(" · ").map((techno) => <li>{techno}</li>)}
-          </ul>
+          <p class="qa-stack">{project.stack}</p>
           {project.links.map((link) => (
             <a class="axiom-btn qa-lien" href={link.href} target="_blank" rel="noopener noreferrer">
               <span class="axiom-btn-text-col">
