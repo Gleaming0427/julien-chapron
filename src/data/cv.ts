@@ -44,9 +44,10 @@ export interface PersonalProject {
   name: string;
   tagline: string;
   description: string;
-  /** The HUD block beside the title. Each line only restates what the card
+  /** The small table beside the title (laid out like the experience cards'
+      Poste / Mission / Période). Each line only restates what the card
       already says elsewhere (status, description): nothing new is claimed
-      there. The first line, the type, is the tagline. */
+      there. */
   hud: { k: string; v: string }[];
   /** The dial's figures. They come word for word from the detail « Ce que
       les mesures montrent »: the two must change together. */
@@ -104,11 +105,9 @@ export interface Textes {
   projetsTitreFin: string;
   projetsLead: string;
   voirProjet: string;
-  /** The projects card's HUD: the left half of its two-part tags, the
-      clock's city, the type key, the dial's tag, the autoplay toggle. */
-  projetTag: string;
+  /** The projects card's HUD: the clock's city, the labels of its blocks,
+      the dial's tag, the autoplay toggle. */
   horlogeVille: string;
-  hudType: string;
   mesuresTag: string;
   mesuresTagFin: string;
   mesure: string;
@@ -367,9 +366,7 @@ const fr: Donnees = {
     projetsTitreFin: "Un projet IA en détail.",
     projetsLead: "Comment vérifier le comportement réel d'une application quand son code est écrit par des agents IA ?",
     voirProjet: "Voir le code sur GitHub",
-    projetTag: "projet",
     horlogeVille: "Toulouse",
-    hudType: "Type",
     mesuresTag: "mesures",
     mesuresTagFin: "version de référence",
     mesure: "mesure",
@@ -565,9 +562,7 @@ const en: Donnees = {
     projetsTitreFin: "One AI project in depth.",
     projetsLead: "How can you verify what an app really does when AI agents write its code?",
     voirProjet: "View the code on GitHub",
-    projetTag: "project",
     horlogeVille: "Toulouse",
-    hudType: "Type",
     mesuresTag: "measures",
     mesuresTagFin: "reference version",
     mesure: "measure",
